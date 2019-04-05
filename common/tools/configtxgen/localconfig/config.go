@@ -387,6 +387,8 @@ loop:
 	switch ord.OrdererType {
 	case "solo":
 		// nothing to be done here
+	case "elastico":
+		// nothing to be done here
 	case "kafka":
 		if ord.Kafka.Brokers == nil {
 			logger.Infof("Orderer.Kafka unset, setting to %v", genesisDefaults.Orderer.Kafka.Brokers)
