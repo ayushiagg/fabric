@@ -41,6 +41,9 @@ const (
 	// ConsensusTypeKafka identifies the Kafka-based consensus implementation.
 	ConsensusTypeKafka = "kafka"
 
+	// ConsensusTypeElastico identifies the Elastico-based consensus implementation.
+	ConsensusTypeElastico = "elastico"
+
 	// BlockValidationPolicyKey TODO
 	BlockValidationPolicyKey = "BlockValidation"
 
@@ -215,6 +218,7 @@ func NewOrdererGroup(conf *genesisconfig.Orderer) (*cb.ConfigGroup, error) {
 
 	switch conf.OrdererType {
 	case ConsensusTypeSolo:
+	case ConsensusTypeElastico:
 	case ConsensusTypeKafka:
 		addValue(ordererGroup, channelconfig.KafkaBrokersValue(conf.Kafka.Brokers), channelconfig.AdminsPolicyKey)
 	case etcdraft.TypeKey:
