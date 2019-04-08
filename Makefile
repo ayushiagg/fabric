@@ -224,7 +224,7 @@ $(BUILD_DIR)/%/chaintool: Makefile
 	@echo "Installing chaintool"
 	@mkdir -p $(@D)
 	curl -fL $(CHAINTOOL_URL) > $@
-	chmod +x $@
+	sudo chmod +x $@
 
 # We (re)build a package within a docker context but persist the $GOPATH/pkg
 # directory so that subsequent builds are faster
