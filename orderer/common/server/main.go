@@ -575,6 +575,7 @@ func initializeMultichannelRegistrar(
 	registrar := multichannel.NewRegistrar(lf, signer, metricsProvider, callbacks...)
 
 	consenters["solo"] = solo.New()
+	consenters["elastico"] = elastico.New()
 	var kafkaMetrics *kafka.Metrics
 	consenters["kafka"], kafkaMetrics = kafka.New(conf, metricsProvider, healthChecker, registrar)
 	// Note, we pass a 'nil' channel here, we could pass a channel that
