@@ -22,9 +22,11 @@ func TestLoadProfile(t *testing.T) {
 	pNames := []string{
 		SampleDevModeKafkaProfile,
 		SampleDevModeSoloProfile,
+		SampleDevModeElasticoProfile,
 		SampleSingleMSPChannelProfile,
 		SampleSingleMSPKafkaProfile,
 		SampleSingleMSPSoloProfile,
+		SampleSingleMSPElasticoProfile,
 	}
 	for _, pName := range pNames {
 		t.Run(pName, func(t *testing.T) {
@@ -41,9 +43,11 @@ func TestLoadProfileWithPath(t *testing.T) {
 	pNames := []string{
 		SampleDevModeKafkaProfile,
 		SampleDevModeSoloProfile,
+		SampleDevModeElasticoProfile,
 		SampleSingleMSPChannelProfile,
 		SampleSingleMSPKafkaProfile,
 		SampleSingleMSPSoloProfile,
+		SampleSingleMSPElasticoProfile,
 	}
 	for _, pName := range pNames {
 		t.Run(pName, func(t *testing.T) {

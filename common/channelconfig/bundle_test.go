@@ -414,6 +414,11 @@ func TestValidateNewWithConsensusMigration(t *testing.T) {
 		assert.EqualError(t, err,
 			"Attempted to change consensus type from kafka to solo, not supported")
 
+		updateConsensusType(b2, "elastico", ab.ConsensusType_MIG_STATE_NONE, 0)
+		err = b1.ValidateNew(b2)
+		assert.EqualError(t, err,
+			"Attempted to change consensus type from kafka to elastico, not supported")
+
 		updateConsensusType(b2, "kafka", ab.ConsensusType_MIG_STATE_NONE, 7)
 		err = b1.ValidateNew(b2)
 		assert.EqualError(t, err,
@@ -475,6 +480,10 @@ func TestValidateNewWithConsensusMigration(t *testing.T) {
 		updateConsensusType(b2, "solo", ab.ConsensusType_MIG_STATE_NONE, 0)
 		err = b1.ValidateNew(b2)
 		assert.EqualError(t, err, "Attempted to change consensus type from etcdraft to solo, not supported")
+
+		updateConsensusType(b2, "elastico", ab.ConsensusType_MIG_STATE_NONE, 0)
+		err = b1.ValidateNew(b2)
+		assert.EqualError(t, err, "Attempted to change consensus type from etcdraft to elastico, not supported")
 	})
 
 	t.Run("ConsensusTypeMigration unsupported types", func(t *testing.T) {
@@ -483,6 +492,12 @@ func TestValidateNewWithConsensusMigration(t *testing.T) {
 		err := b1.ValidateNew(b2)
 		assert.EqualError(t, err,
 			"Consensus-type migration, state=MIG_STATE_START, unexpected type, actual=solo (expected=kafka)")
+
+		b1 = generateMigrationBundle(true, "elastico", ab.ConsensusType_MIG_STATE_NONE, 0)
+		b2 = generateMigrationBundle(true, "elastico", ab.ConsensusType_MIG_STATE_START, 0)
+		err = b1.ValidateNew(b2)
+		assert.EqualError(t, err,
+			"Consensus-type migration, state=MIG_STATE_START, unexpected type, actual=elastico (expected=kafka)")
 
 		updateConsensusType(b2, "kafka", ab.ConsensusType_MIG_STATE_START, 0)
 		err = b1.ValidateNew(b2)

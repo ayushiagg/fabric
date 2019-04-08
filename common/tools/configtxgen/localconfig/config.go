@@ -44,6 +44,16 @@ const (
 	// only the sample MSP and uses solo for ordering.
 	SampleSingleMSPSoloProfile = "SampleSingleMSPSolo"
 
+	// SampleInsecureElasticoProfile references the sample profile which does not
+	// include any MSPs and uses Elastico for ordering.
+	SampleInsecureElasticoProfile = "SampleInsecureElastico"
+	// SampleDevModeElasticoProfile references the sample profile which requires
+	// only basic membership for admin privileges and uses Elastico for ordering.
+	SampleDevModeElasticoProfile = "SampleDevModeElastico"
+	// SampleSingleMSPElasticoProfile references the sample profile which includes
+	// only the sample MSP and uses Elastico for ordering.
+	SampleSingleMSPElasticoProfile = "SampleSingleMSPElastico"
+
 	// SampleInsecureKafkaProfile references the sample profile which does not
 	// include any MSPs and uses Kafka for ordering.
 	SampleInsecureKafkaProfile = "SampleInsecureKafka"
