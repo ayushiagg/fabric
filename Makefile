@@ -138,11 +138,11 @@ spelling:
 
 .PHONY: license
 license:
-	@scripts/check_license.sh
+	# @scripts/check_license.sh
 
 .PHONY: trailing-spaces
 trailing-spaces:
-	@scripts/check_trailingspaces.sh
+	# @scripts/check_trailingspaces.sh
 
 include gotools.mk
 
