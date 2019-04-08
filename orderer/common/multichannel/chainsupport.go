@@ -80,8 +80,12 @@ func newChainSupport(
 	// Set up the consenter
 	consenterType := ledgerResources.SharedConfig().ConsensusType()
 	consenter, ok := consenters[consenterType]
+	for key := range consenters {
+		logger.Info("start")
+		logger.Infof("consenters key %s", key)
+	}
 	if !ok {
-		logger.Panicf("Error retrieving consenter of type: %s", consenterType)
+		logger.Panicf("Error1h retrieving consenter of type: %s", consenterType)
 	}
 
 	cs.Chain, err = consenter.HandleChain(cs, metadata)
