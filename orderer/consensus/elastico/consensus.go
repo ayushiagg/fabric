@@ -106,6 +106,10 @@ func (ch *chain) MigrationStatus() migration.Status {
 	return ch.migrationStatus
 }
 
+func (ch *chain) runElastico(msg *message) {
+
+}
+
 func (ch *chain) main() {
 	var timer <-chan time.Time
 	var err error
@@ -124,6 +128,7 @@ func (ch *chain) main() {
 						continue
 					}
 				}
+				ch.runElastico(msg)
 				batches, pending := ch.support.BlockCutter().Ordered(msg.normalMsg)
 
 				for _, batch := range batches {
