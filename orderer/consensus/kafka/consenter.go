@@ -26,6 +26,7 @@ type healthChecker interface {
 
 // New creates a Kafka-based consenter. Called by orderer's main.go.
 func New(config *localconfig.TopLevel, metricsProvider metrics.Provider, healthChecker healthChecker, migCtrl migration.Controller) (consensus.Consenter, *Metrics) {
+	logger.Info("KAFKA: file is consenter.go , func is  New()")
 	if config.Kafka.Verbose {
 		logging.SetLevel(logging.DEBUG, "orderer.consensus.kafka.sarama")
 	}
@@ -80,6 +81,7 @@ type consenterImpl struct {
 // multichannel.NewManagerImpl() when ranging over the ledgerFactory's
 // existingChains.
 func (consenter *consenterImpl) HandleChain(support consensus.ConsenterSupport, metadata *cb.Metadata) (consensus.Chain, error) {
+	logger.Info("KAFKA: file is consenter.go , func is  HandleChain()")
 	lastOffsetPersisted, lastOriginalOffsetProcessed, lastResubmittedConfigOffset := getOffsets(metadata.Value, support.ChainID())
 	ch, err := newChain(consenter, support, lastOffsetPersisted, lastOriginalOffsetProcessed, lastResubmittedConfigOffset)
 	if err != nil {
@@ -102,25 +104,30 @@ type commonConsenter interface {
 }
 
 func (consenter *consenterImpl) brokerConfig() *sarama.Config {
+	logger.Info("KAFKA: file is consenter.go , func is  brokerConfig()")
 	return consenter.brokerConfigVal
 }
 
 func (consenter *consenterImpl) retryOptions() localconfig.Retry {
+	logger.Info("KAFKA: file is consenter.go , func is  retryOptions()")
 	return consenter.retryOptionsVal
 }
 
 func (consenter *consenterImpl) topicDetail() *sarama.TopicDetail {
+	logger.Info("KAFKA: file is consenter.go , func is  topicDetail()")
 	return consenter.topicDetailVal
 }
 
 // bootstrapFile returns the  bootstrap (genesis) filename, if defined, or an empty string.
 // Used during consensus-type migration commit.
 func (consenter *consenterImpl) bootstrapFile() string {
+	logger.Info("KAFKA: file is consenter.go , func is  bootstrapFile()")
 	return consenter.bootstrapFileName
 }
 
 // migrationController returns the passed-in migration.Controller implementation, which coordinates
 // consensus-type migration. This is implemented the multichannel.Registrar.
 func (consenter *consenterImpl) migrationController() migration.Controller {
+	logger.Info("KAFKA: file is consenter.go , func is  migrationController()")
 	return consenter.migController
 }

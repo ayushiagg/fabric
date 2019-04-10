@@ -184,6 +184,7 @@ type Metrics struct {
 }
 
 func NewMetrics(p metrics.Provider, registry gometrics.Registry) *Metrics {
+	logger.Info("KAFKA: file is metrics.go , func is  NewMetrics()")
 	return &Metrics{
 		IncomingByteRate:  p.NewGauge(incomingByteRate),
 		OutgoingByteRate:  p.NewGauge(outgoingByteRate),
@@ -204,6 +205,7 @@ func NewMetrics(p metrics.Provider, registry gometrics.Registry) *Metrics {
 // PollGoMetrics takes the current metric values from go-metrics and publishes them to
 // the gauges exposed through go-kit's metrics.
 func (m *Metrics) PollGoMetrics() {
+	logger.Info("KAFKA: file is metrics.go , func is  PollGoMetrics()")
 	m.GoMetricsRegistry.Each(func(name string, value interface{}) {
 		recordMeter := func(prefix, label string, gauge metrics.Gauge) bool {
 			if !strings.HasPrefix(name, prefix) {
@@ -258,6 +260,7 @@ func (m *Metrics) PollGoMetrics() {
 // PollGoMetricsUntilStop should generally be invoked on a dedicated go routine.  This go routine
 // will then invoke PollGoMetrics at the specified frequency until the stopChannel closes.
 func (m *Metrics) PollGoMetricsUntilStop(frequency time.Duration, stopChannel <-chan struct{}) {
+	logger.Info("KAFKA: file is metrics.go , func is  PollGoMetricsUntilStop()")
 	timer := time.NewTimer(frequency)
 	defer timer.Stop()
 	for {

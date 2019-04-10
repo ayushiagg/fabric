@@ -35,6 +35,7 @@ type channelImpl struct {
 
 // Returns a new channel for a given topic name and partition number.
 func newChannel(topic string, partition int32) channel {
+	logger.Info("KAFKA: file is channel.go , func is  newChannel()")
 	return &channelImpl{
 		tpc: fmt.Sprintf("%s", topic),
 		prt: partition,
@@ -43,16 +44,19 @@ func newChannel(topic string, partition int32) channel {
 
 // topic returns the Kafka topic this channel belongs to.
 func (chn *channelImpl) topic() string {
+	logger.Info("KAFKA: file is channel.go , func is  topic()")
 	return chn.tpc
 }
 
 // partition returns the Kafka partition where this channel resides.
 func (chn *channelImpl) partition() int32 {
+	logger.Info("KAFKA: file is channel.go , func is  partition()")
 	return chn.prt
 }
 
 // String returns a string identifying the Kafka topic/partition corresponding
 // to this channel.
 func (chn *channelImpl) String() string {
+	logger.Info("KAFKA: file is channel.go , func is  String()")
 	return fmt.Sprintf("%s/%d", chn.tpc, chn.prt)
 }

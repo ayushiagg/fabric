@@ -50,6 +50,7 @@ func newChain(
 	lastOriginalOffsetProcessed int64,
 	lastResubmittedConfigOffset int64,
 ) (*chainImpl, error) {
+	logger.Info("KAFKA: file is chain.go , func is newChain()")
 	lastCutBlockNumber := getLastCutBlockNumber(support.Height())
 	logger.Infof("[channel: %s] Starting chain with last persisted offset %d and last recorded block [%d]",
 		support.ChainID(), lastOffsetPersisted, lastCutBlockNumber)
@@ -133,12 +134,14 @@ type chainImpl struct {
 
 // MigrationStatus provides access to the consensus-type migration status of the chain.
 func (chain *chainImpl) MigrationStatus() migration.Status {
+	logger.Info("KAFKA: file is chain.go , func is  MigrationStatus()")
 	return chain.migrationStatusStepper
 }
 
 // Errored returns a channel which will close when a partition consumer error
 // has occurred. Checked by Deliver().
 func (chain *chainImpl) Errored() <-chan struct{} {
+	logger.Info("KAFKA: file is chain.go , func is Errored()")
 	select {
 	case <-chain.startChan:
 		return chain.errorChan
@@ -156,12 +159,14 @@ func (chain *chainImpl) Errored() <-chan struct{} {
 // launched, before the call to NewServer(). Launches a goroutine so as not to
 // block the consensus.Manager.
 func (chain *chainImpl) Start() {
+	logger.Info("KAFKA: file is chain.go , func is  Start()")
 	go startThread(chain)
 }
 
 // Halt frees the resources which were allocated for this Chain. Implements the
 // consensus.Chain interface.
 func (chain *chainImpl) Halt() {
+	logger.Info("KAFKA: file is chain.go , func is  Halt()")
 	select {
 	case <-chain.startChan:
 		// chain finished starting, so we can halt it
@@ -189,6 +194,7 @@ func (chain *chainImpl) Halt() {
 }
 
 func (chain *chainImpl) WaitReady() error {
+	logger.Info("KAFKA: file is chain.go , func is  WaitReady()")
 	select {
 	case <-chain.startChan: // The Start phase has completed
 		select {
@@ -203,18 +209,21 @@ func (chain *chainImpl) WaitReady() error {
 }
 
 func (chain *chainImpl) doneReprocessing() <-chan struct{} {
+	logger.Info("KAFKA: file is chain.go , func is  doneReprocessing()")
 	chain.doneReprocessingMutex.Lock()
 	defer chain.doneReprocessingMutex.Unlock()
 	return chain.doneReprocessingMsgInFlight
 }
 
 func (chain *chainImpl) reprocessConfigComplete() {
+	logger.Info("KAFKA: file is chain.go , func is  reprocessConfigComplete()")
 	chain.doneReprocessingMutex.Lock()
 	defer chain.doneReprocessingMutex.Unlock()
 	close(chain.doneReprocessingMsgInFlight)
 }
 
 func (chain *chainImpl) reprocessConfigPending() {
+	logger.Info("KAFKA: file is chain.go , func is  reprocessConfigPending()")
 	chain.doneReprocessingMutex.Lock()
 	defer chain.doneReprocessingMutex.Unlock()
 	chain.doneReprocessingMsgInFlight = make(chan struct{})
@@ -222,10 +231,12 @@ func (chain *chainImpl) reprocessConfigPending() {
 
 // Implements the consensus.Chain interface. Called by Broadcast().
 func (chain *chainImpl) Order(env *cb.Envelope, configSeq uint64) error {
+	logger.Info("KAFKA: file is chain.go , func is  Order()")
 	return chain.order(env, configSeq, int64(0))
 }
 
 func (chain *chainImpl) order(env *cb.Envelope, configSeq uint64, originalOffset int64) error {
+	logger.Info("KAFKA: file is chain.go , func is  order()")
 	// During consensus-type migration: stop all normal txs on the system-channel and standard-channels.
 	if chain.migrationStatusStepper.IsPending() || chain.migrationStatusStepper.IsCommitted() {
 		return errors.Errorf("cannot enqueue, consensus-type migration pending")
@@ -243,11 +254,13 @@ func (chain *chainImpl) order(env *cb.Envelope, configSeq uint64, originalOffset
 
 // Implements the consensus.Chain interface. Called by Broadcast().
 func (chain *chainImpl) Configure(config *cb.Envelope, configSeq uint64) error {
+	logger.Info("KAFKA: file is chain.go , func is  Configure()")
 	return chain.configure(config, configSeq, int64(0))
 }
 
 func (chain *chainImpl) configure(config *cb.Envelope, configSeq uint64, originalOffset int64) error {
 	// During consensus-type migration, stop channel creation
+	logger.Info("KAFKA: file is chain.go , func is  configure()")
 	if chain.ConsenterSupport.IsSystemChannel() && chain.migrationStatusStepper.IsPending() {
 		ordererTx, err := isOrdererTx(config)
 		if err != nil {
@@ -274,6 +287,7 @@ func (chain *chainImpl) configure(config *cb.Envelope, configSeq uint64, origina
 
 // enqueue accepts a message and returns true on acceptance, or false otheriwse.
 func (chain *chainImpl) enqueue(kafkaMsg *ab.KafkaMessage) bool {
+	logger.Info("KAFKA: file is chain.go , func is  enqueue()")
 	logger.Debugf("[channel: %s] Enqueueing envelope...", chain.ChainID())
 	select {
 	case <-chain.startChan: // The Start phase has completed
@@ -302,6 +316,7 @@ func (chain *chainImpl) enqueue(kafkaMsg *ab.KafkaMessage) bool {
 }
 
 func (chain *chainImpl) HealthCheck(ctx context.Context) error {
+	logger.Info("KAFKA: file is chain.go , func is  HealthCheck()")
 	var err error
 
 	payload := utils.MarshalOrPanic(newConnectMessage())
@@ -320,6 +335,7 @@ func (chain *chainImpl) HealthCheck(ctx context.Context) error {
 
 // Called by Start().
 func startThread(chain *chainImpl) {
+	logger.Info("KAFKA: file is chain.go , func is  startThread()")
 	var err error
 
 	// Create topic if it does not exist (requires Kafka v0.10.1.0)
@@ -375,6 +391,7 @@ func startThread(chain *chainImpl) {
 // takes care of converting the stream of ordered messages into blocks for the
 // channel's ledger.
 func (chain *chainImpl) processMessagesToBlocks() ([]uint64, error) {
+	logger.Info("KAFKA: file is chain.go , func is  processMessagesToBlocks()")
 	counts := make([]uint64, 11) // For metrics and tests
 	msg := new(ab.KafkaMessage)
 
@@ -529,6 +546,7 @@ func (chain *chainImpl) processMessagesToBlocks() ([]uint64, error) {
 }
 
 func (chain *chainImpl) closeKafkaObjects() []error {
+	logger.Info("KAFKA: file is chain.go , func is  closeKafkaObjects()")
 	var errs []error
 
 	err := chain.channelConsumer.Close()
@@ -561,10 +579,12 @@ func (chain *chainImpl) closeKafkaObjects() []error {
 // Helper functions
 
 func getLastCutBlockNumber(blockchainHeight uint64) uint64 {
+	logger.Info("KAFKA: file is chain.go , func is  getLastCutBlockNumber()")
 	return blockchainHeight - 1
 }
 
 func getOffsets(metadataValue []byte, chainID string) (persisted int64, processed int64, resubmitted int64) {
+	logger.Info("KAFKA: file is chain.go , func is  getOffsets()")
 	if metadataValue != nil {
 		// Extract orderer-related metadata from the tip of the ledger first
 		kafkaMetadata := &ab.KafkaMetadata{}
@@ -580,6 +600,7 @@ func getOffsets(metadataValue []byte, chainID string) (persisted int64, processe
 }
 
 func newConnectMessage() *ab.KafkaMessage {
+	logger.Info("KAFKA: file is chain.go , func is  newConnectMessage()")
 	return &ab.KafkaMessage{
 		Type: &ab.KafkaMessage_Connect{
 			Connect: &ab.KafkaMessageConnect{
@@ -590,6 +611,7 @@ func newConnectMessage() *ab.KafkaMessage {
 }
 
 func newNormalMessage(payload []byte, configSeq uint64, originalOffset int64) *ab.KafkaMessage {
+	logger.Info("KAFKA: file is chain.go , func is  newNormalMessage()")
 	return &ab.KafkaMessage{
 		Type: &ab.KafkaMessage_Regular{
 			Regular: &ab.KafkaMessageRegular{
@@ -603,6 +625,7 @@ func newNormalMessage(payload []byte, configSeq uint64, originalOffset int64) *a
 }
 
 func newConfigMessage(config []byte, configSeq uint64, originalOffset int64) *ab.KafkaMessage {
+	logger.Info("KAFKA: file is chain.go , func is  newConfigMessage()")
 	return &ab.KafkaMessage{
 		Type: &ab.KafkaMessage_Regular{
 			Regular: &ab.KafkaMessageRegular{
@@ -616,6 +639,7 @@ func newConfigMessage(config []byte, configSeq uint64, originalOffset int64) *ab
 }
 
 func newTimeToCutMessage(blockNumber uint64) *ab.KafkaMessage {
+	logger.Info("KAFKA: file is chain.go , func is  newTimeToCutMessage()")
 	return &ab.KafkaMessage{
 		Type: &ab.KafkaMessage_TimeToCut{
 			TimeToCut: &ab.KafkaMessageTimeToCut{
@@ -626,6 +650,7 @@ func newTimeToCutMessage(blockNumber uint64) *ab.KafkaMessage {
 }
 
 func newProducerMessage(channel channel, pld []byte) *sarama.ProducerMessage {
+	logger.Info("KAFKA: file is chain.go , func is  newProducerMessage()")
 	return &sarama.ProducerMessage{
 		Topic: channel.topic(),
 		Key:   sarama.StringEncoder(strconv.Itoa(int(channel.partition()))), // TODO Consider writing an IntEncoder?
@@ -634,11 +659,14 @@ func newProducerMessage(channel channel, pld []byte) *sarama.ProducerMessage {
 }
 
 func (chain *chainImpl) processConnect(channelName string) error {
+	logger.Info("KAFKA: file is chain.go , func is  processConnect()")
 	logger.Debugf("[channel: %s] It's a connect message - ignoring", channelName)
 	return nil
 }
 
 func (chain *chainImpl) processRegular(regularMessage *ab.KafkaMessageRegular, receivedOffset int64) error {
+
+	logger.Info("KAFKA: file is chain.go , func is  processRegular()")
 	// When committing a normal message, we also update `lastOriginalOffsetProcessed` with `newOffset`.
 	// It is caller's responsibility to deduce correct value of `newOffset` based on following rules:
 	// - if Resubmission is switched off, it should always be zero
@@ -952,6 +980,7 @@ func (chain *chainImpl) processRegular(regularMessage *ab.KafkaMessageRegular, r
 //
 // Illegal transitions triggered by the user are dropped, unexpected states (which indicate a bug) cause panic.
 func (chain *chainImpl) processMigrationStep(configTx *cb.Envelope) (commitBlock bool, err error) {
+	logger.Info("KAFKA: file is chain.go , func is  processMigrationStep()")
 
 	if !chain.ConsenterSupport.SharedConfig().Capabilities().Kafka2RaftMigration() {
 		return true, nil
@@ -1036,6 +1065,8 @@ func (chain *chainImpl) processMigrationStep(configTx *cb.Envelope) (commitBlock
 }
 
 func (chain *chainImpl) processTimeToCut(ttcMessage *ab.KafkaMessageTimeToCut, receivedOffset int64) error {
+	logger.Info("KAFKA: file is chain.go , func is  processTimeToCut()")
+
 	ttcNumber := ttcMessage.GetBlockNumber()
 	logger.Debugf("[channel: %s] It's a time-to-cut message for block [%d]", chain.ChainID(), ttcNumber)
 	if ttcNumber == chain.lastCutBlockNumber+1 {
@@ -1067,6 +1098,7 @@ func (chain *chainImpl) processTimeToCut(ttcMessage *ab.KafkaMessageTimeToCut, r
 // prevents the panicking that would occur if we were to set up a consumer and
 // seek on a partition that hadn't been written to yet.
 func sendConnectMessage(retryOptions localconfig.Retry, exitChan chan struct{}, producer sarama.SyncProducer, channel channel) error {
+	logger.Info("KAFKA: file is chain.go , func is  sendConnectMessage()")
 	logger.Infof("[channel: %s] About to post the CONNECT message...", channel.topic())
 
 	payload := utils.MarshalOrPanic(newConnectMessage())
@@ -1088,6 +1120,7 @@ func sendConnectMessage(retryOptions localconfig.Retry, exitChan chan struct{}, 
 }
 
 func sendTimeToCut(producer sarama.SyncProducer, channel channel, timeToCutBlockNumber uint64, timer *<-chan time.Time) error {
+	logger.Info("KAFKA: file is chain.go , func is  sendTimeToCut()")
 	logger.Debugf("[channel: %s] Time-to-cut block [%d] timer expired", channel.topic(), timeToCutBlockNumber)
 	*timer = nil
 	payload := utils.MarshalOrPanic(newTimeToCutMessage(timeToCutBlockNumber))
@@ -1098,6 +1131,7 @@ func sendTimeToCut(producer sarama.SyncProducer, channel channel, timeToCutBlock
 
 // Sets up the partition consumer for a channel using the given retry options.
 func setupChannelConsumerForChannel(retryOptions localconfig.Retry, haltChan chan struct{}, parentConsumer sarama.Consumer, channel channel, startFrom int64) (sarama.PartitionConsumer, error) {
+	logger.Info("KAFKA: file is chain.go , func is  setupChannelConsumerForChannel()")
 	var err error
 	var channelConsumer sarama.PartitionConsumer
 
@@ -1114,6 +1148,7 @@ func setupChannelConsumerForChannel(retryOptions localconfig.Retry, haltChan cha
 
 // Sets up the parent consumer for a channel using the given retry options.
 func setupParentConsumerForChannel(retryOptions localconfig.Retry, haltChan chan struct{}, brokers []string, brokerConfig *sarama.Config, channel channel) (sarama.Consumer, error) {
+	logger.Info("KAFKA: file is chain.go , func is  setupParentConsumerForChannel()")
 	var err error
 	var parentConsumer sarama.Consumer
 
@@ -1130,6 +1165,7 @@ func setupParentConsumerForChannel(retryOptions localconfig.Retry, haltChan chan
 
 // Sets up the writer/producer for a channel using the given retry options.
 func setupProducerForChannel(retryOptions localconfig.Retry, haltChan chan struct{}, brokers []string, brokerConfig *sarama.Config, channel channel) (sarama.SyncProducer, error) {
+	logger.Info("KAFKA: file is chain.go , func is  setupProducerForChannel()")
 	var err error
 	var producer sarama.SyncProducer
 
@@ -1147,6 +1183,7 @@ func setupProducerForChannel(retryOptions localconfig.Retry, haltChan chan struc
 // Creates the Kafka topic for the channel if it does not already exist
 func setupTopicForChannel(retryOptions localconfig.Retry, haltChan chan struct{}, brokers []string, brokerConfig *sarama.Config, topicDetail *sarama.TopicDetail, channel channel) error {
 
+	logger.Info("KAFKA: file is chain.go , func is  setupTopicForChannel()")
 	// requires Kafka v0.10.1.0 or higher
 	if !brokerConfig.Version.IsAtLeast(sarama.V0_10_1_0) {
 		return nil
@@ -1283,6 +1320,7 @@ func setupTopicForChannel(retryOptions localconfig.Retry, haltChan chan struct{}
 // of initial replicas. This information is needed to provide context when
 // a health check returns an error.
 func getHealthyClusterReplicaInfo(retryOptions localconfig.Retry, haltChan chan struct{}, brokers []string, channel channel) ([]int32, error) {
+	logger.Info("KAFKA: file is chain.go , func is  getHealthyClusterReplicaInfo()")
 	var replicaIDs []int32
 
 	retryMsg := "Getting list of Kafka brokers replicating the channel"
@@ -1307,6 +1345,7 @@ func getHealthyClusterReplicaInfo(retryOptions localconfig.Retry, haltChan chan 
 // This is only called during consensus-type migration, so the extra work
 // (unmarshaling the envelope again) is not that important.
 func isOrdererTx(env *cb.Envelope) (bool, error) {
+	logger.Info("KAFKA: file is chain.go , func is  isOrderTx()")
 	payload, err := utils.UnmarshalPayload(env.Payload)
 	if err != nil {
 		return false, err

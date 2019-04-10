@@ -23,6 +23,7 @@ type retryProcess struct {
 }
 
 func newRetryProcess(retryOptions localconfig.Retry, exit chan struct{}, channel channel, msg string, fn func() error) *retryProcess {
+	logger.Info("KAFKA: file is retry.go , func is  newRetryProcess()")
 	return &retryProcess{
 		shortPollingInterval: retryOptions.ShortInterval,
 		shortTimeout:         retryOptions.ShortTotal,
@@ -36,6 +37,7 @@ func newRetryProcess(retryOptions localconfig.Retry, exit chan struct{}, channel
 }
 
 func (rp *retryProcess) retry() error {
+	logger.Info("KAFKA: file is retry.go , func is  retry()")
 	if err := rp.try(rp.shortPollingInterval, rp.shortTimeout); err != nil {
 		logger.Debugf("[channel: %s] Switching to the long retry interval", rp.channel.topic())
 		return rp.try(rp.longPollingInterval, rp.longTimeout)
@@ -44,6 +46,7 @@ func (rp *retryProcess) retry() error {
 }
 
 func (rp *retryProcess) try(interval, total time.Duration) (err error) {
+	logger.Info("KAFKA: file is retry.go , func is try()")
 	// Configuration validation will not allow non-positive ticker values
 	// (which would result in panic). The path below is for those test cases
 	// when we cannot avoid the creation of a retriable process but we wish

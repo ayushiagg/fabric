@@ -21,6 +21,7 @@ var saramaLogger eventLogger
 
 // init initializes the samara logger
 func init() {
+	logger.Info("KAFKA: file is logger.go , func is  first-init()")
 	loggingProvider := flogging.MustGetLogger("orderer.consensus.kafka.sarama")
 	saramaEventLogger := &saramaLoggerImpl{
 		logger: loggingProvider.WithOptions(zap.AddCallerSkip(3)),
@@ -34,6 +35,7 @@ func init() {
 
 // init starts a go routine that detects a possible configuration issue
 func init() {
+	logger.Info("KAFKA: file is logger.go , func is  second-init()")
 	listener := saramaLogger.NewListener("insufficient data to decode packet")
 	go func() {
 		for {
@@ -67,18 +69,22 @@ type saramaLoggerImpl struct {
 }
 
 func (l saramaLoggerImpl) Print(args ...interface{}) {
+	logger.Info("KAFKA: file is logger.go , func is  Print()")
 	l.print(fmt.Sprint(args...))
 }
 
 func (l saramaLoggerImpl) Printf(format string, args ...interface{}) {
+	logger.Info("KAFKA: file is logger.go , func is  Printf()")
 	l.print(fmt.Sprintf(format, args...))
 }
 
 func (l saramaLoggerImpl) Println(args ...interface{}) {
+	logger.Info("KAFKA: file is logger.go , func is  Println()")
 	l.print(fmt.Sprintln(args...))
 }
 
 func (l saramaLoggerImpl) print(message string) {
+	logger.Info("KAFKA: file is logger.go , func is  print()")
 	l.eventListenerSupport.fire(message)
 	l.logger.Debug(message)
 }
@@ -87,12 +93,14 @@ func (l saramaLoggerImpl) print(message string) {
 const listenerChanSize = 100
 
 func (l saramaLoggerImpl) NewListener(substr string) <-chan string {
+	logger.Info("KAFKA: file is logger.go , func is  NewListener()")
 	listener := make(chan string, listenerChanSize)
 	l.eventListenerSupport.addListener(substr, listener)
 	return listener
 }
 
 func (l saramaLoggerImpl) RemoveListener(substr string, listener <-chan string) {
+	logger.Info("KAFKA: file is logger.go , func is  RemoveListener()")
 	l.eventListenerSupport.removeListener(substr, listener)
 }
 
@@ -105,6 +113,7 @@ type eventListenerSupport struct {
 
 // addListener adds a listener to the list of listeners for the specified substring
 func (b *eventListenerSupport) addListener(substr string, listener chan string) {
+	logger.Info("KAFKA: file is logger.go , func is  addListener()")
 	b.Lock()
 	defer b.Unlock()
 	if listeners, ok := b.listeners[substr]; ok {
@@ -117,6 +126,7 @@ func (b *eventListenerSupport) addListener(substr string, listener chan string) 
 // fire sends the specified message to each listener that is registered with
 // a substring contained in the message
 func (b *eventListenerSupport) fire(message string) {
+	logger.Info("KAFKA: file is logger.go , func is  fire()")
 	b.Lock()
 	defer b.Unlock()
 	for substr, listeners := range b.listeners {
@@ -130,6 +140,7 @@ func (b *eventListenerSupport) fire(message string) {
 
 // addListener removes a listener from the list of listeners for the specified substring
 func (b *eventListenerSupport) removeListener(substr string, listener <-chan string) {
+	logger.Info("KAFKA: file is logger.go , func is  removeListener()")
 	b.Lock()
 	defer b.Unlock()
 	if listeners, ok := b.listeners[substr]; ok {
