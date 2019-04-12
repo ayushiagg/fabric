@@ -110,6 +110,46 @@ func (ch *chain) MigrationStatus() migration.Status {
 	return ch.migrationStatus
 }
 
+func failOnError(err error, msg string, exit bool) {
+	// logging the error
+	if err != nil {
+		logger.Error(msg)
+		if exit {
+			os.Exit(1)
+		}
+	}
+}
+
+func marshalData(msg map[string]interface{}) []byte {
+
+	body, err := json.Marshal(msg)
+	// fmt.Println("marshall data", body)
+	failOnError(err, "error in marshal", true)
+	return body
+}
+
+func publishMsg(channel *amqp.Channel, queueName string, msg map[string]interface{}) {
+
+	body := marshalData(msg)
+
+	err := channel.Publish(
+		"",        // exchange
+		queueName, // routing key
+		false,     // mandatory
+		false,     // immediate
+		amqp.Publishing{
+			ContentType: "text/plain",
+			Body:        body,
+		})
+
+	failOnError(err, "Failed to publish a message", true)
+}
+
+type msgType struct {
+	Data map[string]interface{}
+	Type string
+}
+
 func (ch *chain) runElastico(msg *message) {
 
 }
