@@ -157,6 +157,9 @@ func (ch *chain) runElastico(msg *message) {
 	for _, queueName := range allqueues {
 		publishMsg(channel, queueName.Name, newEpochMsg)
 	}
+	for StateEnv := os.Getenv("ELASTICO_STATE") ;  StateEnv != elasticoSteps.ElasticoStates["Reset"] {
+		StateEnv = os.Getenv("ELASTICO_STATE")
+	}
 }
 
 func (ch *chain) main() {
@@ -178,6 +181,7 @@ func (ch *chain) main() {
 					}
 				}
 				ch.runElastico(msg)
+				
 				batches, pending := ch.support.BlockCutter().Ordered(msg.normalMsg)
 
 				for _, batch := range batches {
