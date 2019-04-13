@@ -25,15 +25,16 @@ type consenter struct{}
 
 type chain struct {
 	support         consensus.ConsenterSupport
-	sendChan        chan *message
+	sendChan        chan *Message
 	exitChan        chan struct{}
 	migrationStatus migration.Status
 }
 
-type message struct {
-	configSeq uint64
-	normalMsg *cb.Envelope
-	configMsg *cb.Envelope
+// Message :- 
+type Message struct {
+	ConfigSeq uint64
+	NormalMsg *cb.Envelope
+	ConfigMsg *cb.Envelope
 }
 
 // New creates a new consenter for the solo consensus scheme.
@@ -51,7 +52,7 @@ func (solo *consenter) HandleChain(support consensus.ConsenterSupport, metadata 
 func newChain(support consensus.ConsenterSupport) *chain {
 	return &chain{
 		support:         support,
-		sendChan:        make(chan *message),
+		sendChan:        make(chan *Message),
 		exitChan:        make(chan struct{}),
 		migrationStatus: migration.NewStatusStepper(support.IsSystemChannel(), support.ChainID()),
 	}
@@ -75,11 +76,11 @@ func (ch *chain) WaitReady() error {
 }
 
 // Order accepts normal messages for ordering
-func (ch *chain) Order(env *cb.Envelope, configSeq uint64) error {
+func (ch *chain) Order(env *cb.Envelope, ConfigSeq uint64) error {
 	select {
-	case ch.sendChan <- &message{
-		configSeq: configSeq,
-		normalMsg: env,
+	case ch.sendChan <- &Message{
+		ConfigSeq: ConfigSeq,
+		NormalMsg: env,
 	}:
 		return nil
 	case <-ch.exitChan:
@@ -88,11 +89,11 @@ func (ch *chain) Order(env *cb.Envelope, configSeq uint64) error {
 }
 
 // Configure accepts configuration update messages for ordering
-func (ch *chain) Configure(config *cb.Envelope, configSeq uint64) error {
+func (ch *chain) Configure(config *cb.Envelope, ConfigSeq uint64) error {
 	select {
-	case ch.sendChan <- &message{
-		configSeq: configSeq,
-		configMsg: config,
+	case ch.sendChan <- &Message{
+		ConfigSeq: ConfigSeq,
+		ConfigMsg: config,
 	}:
 		return nil
 	case <-ch.exitChan:
@@ -113,7 +114,7 @@ func marshalData(msg map[string]interface{}) []byte {
 
 	body, err := json.Marshal(msg)
 	// fmt.Println("marshall data", body)
-	connection.FailOnError(err, "error in marshal", true)
+	FailOnError(err, "error in marshal", true)
 	return body
 }
 
@@ -131,7 +132,7 @@ func publishMsg(channel *amqp.Channel, queueName string, msg map[string]interfac
 			Body:        body,
 		})
 
-	connection.FailOnError(err, "Failed to publish a message", true)
+	FailOnError(err, "Failed to publish a Message", true)
 }
 
 type msgType struct {
@@ -139,23 +140,23 @@ type msgType struct {
 	Type string
 }
 
-func (ch *chain) runElastico(msg *message) {
+func (ch *chain) runElastico(msg *Message) {
 
 	
 	err := os.Setenv("ELASTICO_STATE", "0")
-	connection.FailOnError(err , "fail to set the environment variable"  ,true)
-	conn := connection.GetConnection()
-	channel := connection.GetChannel(conn)
+	FailOnError(err , "fail to set the environment variable"  ,true)
+	conn := GetConnection()
+	channel := GetChannel(conn)
 	allqueues := get_allQueues()
 	newEpochMsg := make(map[string]interface{})
 	newEpochMsg["Type"] = "Start new epoch"
-	newEpochMsg["Epoch"] = elasticoSteps.RandomGen(64)
+	newEpochMsg["Epoch"] = RandomGen(64)
 	newEpochMsg["Data"] = msg
 	// inform other orderers to start the epoch
 	for _, queueName := range allqueues {
 		publishMsg(channel, queueName.Name, newEpochMsg)
 	}
-	for StateEnv := os.Getenv("ELASTICO_STATE") ;  StateEnv != elasticoSteps.ElasticoStates["Reset"] {
+	for StateEnv := os.Getenv("ELASTICO_STATE") ;  StateEnv != ElasticoStates["Reset"] {
 		StateEnv = os.Getenv("ELASTICO_STATE")
 	}
 }
@@ -169,18 +170,18 @@ func (ch *chain) main() {
 		err = nil
 		select {
 		case msg := <-ch.sendChan:
-			if msg.configMsg == nil {
+			if msg.ConfigMsg == nil {
 				// NormalMsg
-				if msg.configSeq < seq {
-					_, err = ch.support.ProcessNormalMsg(msg.normalMsg)
+				if msg.ConfigSeq < seq {
+					_, err = ch.support.ProcessNormalMsg(msg.NormalMsg)
 					if err != nil {
-						logger.Warningf("Discarding bad normal message: %s", err)
+						logger.Warningf("Discarding bad normal Message: %s", err)
 						continue
 					}
 				}
 				ch.runElastico(msg)
 				
-				batches, pending := ch.support.BlockCutter().Ordered(msg.normalMsg)
+				batches, pending := ch.support.BlockCutter().Ordered(msg.NormalMsg)
 
 				for _, batch := range batches {
 					block := ch.support.CreateNextBlock(batch)
@@ -203,10 +204,10 @@ func (ch *chain) main() {
 
 			} else {
 				// ConfigMsg
-				if msg.configSeq < seq {
-					msg.configMsg, _, err = ch.support.ProcessConfigMsg(msg.configMsg)
+				if msg.ConfigSeq < seq {
+					msg.ConfigMsg, _, err = ch.support.ProcessConfigMsg(msg.ConfigMsg)
 					if err != nil {
-						logger.Warningf("Discarding bad config message: %s", err)
+						logger.Warningf("Discarding bad config Message: %s", err)
 						continue
 					}
 				}
@@ -216,7 +217,7 @@ func (ch *chain) main() {
 					ch.support.WriteBlock(block, nil)
 				}
 
-				block := ch.support.CreateNextBlock([]*cb.Envelope{msg.configMsg})
+				block := ch.support.CreateNextBlock([]*cb.Envelope{msg.ConfigMsg})
 				ch.support.WriteConfigBlock(block, nil)
 				timer = nil
 			}
