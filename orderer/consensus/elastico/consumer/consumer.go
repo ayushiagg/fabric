@@ -171,5 +171,45 @@ func Execute(decodeMsg msgType) {
 		// Now, the node can be reset
 		return "reset"
 	}
+	return ""
+}
 
+// Run :-
+func Run(ch *amqp.Channel, queueName string, exchangeName string) {
+	defer ch.Close()
+	for {
+		// count the number of messages that are in the queue
+		queue, err := ch.QueueInspect(queueName)
+		connection.FailOnError(err, "error in inspect", false)
+		if err == nil {
+			Consume(ch, queue, exchangeName)
+		}
+	}
+}
+
+func main() {
+	conn := connection.GetConnection()
+	ch := connection.GetChannel(conn)
+	defer conn.Close()
+
+	epoch := 0
+	exchangeName := "epoch" + strconv.Itoa(epoch)
+	errExchange := ch.ExchangeDeclare(exchangeName, "fanout", true, false, false, false, nil)
+	connection.FailOnError(errExchange, "Failed to declare a exchange", true)
+
+	queueName := os.Getenv("ORDERER_HOST")
+
+	queue, err := ch.QueueDeclare(
+		queueName, //name of the queue
+		false,     // durable
+		false,     // delete when unused
+		false,     // exclusive
+		false,     // no-wait
+		nil,       // arguments
+	)
+
+	connection.FailOnError(err, "Failed to declare a queue", true)
+	errQueueBind := ch.QueueBind(queueName, "", exchangeName, false, nil)
+	connection.FailOnError(errQueueBind, "Failed to bind a queue to exchange", true)
+	Run(ch, queue.Name, exchangeName)
 }
