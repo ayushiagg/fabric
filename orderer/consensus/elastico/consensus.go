@@ -14,8 +14,6 @@ import (
 
 	"github.com/hyperledger/fabric/common/flogging"
 	"github.com/hyperledger/fabric/orderer/consensus"
-	"github.com/hyperledger/fabric/orderer/consensus/elastico/connection"
-	"github.com/hyperledger/fabric/orderer/consensus/elastico/elasticoSteps"
 	"github.com/hyperledger/fabric/orderer/consensus/migration"
 	cb "github.com/hyperledger/fabric/protos/common"
 	"github.com/streadway/amqp"
