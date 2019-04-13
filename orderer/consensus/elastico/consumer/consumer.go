@@ -11,11 +11,18 @@ import (
 	"github.com/streadway/amqp"
 )
 
-func main() {
-	conn := connection.GetConnection()
-	ch := connection.GetChannel(conn)
-	// close the channel
-	defer ch.Close()
+type msgType struct {
+	Type string
+	Data json.RawMessage
+}
+
+//ExecuteConsume :-
+func ExecuteConsume(ch *amqp.Channel, Queue Queue, decodeMsg msgType, exchangeName string) {
+
+	epoch := 0
+
+	elasticoObj := elasticoSteps.Elastico{}
+	elasticoObj.ElasticoInit()
 
 	queueName := "hello" + nodeport
 	// count the number of messages that are in the queue
