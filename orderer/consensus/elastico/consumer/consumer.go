@@ -34,27 +34,18 @@ func ExecuteConsume(ch *amqp.Channel, Queue Queue, decodeMsg msgType, exchangeNa
 //Consume :-
 func Consume(ch *amqp.Channel, queue amqp.Queue, exchangeName string) {
 	var decodedmsg msgType
-	if err == nil {
-		// consume all the messages one by one
-		var requeueMsgs [][]byte
-		for ; Queue.Messages > 0; Queue.Messages-- {
-
-			// get the message from the queue
-			msg, ok, err := ch.Get(Queue.Name, true)
-			failOnError(err, "error in get of queue", true)
-			if ok {
-				err := json.Unmarshal(msg.Body, &decodedmsg)
-				failOnError(err, "error in unmarshall", true)
-
-				if decodedmsg.Epoch == epoch {
-					// consume the msg by taking the action in receive
-					e.receive(decodedmsg, epoch)
-				} else if decodedmsg.Epoch > epoch {
-					requeueMsgs = append(requeueMsgs, msg.Body)
-					log.Warn("Need to requeue msgs! type - ", decodedmsg.Type, " epoch - ", decodedmsg.Epoch, " present epoch : ", epoch)
-				} else {
-					log.Warn("Discarding Msgs type - ", decodedmsg.Type, " epoch - ", decodedmsg.Epoch, " present epoch : ", epoch)
-				}
+	// consume all the messages one by one
+	for ; queue.Messages > 0; queue.Messages-- {
+		// get the message from the queue
+		msg, ok, err := ch.Get(queue.Name, true)
+		connection.FailOnError(err, "error in get of queue", true)
+		if ok {
+			err = json.Unmarshal(msg.Body, &decodedmsg)
+			connection.FailOnError(err, "error in unmarshall", true)
+			if decodedmsg.Type == "Start New Epoch" {
+				// consume the msg by taking the action in receive
+				ExecuteConsume(ch, queue, decodedmsg, exchangeName)
+				break
 			}
 		}
 		// requeue the messages of future epochs
