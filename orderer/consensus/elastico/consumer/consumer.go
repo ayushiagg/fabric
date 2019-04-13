@@ -24,11 +24,15 @@ func ExecuteConsume(ch *amqp.Channel, Queue Queue, decodeMsg msgType, exchangeNa
 	elasticoObj := elasticoSteps.Elastico{}
 	elasticoObj.ElasticoInit()
 
-	queueName := "hello" + nodeport
-	// count the number of messages that are in the queue
-	Queue, err := ch.QueueInspect(queueName)
-	// failOnError(err, "error in inspect", false)
+	for {
 
+		elasticoObj.Execute(exchangeName, epoch)
+		elasticoObj.Consume(ch, Queue)
+	}
+}
+
+//Consume :-
+func Consume(ch *amqp.Channel, queue amqp.Queue, exchangeName string) {
 	var decodedmsg msgType
 	if err == nil {
 		// consume all the messages one by one
