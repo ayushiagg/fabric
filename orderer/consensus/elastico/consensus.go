@@ -143,13 +143,13 @@ type msgType struct {
 
 func (ch *chain) runElastico(msg *message) {
 
-	// inform other orderers to start the epoch
-
+	
+	err := os.Setenv("ELASTICO_STATE", "0")
+	connection.FailOnError(err , "fail to set the environment variable"  ,true)
 	conn := connection.GetConnection()
 	channel := connection.GetChannel(conn)
 	allqueues := get_allQueues()
 	newEpochMsg := make(map[string]interface{})
-
 	newEpochMsg["Type"] = "Start new epoch"
 	for _, queueName := range allqueues {
 		publishMsg(channel, queueName.Name, newEpochMsg)
