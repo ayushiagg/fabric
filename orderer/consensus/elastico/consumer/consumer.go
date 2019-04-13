@@ -2,8 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"os"
+	"strconv"
 
 	"github.com/hyperledger/fabric/orderer/consensus/elastico/connection"
+	"github.com/hyperledger/fabric/orderer/consensus/elastico/elasticoSteps"
 	"github.com/streadway/amqp"
 )
 
