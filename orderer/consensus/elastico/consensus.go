@@ -151,6 +151,9 @@ func (ch *chain) runElastico(msg *message) {
 	allqueues := get_allQueues()
 	newEpochMsg := make(map[string]interface{})
 	newEpochMsg["Type"] = "Start new epoch"
+	newEpochMsg["Epoch"] = elasticoSteps.RandomGen(64)
+	newEpochMsg["Data"] = msg
+	// inform other orderers to start the epoch
 	for _, queueName := range allqueues {
 		publishMsg(channel, queueName.Name, newEpochMsg)
 	}
