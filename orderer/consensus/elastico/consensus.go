@@ -15,6 +15,7 @@ import (
 	"github.com/hyperledger/fabric/common/flogging"
 	"github.com/hyperledger/fabric/orderer/consensus"
 	"github.com/hyperledger/fabric/orderer/consensus/elastico/connection"
+	"github.com/hyperledger/fabric/orderer/consensus/elastico/elasticoSteps"
 	"github.com/hyperledger/fabric/orderer/consensus/migration"
 	cb "github.com/hyperledger/fabric/protos/common"
 	"github.com/streadway/amqp"
@@ -110,21 +111,11 @@ func (ch *chain) MigrationStatus() migration.Status {
 	return ch.migrationStatus
 }
 
-func failOnError(err error, msg string, exit bool) {
-	// logging the error
-	if err != nil {
-		logger.Error(msg)
-		if exit {
-			os.Exit(1)
-		}
-	}
-}
-
 func marshalData(msg map[string]interface{}) []byte {
 
 	body, err := json.Marshal(msg)
 	// fmt.Println("marshall data", body)
-	failOnError(err, "error in marshal", true)
+	connection.FailOnError(err, "error in marshal", true)
 	return body
 }
 
@@ -142,7 +133,7 @@ func publishMsg(channel *amqp.Channel, queueName string, msg map[string]interfac
 			Body:        body,
 		})
 
-	failOnError(err, "Failed to publish a message", true)
+	connection.FailOnError(err, "Failed to publish a message", true)
 }
 
 type msgType struct {

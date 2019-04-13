@@ -9,6 +9,7 @@ import (
 
 var logger = flogging.MustGetLogger("orderer.consensus.elastico.connection")
 
+// FailOnError :-
 func FailOnError(err error, msg string, exit bool) {
 	// logging the error
 	if err != nil {
@@ -19,6 +20,7 @@ func FailOnError(err error, msg string, exit bool) {
 	}
 }
 
+//GetChannel :-
 func GetChannel(connection *amqp.Connection) *amqp.Channel {
 	/*
 		get channel
@@ -28,6 +30,7 @@ func GetChannel(connection *amqp.Connection) *amqp.Channel {
 	return channel
 }
 
+//GetConnection :-
 func GetConnection() *amqp.Connection {
 	/*
 		establish a connection with RabbitMQ server
