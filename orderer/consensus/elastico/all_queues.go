@@ -5,13 +5,13 @@ import (
 	"net/http"
 )
 
-// Queue:
+// Queue :-
 type Queue struct {
 	Name  string `json:name`
 	VHost string `json:vhost`
 }
 
-func get_allQueues() []Queue {
+func getallQueues() []Queue {
 
 	manager := "http://127.0.0.1:15672/api/queues/"
 	client := &http.Client{}

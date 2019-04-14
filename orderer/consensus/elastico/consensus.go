@@ -10,16 +10,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
-	"github.com/hyperledger/fabric/common/flogging"
 	"github.com/hyperledger/fabric/orderer/consensus"
 	"github.com/hyperledger/fabric/orderer/consensus/migration"
 	cb "github.com/hyperledger/fabric/protos/common"
 	"github.com/streadway/amqp"
 )
-
-var logger = flogging.MustGetLogger("orderer.consensus.elastico")
 
 type consenter struct{}
 
@@ -30,7 +28,7 @@ type chain struct {
 	migrationStatus migration.Status
 }
 
-// Message :- 
+// Message :-
 type Message struct {
 	ConfigSeq uint64
 	NormalMsg *cb.Envelope
