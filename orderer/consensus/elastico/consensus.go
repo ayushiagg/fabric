@@ -140,21 +140,33 @@ type msgType struct {
 
 func (ch *chain) runElastico(msg *Message) {
 
-	
-	err := os.Setenv("ELASTICO_STATE", "0")
-	FailOnError(err , "fail to set the environment variable"  ,true)
+	// if elastico is running for previous epoch then wait for it to reset and get finished
+	for stateEnv := os.Getenv("ELASTICO_STATE"); stateEnv != "" && stateEnv != strconv.Itoa(ElasticoStates["Reset"]); {
+		stateEnv = os.Getenv("ELASTICO_STATE")
+	}
+	// set the ELASTICO_STATE env to NONE
+	err := os.Setenv("ELASTICO_STATE", strconv.Itoa(ElasticoStates["NONE"]))
+	FailOnError(err, "fail to set the environment variable", true)
+
 	conn := GetConnection()
 	channel := GetChannel(conn)
-	allqueues := get_allQueues()
+	defer conn.Close()
+	defer channel.Close()
+	// get all queues of rabbit mq
+	allqueues := getallQueues()
+
+	//construct the new epoch msg
 	newEpochMsg := make(map[string]interface{})
 	newEpochMsg["Type"] = "Start new epoch"
-	newEpochMsg["Epoch"] = RandomGen(64)
+	newEpochMsg["Epoch"] = RandomGen(64).String()
 	newEpochMsg["Data"] = msg
+
 	// inform other orderers to start the epoch
 	for _, queueName := range allqueues {
 		publishMsg(channel, queueName.Name, newEpochMsg)
 	}
-	for StateEnv := os.Getenv("ELASTICO_STATE") ;  StateEnv != ElasticoStates["Reset"] {
+	// Block will not go to BlockCutter till state is reset for the orderer
+	for StateEnv := os.Getenv("ELASTICO_STATE"); StateEnv != strconv.Itoa(ElasticoStates["Reset"]); {
 		StateEnv = os.Getenv("ELASTICO_STATE")
 	}
 }
@@ -177,8 +189,9 @@ func (ch *chain) main() {
 						continue
 					}
 				}
+				// run the elastico
 				ch.runElastico(msg)
-				
+
 				batches, pending := ch.support.BlockCutter().Ordered(msg.NormalMsg)
 
 				for _, batch := range batches {
