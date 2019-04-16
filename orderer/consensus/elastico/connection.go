@@ -35,7 +35,7 @@ func GetConnection() *amqp.Connection {
 	/*
 		establish a connection with RabbitMQ server
 	*/
-	connection, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	connection, err := amqp.Dial("amqp://guest:guest@rabbitmq0:5672/")
 	FailOnError(err, "Failed to connect to RabbitMQ", true) // report the error
 	return connection
 }
