@@ -7,8 +7,8 @@ import (
 
 // Queue :-
 type Queue struct {
-	Name  string `json:name`
-	VHost string `json:vhost`
+	Name  string `json:"name"`
+	VHost string `json:"vhost"`
 }
 
 func getallQueues() []Queue {

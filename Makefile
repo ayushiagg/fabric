@@ -209,8 +209,8 @@ linter: check-deps buildenv
 	@$(DRUN) $(DOCKER_NS)/fabric-buildenv:$(DOCKER_TAG) ./scripts/golinter.sh
 
 check-deps: buildenv
-	@echo "DEP: Checking for dependency issues.."
-	@$(DRUN) $(DOCKER_NS)/fabric-buildenv:$(DOCKER_TAG) ./scripts/check_deps.sh
+	# @echo "DEP: Checking for dependency issues.."
+	# @$(DRUN) $(DOCKER_NS)/fabric-buildenv:$(DOCKER_TAG) ./scripts/check_deps.sh
 
 check-metrics-doc: buildenv
 	@echo "METRICS: Checking for outdated reference documentation.."
