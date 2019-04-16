@@ -1670,7 +1670,7 @@ func (e *Elastico) Execute(exchangeName string, epoch string, Txn NewEpochMsg) s
 		if e.flag == false {
 
 			// logging the bad nodes
-			logger.Errorf("member with invalid POW %s with commMembers : %s", e.Identity, e.committeeMembers)
+			// logger.Errorf("member with invalid POW %s with commMembers : %s", e.Identity, e.committeeMembers)
 		}
 		// Now The node should go for Intra committee consensus
 		// initial state for the PBFT
@@ -2825,7 +2825,7 @@ func (e *Elastico) processPrepareMsg(msg DecodeMsgType) {
 
 	err := json.Unmarshal(msg.Data, &decodeMsg)
 	FailOnError(err, "fail to decode prepare msg", true)
-	logger.Info("prepare msg in--", e.Port, "msg---", decodeMsg)
+	logger.Infof("prepare msg in-- %s msg---", e.Port)
 
 	verified := e.verifyPrepare(decodeMsg)
 	if verified {
