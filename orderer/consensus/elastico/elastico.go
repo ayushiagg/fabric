@@ -324,11 +324,8 @@ func (e *Elastico) initER() {
 
 // ElasticoInit :- initialise of data members
 func (e *Elastico) ElasticoInit() {
-	var err error
 	// create rabbit mq connection
-	e.connection, err = amqp.Dial("amqp://guest:guest@localhost:5672/")
-	// log if connection fails
-	FailOnError(err, "Failed to connect to RabbitMQ", true)
+	e.connection = GetConnection()
 	// set IP
 	e.getIP()
 	e.getPort()
