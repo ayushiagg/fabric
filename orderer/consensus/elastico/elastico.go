@@ -24,10 +24,10 @@ import (
 var finNum int64
 
 // D - difficulty level , leading bits of PoW must have D 0's (keep w.r.t to hex)
-var D = 4
+var D = 3
 
 // c - size of committee
-var c = 4
+var c = 2
 
 // r - number of bits in random string
 var r int64 = 8
@@ -1492,6 +1492,18 @@ func (e *Elastico) sendPrepare(prepareMsgList []map[string]interface{}) {
 			nodeID.send(preparemsg)
 		}
 	}
+}
+
+// DecodeMsgType :-
+type DecodeMsgType struct {
+	Type  string
+	Data  json.RawMessage
+	Epoch string
+}
+
+// NewEpochMsg   :-
+type NewEpochMsg struct {
+	Data *Message
 }
 
 func (e *Elastico) receiveTxns(epochTxn NewEpochMsg) {
