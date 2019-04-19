@@ -157,7 +157,7 @@ type Elastico struct {
 	Identity     IDENTITY
 	CommitteeID  int64
 	// only when this node is the member of directory committee
-	committeeList map[int64][]IDENTITY
+	CommitteeList map[int64][]IDENTITY
 	// only when this node is not the member of directory committee
 	committeeMembers []IDENTITY
 	isDirectory      bool
@@ -215,7 +215,7 @@ func (e *Elastico) reset() {
 
 	e.CurDirectory = make([]IDENTITY, 0)
 	// only when this node is the member of directory committee
-	e.committeeList = make(map[int64][]IDENTITY)
+	e.CommitteeList = make(map[int64][]IDENTITY)
 	// only when this node is not the member of directory committee
 	e.committeeMembers = make([]IDENTITY, 0)
 
@@ -343,7 +343,7 @@ func (e *Elastico) ElasticoInit() {
 
 	e.CurDirectory = make([]IDENTITY, 0)
 
-	e.committeeList = make(map[int64][]IDENTITY)
+	e.CommitteeList = make(map[int64][]IDENTITY)
 
 	e.committeeMembers = make([]IDENTITY, 0)
 
@@ -2088,25 +2088,25 @@ func (e *Elastico) receiveNewNode(msg DecodeMsgType, epoch string) {
 	identityobj := decodeMsg.Identity
 	// verify the PoW
 	if e.verifyPoW(identityobj) {
-		_, ok := e.committeeList[identityobj.CommitteeID]
+		_, ok := e.CommitteeList[identityobj.CommitteeID]
 		if ok == false {
 
 			// Add the Identity in committee
-			e.committeeList[identityobj.CommitteeID] = make([]IDENTITY, 0)
-			e.committeeList[identityobj.CommitteeID] = append(e.committeeList[identityobj.CommitteeID], identityobj)
+			e.CommitteeList[identityobj.CommitteeID] = make([]IDENTITY, 0)
+			e.CommitteeList[identityobj.CommitteeID] = append(e.CommitteeList[identityobj.CommitteeID], identityobj)
 
-		} else if len(e.committeeList[identityobj.CommitteeID]) < c {
+		} else if len(e.CommitteeList[identityobj.CommitteeID]) < c {
 			// Add the Identity in committee
 			flag := true
-			for _, obj := range e.committeeList[identityobj.CommitteeID] {
+			for _, obj := range e.CommitteeList[identityobj.CommitteeID] {
 				if identityobj.isEqual(&obj) {
 					flag = false
 					break
 				}
 			}
 			if flag {
-				e.committeeList[identityobj.CommitteeID] = append(e.committeeList[identityobj.CommitteeID], identityobj)
-				if len(e.committeeList[identityobj.CommitteeID]) == c {
+				e.CommitteeList[identityobj.CommitteeID] = append(e.CommitteeList[identityobj.CommitteeID], identityobj)
+				if len(e.CommitteeList[identityobj.CommitteeID]) == c {
 					// check that if all committees are full
 					e.checkCommitteeFull(epoch)
 				}
@@ -2124,7 +2124,7 @@ func (e *Elastico) checkCommitteeFull(epoch string) {
 	*/
 
 	logger.Info("file:- elastico.go, func:- checkCommitteeFull()")
-	commList := e.committeeList
+	commList := e.CommitteeList
 	flag := 0
 	numOfCommittees := int64(math.Pow(2, float64(s)))
 	// iterating over all committee ids
@@ -2189,7 +2189,7 @@ func (e *Elastico) notifyFinalCommittee(epoch string) {
 		notify the members of the final committee that they are the final committee members
 	*/
 	logger.Info("file:- elastico.go, func:- notifyFinalCommittee()")
-	finalCommList := e.committeeList[finNum]
+	finalCommList := e.CommitteeList[finNum]
 	fmt.Println("len of final comm--", len(finalCommList))
 	for _, finalMember := range finalCommList {
 		data := map[string]interface{}{"Identity": e.Identity}
