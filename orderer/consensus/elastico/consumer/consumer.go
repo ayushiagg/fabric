@@ -15,7 +15,7 @@ var logger = flogging.MustGetLogger("orderer.consensus.elastico.consumer")
 func ExecuteConsume(ch *amqp.Channel, Queue string, decodeMsg elastico.DecodeMsgType, exchangeName string, newEpochMessage elastico.NewEpochMsg, elasticoObj *elastico.Elastico) {
 	logger.Info("file:- consumer.go, func:- ExecuteConsume()")
 	for {
-
+		logger.Info("Orderer State - %s %s ", os.Getenv("ORDERER_HOST"), elasticoObj.State)
 		response := elasticoObj.Execute(exchangeName, decodeMsg.Epoch, newEpochMessage)
 		if response == "reset" {
 			break

@@ -153,7 +153,7 @@ type Elastico struct {
 	Port         string
 	key          *rsa.PrivateKey
 	PoW          PoWmsg
-	curDirectory []IDENTITY
+	CurDirectory []IDENTITY
 	Identity     IDENTITY
 	CommitteeID  int64
 	// only when this node is the member of directory committee
@@ -173,7 +173,7 @@ type Elastico struct {
 	CommitteeConsensusDataTxns     map[int64]map[string][]*Message
 	finalBlockbyFinalCommittee     map[string][]IdentityAndSign
 	finalBlockbyFinalCommitteeTxns map[string][]*Message
-	state                          int
+	State                          int
 	mergedBlock                    []*Message
 	finalBlock                     FinalBlockData
 	RcommitmentSet                 map[string]bool
@@ -213,7 +213,7 @@ func (e *Elastico) reset() {
 	e.PoW.SetOfRs = make([]string, 0)
 	e.PoW.Nonce = 0
 
-	e.curDirectory = make([]IDENTITY, 0)
+	e.CurDirectory = make([]IDENTITY, 0)
 	// only when this node is the member of directory committee
 	e.committeeList = make(map[int64][]IDENTITY)
 	// only when this node is not the member of directory committee
@@ -236,7 +236,7 @@ func (e *Elastico) reset() {
 	e.CommitteeConsensusDataTxns = make(map[int64]map[string][]*Message)
 	e.finalBlockbyFinalCommittee = make(map[string][]IdentityAndSign)
 	e.finalBlockbyFinalCommitteeTxns = make(map[string][]*Message)
-	e.state = ElasticoStates["NONE"]
+	e.State = ElasticoStates["NONE"]
 	e.mergedBlock = make([]*Message, 0)
 
 	e.finalBlock = FinalBlockData{}
@@ -341,7 +341,7 @@ func (e *Elastico) ElasticoInit() {
 	e.PoW.SetOfRs = make([]string, 0)
 	e.PoW.Nonce = 0
 
-	e.curDirectory = make([]IDENTITY, 0)
+	e.CurDirectory = make([]IDENTITY, 0)
 
 	e.committeeList = make(map[int64][]IDENTITY)
 
@@ -367,7 +367,7 @@ func (e *Elastico) ElasticoInit() {
 
 	e.finalBlockbyFinalCommitteeTxns = make(map[string][]*Message)
 
-	e.state = ElasticoStates["NONE"]
+	e.State = ElasticoStates["NONE"]
 
 	e.mergedBlock = make([]*Message, 0)
 
@@ -423,7 +423,7 @@ func (e *Elastico) computePoW() {
 	for i := 0; i < D; i++ {
 		zeroString += "0"
 	}
-	if e.state == ElasticoStates["NONE"] {
+	if e.State == ElasticoStates["NONE"] {
 		nonce := e.PoW.Nonce
 		PK := e.key.PublicKey // public key
 		IP := e.IP + e.Port
@@ -448,7 +448,7 @@ func (e *Elastico) computePoW() {
 			e.PoW.SetOfRs = randomsetR
 			e.PoW.Nonce = nonce
 			// change the state after solving the puzzle
-			e.state = ElasticoStates["PoW Computed"]
+			e.State = ElasticoStates["PoW Computed"]
 		} else {
 			// try for other nonce
 			nonce++
@@ -523,7 +523,7 @@ func (e *Elastico) formIdentity() {
 		Identity consists of public key, ip, committee id, PoW, nonce, epoch randomness
 	*/
 	logger.Info("file:- elastico.go, func:- formIdentity()")
-	if e.state == ElasticoStates["PoW Computed"] {
+	if e.State == ElasticoStates["PoW Computed"] {
 
 		PK := e.key.PublicKey
 
@@ -532,7 +532,7 @@ func (e *Elastico) formIdentity() {
 
 		e.Identity = IDENTITY{IP: e.IP, PK: PK, CommitteeID: e.CommitteeID, PoW: e.PoW, EpochRandomness: e.EpochRandomness, Port: e.Port}
 		// changed the state after Identity formation
-		e.state = ElasticoStates["Formed Identity"]
+		e.State = ElasticoStates["Formed Identity"]
 	}
 }
 
@@ -585,7 +585,7 @@ func (e *Elastico) SendToDirectory(epoch string) {
 
 	logger.Info("file:- elastico.go, func:- SendToDirectory()")
 	// Add the new processor in particular committee list of directory committee nodes
-	for _, nodeID := range e.curDirectory {
+	for _, nodeID := range e.CurDirectory {
 
 		data := map[string]interface{}{"Identity": e.Identity}
 
@@ -600,7 +600,7 @@ func (e *Elastico) formCommittee(exchangeName string, epoch string) {
 		creates directory committee if not yet created otherwise informs all the directory members
 	*/
 	logger.Info("file:- elastico.go, func:- formCommittee()")
-	if len(e.curDirectory) < c {
+	if len(e.CurDirectory) < c {
 
 		e.isDirectory = true
 
@@ -609,13 +609,13 @@ func (e *Elastico) formCommittee(exchangeName string, epoch string) {
 
 		BroadcastToNetwork(exchangeName, msg)
 		// change the state as it is the directory member
-		e.state = ElasticoStates["RunAsDirectory"]
+		e.State = ElasticoStates["RunAsDirectory"]
 	} else {
 
 		e.SendToDirectory(epoch)
-		if e.state != ElasticoStates["Receiving Committee Members"] {
+		if e.State != ElasticoStates["Receiving Committee Members"] {
 
-			e.state = ElasticoStates["Formed Committee"]
+			e.State = ElasticoStates["Formed Committee"]
 		}
 	}
 }
@@ -698,7 +698,7 @@ func (e *Elastico) runPBFT(epoch string) {
 		Runs a Pbft instance for the intra-committee consensus
 	*/
 	logger.Info("file:- elastico.go, func:- runPBFT()")
-	if e.state == ElasticoStates["PBFT_NONE"] {
+	if e.State == ElasticoStates["PBFT_NONE"] {
 		if e.primary {
 			prePrepareMsg := e.constructPrePrepare(epoch) //construct pre-prepare msg
 			// multicasts the pre-prepare msg to replicas
@@ -706,7 +706,7 @@ func (e *Elastico) runPBFT(epoch string) {
 			e.sendPrePrepare(prePrepareMsg)
 
 			// change the state of primary to pre-prepared
-			e.state = ElasticoStates["PBFT_PRE_PREPARE_SENT"]
+			e.State = ElasticoStates["PBFT_PRE_PREPARE_SENT"]
 			// primary will log the pre-prepare msg for itself
 			prePrepareMsgEncoded, _ := json.Marshal(prePrepareMsg["data"])
 
@@ -719,11 +719,11 @@ func (e *Elastico) runPBFT(epoch string) {
 
 			// for non-primary members
 			if e.isPrePrepared() {
-				e.state = ElasticoStates["PBFT_PRE_PREPARE"]
+				e.State = ElasticoStates["PBFT_PRE_PREPARE"]
 			}
 		}
 
-	} else if e.state == ElasticoStates["PBFT_PRE_PREPARE"] {
+	} else if e.State == ElasticoStates["PBFT_PRE_PREPARE"] {
 
 		if e.primary == false {
 
@@ -731,29 +731,29 @@ func (e *Elastico) runPBFT(epoch string) {
 			// ToDo: verify whether the pre-prepare msg comes from various primaries or not
 			preparemsgList := e.constructPrepare(epoch)
 			e.sendPrepare(preparemsgList)
-			e.state = ElasticoStates["PBFT_PREPARE_SENT"]
+			e.State = ElasticoStates["PBFT_PREPARE_SENT"]
 		}
 
-	} else if e.state == ElasticoStates["PBFT_PREPARE_SENT"] || e.state == ElasticoStates["PBFT_PRE_PREPARE_SENT"] {
+	} else if e.State == ElasticoStates["PBFT_PREPARE_SENT"] || e.State == ElasticoStates["PBFT_PRE_PREPARE_SENT"] {
 		// ToDo: if, primary has not changed its state to "PBFT_PREPARE_SENT"
 		if e.isPrepared() {
 
 			// logging.warning("prepared done by %s" , str(e.Port))
-			e.state = ElasticoStates["PBFT_PREPARED"]
+			e.State = ElasticoStates["PBFT_PREPARED"]
 		}
 
-	} else if e.state == ElasticoStates["PBFT_PREPARED"] {
+	} else if e.State == ElasticoStates["PBFT_PREPARED"] {
 
 		commitMsgList := e.constructCommit(epoch)
 		e.sendCommit(commitMsgList)
-		e.state = ElasticoStates["PBFT_COMMIT_SENT"]
+		e.State = ElasticoStates["PBFT_COMMIT_SENT"]
 
-	} else if e.state == ElasticoStates["PBFT_COMMIT_SENT"] {
+	} else if e.State == ElasticoStates["PBFT_COMMIT_SENT"] {
 
 		if e.isCommitted() {
 
 			// logging.warning("committed done by %s" , str(e.Port))
-			e.state = ElasticoStates["PBFT_COMMITTED"]
+			e.State = ElasticoStates["PBFT_COMMITTED"]
 		}
 	}
 
@@ -959,7 +959,7 @@ func (e *Elastico) runFinalPBFT(epoch string) {
 		Run PBFT by final committee members
 	*/
 	logger.Info("file:- elastico.go, func:- runFinalPBFT()")
-	if e.state == ElasticoStates["FinalPBFT_NONE"] {
+	if e.State == ElasticoStates["FinalPBFT_NONE"] {
 
 		if e.primary {
 
@@ -970,7 +970,7 @@ func (e *Elastico) runFinalPBFT(epoch string) {
 			e.sendPrePrepare(finalPrePreparemsg)
 
 			// change the state of primary to pre-prepared
-			e.state = ElasticoStates["FinalPBFT_PRE_PREPARE_SENT"]
+			e.State = ElasticoStates["FinalPBFT_PRE_PREPARE_SENT"]
 			// primary will log the pre-prepare msg for itself
 
 			prePrepareMsgEncoded, _ := json.Marshal(finalPrePreparemsg["data"])
@@ -985,34 +985,34 @@ func (e *Elastico) runFinalPBFT(epoch string) {
 
 			// for non-primary members
 			if e.isFinalprePrepared() {
-				e.state = ElasticoStates["FinalPBFT_PRE_PREPARE"]
+				e.State = ElasticoStates["FinalPBFT_PRE_PREPARE"]
 			}
 		}
 
-	} else if e.state == ElasticoStates["FinalPBFT_PRE_PREPARE"] {
+	} else if e.State == ElasticoStates["FinalPBFT_PRE_PREPARE"] {
 
 		if e.primary == false {
 
 			// construct prepare msg
 			FinalpreparemsgList := e.constructFinalPrepare(epoch)
 			e.sendPrepare(FinalpreparemsgList)
-			e.state = ElasticoStates["FinalPBFT_PREPARE_SENT"]
+			e.State = ElasticoStates["FinalPBFT_PREPARE_SENT"]
 		}
-	} else if e.state == ElasticoStates["FinalPBFT_PREPARE_SENT"] || e.state == ElasticoStates["FinalPBFT_PRE_PREPARE_SENT"] {
+	} else if e.State == ElasticoStates["FinalPBFT_PREPARE_SENT"] || e.State == ElasticoStates["FinalPBFT_PRE_PREPARE_SENT"] {
 
 		// ToDo: primary has not changed its state to "FinalPBFT_PREPARE_SENT"
 		if e.isFinalPrepared() {
 
 			fmt.Println("final prepared done")
-			e.state = ElasticoStates["FinalPBFT_PREPARED"]
+			e.State = ElasticoStates["FinalPBFT_PREPARED"]
 		}
-	} else if e.state == ElasticoStates["FinalPBFT_PREPARED"] {
+	} else if e.State == ElasticoStates["FinalPBFT_PREPARED"] {
 
 		commitMsgList := e.constructFinalCommit(epoch)
 		e.sendCommit(commitMsgList)
-		e.state = ElasticoStates["FinalPBFT_COMMIT_SENT"]
+		e.State = ElasticoStates["FinalPBFT_COMMIT_SENT"]
 
-	} else if e.state == ElasticoStates["FinalPBFT_COMMIT_SENT"] {
+	} else if e.State == ElasticoStates["FinalPBFT_COMMIT_SENT"] {
 
 		if e.isFinalCommitted() {
 			for viewID := range e.FinalcommittedData {
@@ -1024,7 +1024,7 @@ func (e *Elastico) runFinalPBFT(epoch string) {
 					e.finalBlock.Txns = e.unionTxns(e.finalBlock.Txns, msgList)
 				}
 			}
-			e.state = ElasticoStates["FinalPBFT_COMMITTED"]
+			e.State = ElasticoStates["FinalPBFT_COMMITTED"]
 		}
 	}
 }
@@ -1597,7 +1597,7 @@ func (e *Elastico) SendtoFinal(epoch string) {
 		msg := map[string]interface{}{"data": data, "type": "intraCommitteeBlock", "epoch": epoch}
 		finalID.send(msg)
 	}
-	e.state = ElasticoStates["Intra Consensus Result Sent to Final"]
+	e.State = ElasticoStates["Intra Consensus Result Sent to Final"]
 }
 
 func (e *Elastico) signTxnList(TxnBlock []*Message) string {
@@ -1677,7 +1677,7 @@ func (e *Elastico) verifyAndMergeConsensusData() {
 	}
 	if len(e.mergedBlock) > 0 {
 		fmt.Println("final committee port - ", e.Port, "has merged data")
-		e.state = ElasticoStates["Merged Consensus Data"]
+		e.State = ElasticoStates["Merged Consensus Data"]
 	}
 }
 
@@ -1696,7 +1696,7 @@ func (e *Elastico) RunInteractiveConsistency(epoch string) {
 			msg := map[string]interface{}{"data": data, "type": "InteractiveConsistency", "epoch": epoch}
 			nodeID.send(msg)
 		}
-		e.state = ElasticoStates["InteractiveConsistencyStarted"]
+		e.State = ElasticoStates["InteractiveConsistencyStarted"]
 	}
 }
 
@@ -1708,23 +1708,23 @@ func (e *Elastico) Execute(exchangeName string, epoch string, Txn NewEpochMsg) s
 	logger.Info("file:- elastico.go, func:- Execute()")
 	config := EState{}
 	// initial state of elastico node
-	if e.state == ElasticoStates["NONE"] {
+	if e.State == ElasticoStates["NONE"] {
 		e.executePoW()
-	} else if e.state == ElasticoStates["PoW Computed"] {
+	} else if e.State == ElasticoStates["PoW Computed"] {
 
 		// form Identity, when PoW computed
 		e.formIdentity()
-	} else if e.state == ElasticoStates["Formed Identity"] {
+	} else if e.State == ElasticoStates["Formed Identity"] {
 
 		// form committee, when formed Identity
 		e.formCommittee(exchangeName, epoch)
-	} else if e.isDirectory && e.state == ElasticoStates["RunAsDirectory"] {
+	} else if e.isDirectory && e.State == ElasticoStates["RunAsDirectory"] {
 
 		logger.Infof("The directory member :- %s ", e.Port)
 		e.receiveTxns(Txn)
 		// directory member has received the txns for all committees
-		e.state = ElasticoStates["RunAsDirectory after-TxnReceived"]
-	} else if e.state == ElasticoStates["Receiving Committee Members"] {
+		e.State = ElasticoStates["RunAsDirectory after-TxnReceived"]
+	} else if e.State == ElasticoStates["Receiving Committee Members"] {
 
 		// when a node is part of some committee
 		if e.flag == false {
@@ -1734,65 +1734,65 @@ func (e *Elastico) Execute(exchangeName string, epoch string, Txn NewEpochMsg) s
 		}
 		// Now The node should go for Intra committee consensus
 		// initial state for the PBFT
-		e.state = ElasticoStates["PBFT_NONE"]
+		e.State = ElasticoStates["PBFT_NONE"]
 		// run PBFT for intra-committee consensus
 		e.runPBFT(epoch)
 
-	} else if e.state == ElasticoStates["PBFT_NONE"] || e.state == ElasticoStates["PBFT_PRE_PREPARE"] || e.state == ElasticoStates["PBFT_PREPARE_SENT"] || e.state == ElasticoStates["PBFT_PREPARED"] || e.state == ElasticoStates["PBFT_COMMIT_SENT"] || e.state == ElasticoStates["PBFT_PRE_PREPARE_SENT"] {
+	} else if e.State == ElasticoStates["PBFT_NONE"] || e.State == ElasticoStates["PBFT_PRE_PREPARE"] || e.State == ElasticoStates["PBFT_PREPARE_SENT"] || e.State == ElasticoStates["PBFT_PREPARED"] || e.State == ElasticoStates["PBFT_COMMIT_SENT"] || e.State == ElasticoStates["PBFT_PRE_PREPARE_SENT"] {
 
 		// run pbft for intra consensus
 		e.runPBFT(epoch)
-	} else if e.state == ElasticoStates["PBFT_COMMITTED"] {
+	} else if e.State == ElasticoStates["PBFT_COMMITTED"] {
 
 		// send pbft consensus blocks to final committee members
 		logger.Infof("pbft finished by members %s", e.Port)
 		e.SendtoFinal(epoch)
 
-	} else if e.isFinalMember() && e.state == ElasticoStates["Intra Consensus Result Sent to Final"] {
+	} else if e.isFinalMember() && e.State == ElasticoStates["Intra Consensus Result Sent to Final"] {
 
 		// final committee node will collect blocks and merge them
 		e.checkCountForConsensusData()
 
-	} else if e.isFinalMember() && e.state == ElasticoStates["Merged Consensus Data"] {
+	} else if e.isFinalMember() && e.State == ElasticoStates["Merged Consensus Data"] {
 
 		// final committee member runs final pbft
-		e.state = ElasticoStates["FinalPBFT_NONE"]
+		e.State = ElasticoStates["FinalPBFT_NONE"]
 		fmt.Println("start pbft by final member with port--", e.Port)
 		e.runFinalPBFT(epoch)
 
-	} else if e.state == ElasticoStates["FinalPBFT_NONE"] || e.state == ElasticoStates["FinalPBFT_PRE_PREPARE"] || e.state == ElasticoStates["FinalPBFT_PREPARE_SENT"] || e.state == ElasticoStates["FinalPBFT_PREPARED"] || e.state == ElasticoStates["FinalPBFT_COMMIT_SENT"] || e.state == ElasticoStates["FinalPBFT_PRE_PREPARE_SENT"] {
+	} else if e.State == ElasticoStates["FinalPBFT_NONE"] || e.State == ElasticoStates["FinalPBFT_PRE_PREPARE"] || e.State == ElasticoStates["FinalPBFT_PREPARE_SENT"] || e.State == ElasticoStates["FinalPBFT_PREPARED"] || e.State == ElasticoStates["FinalPBFT_COMMIT_SENT"] || e.State == ElasticoStates["FinalPBFT_PRE_PREPARE_SENT"] {
 
 		e.runFinalPBFT(epoch)
 
-	} else if e.isFinalMember() && e.state == ElasticoStates["FinalPBFT_COMMITTED"] {
+	} else if e.isFinalMember() && e.State == ElasticoStates["FinalPBFT_COMMITTED"] {
 
 		// send the commitment to other final committee members
 		e.sendCommitment(epoch)
 		logger.Warn("pbft finished by final committee", e.Port)
 
-	} else if e.isFinalMember() && e.state == ElasticoStates["CommitmentSentToFinal"] {
+	} else if e.isFinalMember() && e.State == ElasticoStates["CommitmentSentToFinal"] {
 
 		// broadcast final txn block to ntw
 		if len(e.commitments) >= c/2+1 {
 			logger.Info("commitments received sucess")
 			e.RunInteractiveConsistency(epoch)
 		}
-	} else if e.isFinalMember() && e.state == ElasticoStates["InteractiveConsistencyStarted"] {
+	} else if e.isFinalMember() && e.State == ElasticoStates["InteractiveConsistencyStarted"] {
 		if len(e.EpochcommitmentSet) >= c/2+1 {
-			e.state = ElasticoStates["InteractiveConsistencyAchieved"]
+			e.State = ElasticoStates["InteractiveConsistencyAchieved"]
 		} else {
 			logger.Warn("Int. Consistency short : ", len(e.EpochcommitmentSet), " port :", e.Port)
 		}
-	} else if e.isFinalMember() && e.state == ElasticoStates["InteractiveConsistencyAchieved"] {
+	} else if e.isFinalMember() && e.State == ElasticoStates["InteractiveConsistencyAchieved"] {
 
 		// broadcast final txn block to ntw
 		logger.Info("Consistency received sucess")
 		e.BroadcastFinalTxn(epoch, exchangeName)
-	} else if e.state == ElasticoStates["FinalBlockReceived"] {
+	} else if e.State == ElasticoStates["FinalBlockReceived"] {
 
 		e.checkCountForFinalData()
 
-	} else if e.isFinalMember() && e.state == ElasticoStates["FinalBlockSentToClient"] {
+	} else if e.isFinalMember() && e.State == ElasticoStates["FinalBlockSentToClient"] {
 
 		// broadcast Ri is done when received commitment has atleast c/2  + 1 signatures
 		if len(e.newRcommitmentSet) >= c/2+1 {
@@ -1801,22 +1801,22 @@ func (e *Elastico) Execute(exchangeName string, epoch string, Txn NewEpochMsg) s
 		} else {
 			logger.Info("insufficient Rs")
 		}
-	} else if e.state == ElasticoStates["BroadcastedR"] {
+	} else if e.State == ElasticoStates["BroadcastedR"] {
 		if len(e.newsetOfRs) >= c/2+1 {
 			logger.Info("received the set of Rs")
-			e.state = ElasticoStates["ReceivedR"]
+			e.State = ElasticoStates["ReceivedR"]
 		} else {
 			logger.Info("Insuffice Set of Rs")
 		}
-	} else if e.state == ElasticoStates["ReceivedR"] {
+	} else if e.State == ElasticoStates["ReceivedR"] {
 
-		e.state = ElasticoStates["Reset"]
+		e.State = ElasticoStates["Reset"]
 		config.State = strconv.Itoa(ElasticoStates["Reset"])
 		SetState(config, "/conf.json")
 		// Now, the node can be reset
 		return "reset"
 	}
-	config.State = strconv.Itoa(e.state)
+	config.State = strconv.Itoa(e.State)
 	SetState(config, "/conf.json")
 	return ""
 }
@@ -1863,9 +1863,9 @@ func (e *Elastico) BroadcastFinalTxn(epoch string, exchangeName string) bool {
 	// final Block sent to ntw
 	e.finalBlock.Sent = true
 	// A final node which is already in received state should not change its state
-	if e.state != ElasticoStates["FinalBlockReceived"] {
+	if e.State != ElasticoStates["FinalBlockReceived"] {
 
-		e.state = ElasticoStates["FinalBlockSent"]
+		e.State = ElasticoStates["FinalBlockSent"]
 	}
 	msg := map[string]interface{}{"data": data, "type": "FinalBlock", "epoch": epoch}
 	BroadcastToNetwork(exchangeName, msg)
@@ -1914,7 +1914,7 @@ func (e *Elastico) sendCommitment(epoch string) {
 			msg := map[string]interface{}{"data": data, "type": "hash", "epoch": epoch}
 			nodeID.send(msg)
 		}
-		e.state = ElasticoStates["CommitmentSentToFinal"]
+		e.State = ElasticoStates["CommitmentSentToFinal"]
 	}
 }
 
@@ -1945,7 +1945,7 @@ func (e *Elastico) checkCountForFinalData() {
 	if len(e.response) > 0 {
 
 		logger.Warnf("final block sent the block to client by %s", e.Port)
-		e.state = ElasticoStates["FinalBlockSentToClient"]
+		e.State = ElasticoStates["FinalBlockSentToClient"]
 	}
 }
 
@@ -1958,7 +1958,7 @@ func (e *Elastico) BroadcastR(epoch string, exchangeName string) {
 
 		msg := map[string]interface{}{"data": data, "type": "RandomStringBroadcast", "epoch": epoch}
 
-		e.state = ElasticoStates["BroadcastedR"]
+		e.State = ElasticoStates["BroadcastedR"]
 
 		BroadcastToNetwork(exchangeName, msg)
 
@@ -2053,10 +2053,10 @@ func (e *Elastico) receiveDirectoryMember(msg DecodeMsgType) {
 	identityobj := decodeMsg.Identity
 	// verify the PoW of the sender
 	if e.verifyPoW(identityobj) {
-		if len(e.curDirectory) < c {
+		if len(e.CurDirectory) < c {
 			// check whether identityobj is already present or not
 			flag := true
-			for _, obj := range e.curDirectory {
+			for _, obj := range e.CurDirectory {
 				if identityobj.isEqual(&obj) {
 					flag = false
 					break
@@ -2064,7 +2064,7 @@ func (e *Elastico) receiveDirectoryMember(msg DecodeMsgType) {
 			}
 			if flag {
 				// append the object if not already present
-				e.curDirectory = append(e.curDirectory, identityobj)
+				e.CurDirectory = append(e.CurDirectory, identityobj)
 			}
 		}
 	} else {
@@ -2141,14 +2141,14 @@ func (e *Elastico) checkCommitteeFull(epoch string) {
 	if flag == 0 {
 
 		logger.Info("committees full  - good")
-		if e.state == ElasticoStates["RunAsDirectory after-TxnReceived"] {
+		if e.State == ElasticoStates["RunAsDirectory after-TxnReceived"] {
 
 			// notify the final members
 			e.notifyFinalCommittee(epoch)
 			// multicast the txns and committee members to the nodes
 			MulticastCommittee(commList, e.Identity, e.txn, epoch)
 			// change the state after multicast
-			e.state = ElasticoStates["RunAsDirectory after-TxnMulticast"]
+			e.State = ElasticoStates["RunAsDirectory after-TxnMulticast"]
 		}
 	}
 }
@@ -2263,7 +2263,7 @@ func (e *Elastico) receiveRandomStringBroadcast(msg DecodeMsgType) {
 
 			if len(e.newsetOfRs) >= c/2+1 {
 				logger.Info("received the set of Rs")
-				e.state = ElasticoStates["ReceivedR"]
+				e.State = ElasticoStates["ReceivedR"]
 			} else {
 				logger.Info("insufficient set of Rs")
 			}
@@ -2507,18 +2507,18 @@ func (e *Elastico) receiveFinalTxnBlock(msg DecodeMsgType) {
 			}
 
 			// block is signed by sufficient final members and when the final block has not been sent to the client yet
-			if len(e.finalBlockbyFinalCommittee[finaltxnBlockDigest]) >= c/2+1 && e.state != ElasticoStates["FinalBlockSentToClient"] {
+			if len(e.finalBlockbyFinalCommittee[finaltxnBlockDigest]) >= c/2+1 && e.State != ElasticoStates["FinalBlockSentToClient"] {
 				// for final members, their state is updated only when they have also sent the finalblock to ntw
 				if e.isFinalMember() {
 					finalBlockSent := e.finalBlock.Sent
 					if finalBlockSent {
 
-						e.state = ElasticoStates["FinalBlockReceived"]
+						e.State = ElasticoStates["FinalBlockReceived"]
 					}
 
 				} else {
 
-					e.state = ElasticoStates["FinalBlockReceived"]
+					e.State = ElasticoStates["FinalBlockReceived"]
 				}
 
 			}
@@ -3195,9 +3195,9 @@ func (e *Elastico) receiveViews(msg DecodeMsgType) {
 			// union of final committee members wrt directory member
 			e.finalCommitteeMembers = e.unionViews(e.finalCommitteeMembers, finalMembers)
 			// received the members
-			if e.state == ElasticoStates["Formed Committee"] && len(e.views) >= c/2+1 {
+			if e.State == ElasticoStates["Formed Committee"] && len(e.views) >= c/2+1 {
 
-				e.state = ElasticoStates["Receiving Committee Members"]
+				e.State = ElasticoStates["Receiving Committee Members"]
 			}
 		}
 	}
