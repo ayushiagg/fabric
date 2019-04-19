@@ -1,11 +1,43 @@
-    orderer0.example.com:
-        extends:
-            file: docker-compose-base.yml
-            service: orderer
-        container_name: orderer0.example.com
+    orderer0:
+        image: hyperledger/fabric-orderer
         environment:
-            - ORDERER_HOST=orderer0.example.com
-            - CONFIGTX_ORDERER_ORDERERTYPE=kafka
+            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${CORE_PEER_NETWORKID}_behave
+            - ORDERER_HOME=/var/hyperledger/orderer
+            - ORDERER_GENERAL_LOGLEVEL=debug
+            - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/msp
+            - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+            - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+            - ORDERER_GENERAL_LISTENPORT=7050
+            - ORDERER_GENERAL_LEDGERTYPE=ram
+            - ORDERER_GENERAL_GENESISMETHOD=file
+            - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/configs/orderer.block
+            - CONFIGTX_ORDERER_ORDERERTYPE=elastico
+            - CONFIGTX_ORDERER_BATCHSIZE_MAXMESSAGECOUNT=${CONFIGTX_ORDERER_BATCHSIZE_MAXMESSAGECOUNT}
+            - CONFIGTX_ORDERER_BATCHTIMEOUT=${CONFIGTX_ORDERER_BATCHTIMEOUT}
+            - CONFIGTX_ORDERER_ADDRESSES=[127.0.0.1:7050]
+            # TLS settings
+            - ORDERER_GENERAL_TLS_ENABLED=${ORDERER_GENERAL_TLS_ENABLED}
+            - ORDERER_GENERAL_TLS_PRIVATEKEY=${ORDERER_GENERAL_TLS_PRIVATEKEY}
+            - ORDERER_GENERAL_TLS_CERTIFICATE=${ORDERER_GENERAL_TLS_CERTIFICATE}
+            - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/tls/ca.crt]
+            - ORDERER_TLS_CLIENTAUTHREQUIRED=${ORDERER_TLS_CLIENTAUTHREQUIRED}
+            - ORDERER_TLS_CLIENTROOTCAS_FILES=/var/hyperledger/users/Admin@example.com/tls/ca.crt
+            - ORDERER_TLS_CLIENTCERT_FILE=/var/hyperledger/users/Admin@example.com/tls/client.crt
+            - ORDERER_TLS_CLIENTKEY_FILE=/var/hyperledger/users/Admin@example.com/tls/client.key
+        volumes:
+            - ../config/:/var/hyperledger/configs
+            - ../crypto-config/ordererOrganizations/example.com/users:/var/hyperledger/users
+            # - ../fabric:/opt/gopath/src/github.com/hyperledger/fabric
+            - ../bin/consumer:/var/hyperledger/fabric/orderer/elastico
+            - /usr/local/go:/usr/local/go
+        working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
+        command: orderer
+        ports:
+          - '7050'
+        container_name: orderer0
+        environment:
+            - ORDERER_HOST=orderer0
+            - CONFIGTX_ORDERER_ORDERERTYPE=elastico
             - RABBITMQ_CONNECT=rabbitmq0:5672
             - CONFIGTX_ORDERER_KAFKA_BROKERS=[kafka0:9092,kafka1:9092,kafka2:9092,kafka3:9092]
             - ORDERER_KAFKA_RETRY_SHORTINTERVAL=1s
@@ -15,8 +47,8 @@
             - ORDERER_ABSOLUTEMAXBYTES=${ORDERER_ABSOLUTEMAXBYTES}
             - ORDERER_PREFERREDMAXBYTES=${ORDERER_PREFERREDMAXBYTES}
         volumes:
-            - ../crypto-config/ordererOrganizations/example.com/orderers/orderer0.example.com/msp:/var/hyperledger/msp
-            - ../crypto-config/ordererOrganizations/example.com/orderers/orderer0.example.com/tls:/var/hyperledger/tls
+            - ../crypto-config/ordererOrganizations/example.com/orderers/orderer0/msp:/var/hyperledger/msp
+            - ../crypto-config/ordererOrganizations/example.com/orderers/orderer0/tls:/var/hyperledger/tls
             - ../config/:/var/hyperledger/configs
         depends_on:
             - rabbitmq0
