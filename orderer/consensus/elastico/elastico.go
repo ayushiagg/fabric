@@ -148,10 +148,10 @@ type Elastico struct {
 		FinalcommittedData - data after committed state in final pbft run
 		faulty - Flag denotes whether this node is faulty or not
 	*/
-	connection   *amqp.Connection
+	Conn         *amqp.Connection
 	IP           string
 	Port         string
-	key          *rsa.PrivateKey
+	Key          *rsa.PrivateKey
 	PoW          PoWmsg
 	CurDirectory []IDENTITY
 	Identity     IDENTITY
@@ -311,7 +311,7 @@ func (e *Elastico) getKey() {
 	logger.Info("file:- elastico.go, func:- getKey()")
 	var err error
 	// generate the public-pvt key pair
-	e.key, err = rsa.GenerateKey(rand.Reader, 2048)
+	e.Key, err = rsa.GenerateKey(rand.Reader, 2048)
 	FailOnError(err, "key generation", true)
 }
 
@@ -329,7 +329,7 @@ func (e *Elastico) initER() {
 func (e *Elastico) ElasticoInit() {
 	logger.Info("file:- elastico.go, func:- ElasticoInit()")
 	// create rabbit mq connection
-	e.connection = GetConnection()
+	e.Conn = GetConnection()
 	// set IP
 	e.getIP()
 	e.getPort()
@@ -425,7 +425,7 @@ func (e *Elastico) computePoW() {
 	}
 	if e.State == ElasticoStates["NONE"] {
 		nonce := e.PoW.Nonce
-		PK := e.key.PublicKey // public key
+		PK := e.Key.PublicKey // public key
 		IP := e.IP + e.Port
 		// If it is the first epoch , randomsetR will be an empty set .
 		// otherwise randomsetR will be any c/2 + 1 random strings Ri that node receives from the previous epoch
@@ -525,7 +525,7 @@ func (e *Elastico) formIdentity() {
 	logger.Info("file:- elastico.go, func:- formIdentity()")
 	if e.State == ElasticoStates["PoW Computed"] {
 
-		PK := e.key.PublicKey
+		PK := e.Key.PublicKey
 
 		// set the committee id acc to PoW solution
 		e.getCommitteeid()
@@ -1292,7 +1292,7 @@ func txnHexdigest(txnList []*Message) string {
 //Sign :- sign the byte array
 func (e *Elastico) Sign(digest []byte) string {
 	logger.Info("file:- elastico.go, func:- Sign()")
-	signed, err := rsa.SignPKCS1v15(rand.Reader, e.key, crypto.SHA256, digest) // sign the digest
+	signed, err := rsa.SignPKCS1v15(rand.Reader, e.Key, crypto.SHA256, digest) // sign the digest
 	FailOnError(err, "Error in Signing byte array", true)
 	signature := base64.StdEncoding.EncodeToString(signed) // encode to base64
 	return signature
@@ -1608,7 +1608,7 @@ func (e *Elastico) signTxnList(TxnBlock []*Message) string {
 		txnDigest := TxnBlock[i].hexdigest() // Get the transaction digest
 		digest.Write([]byte(txnDigest))
 	}
-	signed, err := rsa.SignPKCS1v15(rand.Reader, e.key, crypto.SHA256, digest.Sum(nil)) // sign the digest of Txn List
+	signed, err := rsa.SignPKCS1v15(rand.Reader, e.Key, crypto.SHA256, digest.Sum(nil)) // sign the digest of Txn List
 	FailOnError(err, "Error in Signing Txn List", true)
 	signature := base64.StdEncoding.EncodeToString(signed) // encode to base64
 	return signature
