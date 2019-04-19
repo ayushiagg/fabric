@@ -9,7 +9,6 @@ func main() {
 	n := 66
 	x := 0
 	for i := 0; i < n; i++ {
-
 		fmt.Println("    orderer" + strconv.Itoa(i) + ".example.com:")
 		fmt.Println("        extends:")
 		fmt.Println("            file: docker-compose-base.yml")
@@ -43,6 +42,6 @@ func main() {
 		fmt.Println("        ports:")
 		fmt.Println("          - " + strconv.Itoa(7050+x) + ":7050")
 		fmt.Println("")
-		x += 100
+		x += 500
 	}
 }

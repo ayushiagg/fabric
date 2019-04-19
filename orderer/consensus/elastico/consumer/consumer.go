@@ -4,13 +4,16 @@ import (
 	"encoding/json"
 	"os"
 
+	"github.com/hyperledger/fabric/common/flogging"
 	elastico "github.com/hyperledger/fabric/orderer/consensus/elastico"
 	"github.com/streadway/amqp"
 )
 
+var logger = flogging.MustGetLogger("orderer.consensus.elastico.consumer")
+
 //ExecuteConsume :-
 func ExecuteConsume(ch *amqp.Channel, Queue string, decodeMsg elastico.DecodeMsgType, exchangeName string, newEpochMessage elastico.NewEpochMsg, elasticoObj *elastico.Elastico) {
-
+	logger.Info("file:- consumer.go, func:- ExecuteConsume()")
 	for {
 
 		response := elasticoObj.Execute(exchangeName, decodeMsg.Epoch, newEpochMessage)
@@ -23,6 +26,7 @@ func ExecuteConsume(ch *amqp.Channel, Queue string, decodeMsg elastico.DecodeMsg
 
 //Consume :-
 func Consume(ch *amqp.Channel, queue amqp.Queue, elasticoObj *elastico.Elastico) {
+	logger.Info("file:- consumer.go, func:- Consume()")
 	var decodemsg elastico.DecodeMsgType
 	// consume all the messages one by one
 	for ; queue.Messages > 0; queue.Messages-- {
@@ -56,6 +60,7 @@ func Consume(ch *amqp.Channel, queue amqp.Queue, elasticoObj *elastico.Elastico)
 
 // Run :-
 func Run(ch *amqp.Channel, queueName string, elasticoObj *elastico.Elastico) {
+	logger.Info("file:- consumer.go, func:- Run()")
 	defer ch.Close()
 	for {
 		// count the number of messages that are in the queue
@@ -68,8 +73,11 @@ func Run(ch *amqp.Channel, queueName string, elasticoObj *elastico.Elastico) {
 }
 
 func main() {
+	logger.Info("file:- consumer.go, func:- main()")
 	conn := elastico.GetConnection()
+	logger.Info("elastico-consumer -connection established")
 	ch := elastico.GetChannel(conn)
+	logger.Info("elastico-consumer -channel established")
 	defer conn.Close()
 
 	queueName := os.Getenv("ORDERER_HOST")
@@ -85,8 +93,11 @@ func main() {
 
 	elastico.FailOnError(err, "Failed to declare a queue", true)
 
+	logger.Info("elastico-consumer queue established")
 	elasticoObj := elastico.Elastico{}
 	elasticoObj.ElasticoInit()
+	logger.Info("elastico-consumer elastico init done")
 
 	Run(ch, queue.Name, &elasticoObj)
+	logger.Info("elastico-consumer running done")
 }

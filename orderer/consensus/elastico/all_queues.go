@@ -3,6 +3,7 @@ package elastico
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 )
 
 // Queue :-
@@ -12,8 +13,8 @@ type Queue struct {
 }
 
 func getallQueues() []Queue {
-
-	manager := "http://127.0.0.1:15672/api/queues/"
+	logger.Info("file:- allqueues.go, func:- getallQueues()")
+	manager := "rabbitmq0:15672/api/queues/"
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", manager, nil)
 	req.SetBasicAuth("guest",
@@ -22,6 +23,7 @@ func getallQueues() []Queue {
 
 	value := make([]Queue, 0)
 	json.NewDecoder(resp.Body).Decode(&value)
+	logger.Infof("value size %s", strconv.Itoa(len(value)))
 	// fmt.Println(value)
 	return value
 }

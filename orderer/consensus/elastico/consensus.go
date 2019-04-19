@@ -40,14 +40,17 @@ type Message struct {
 // It accepts messages being delivered via Order/Configure, orders them, and then uses the blockcutter to form the messages
 // into blocks before writing to the given ledger
 func New() consensus.Consenter {
+	logger.Info("file:- consensus.go, func:- New()")
 	return &consenter{}
 }
 
 func (solo *consenter) HandleChain(support consensus.ConsenterSupport, metadata *cb.Metadata) (consensus.Chain, error) {
+	logger.Info("file:- consensus.go, func:- HandleChain()")
 	return newChain(support), nil
 }
 
 func newChain(support consensus.ConsenterSupport) *chain {
+	logger.Info("file:- consensus.go, func:- newChain()")
 	return &chain{
 		support:         support,
 		sendChan:        make(chan *Message),
@@ -57,10 +60,12 @@ func newChain(support consensus.ConsenterSupport) *chain {
 }
 
 func (ch *chain) Start() {
+	logger.Info("file:- consensus.go, func:- Start()")
 	go ch.main()
 }
 
 func (ch *chain) Halt() {
+	logger.Info("file:- consensus.go, func:- Halt()")
 	select {
 	case <-ch.exitChan:
 		// Allow multiple halts without panic
@@ -70,11 +75,13 @@ func (ch *chain) Halt() {
 }
 
 func (ch *chain) WaitReady() error {
+	logger.Info("file:- consensus.go, func:- WaitReady()")
 	return nil
 }
 
 // Order accepts normal messages for ordering
 func (ch *chain) Order(env *cb.Envelope, ConfigSeq uint64) error {
+	logger.Info("file:- consensus.go, func:- Order()")
 	select {
 	case ch.sendChan <- &Message{
 		ConfigSeq: ConfigSeq,
@@ -88,6 +95,7 @@ func (ch *chain) Order(env *cb.Envelope, ConfigSeq uint64) error {
 
 // Configure accepts configuration update messages for ordering
 func (ch *chain) Configure(config *cb.Envelope, ConfigSeq uint64) error {
+	logger.Info("file:- consensus.go, func:- Configure()")
 	select {
 	case ch.sendChan <- &Message{
 		ConfigSeq: ConfigSeq,
@@ -101,15 +109,17 @@ func (ch *chain) Configure(config *cb.Envelope, ConfigSeq uint64) error {
 
 // Errored only closes on exit
 func (ch *chain) Errored() <-chan struct{} {
+	logger.Info("file:- consensus.go, func:- Errored()")
 	return ch.exitChan
 }
 
 func (ch *chain) MigrationStatus() migration.Status {
+	logger.Info("file:- consensus.go, func:- MigrationStatus()")
 	return ch.migrationStatus
 }
 
 func marshalData(msg map[string]interface{}) []byte {
-
+	logger.Info("file:- consensus.go, func:- marshalData()")
 	body, err := json.Marshal(msg)
 	// fmt.Println("marshall data", body)
 	FailOnError(err, "error in marshal", true)
@@ -117,7 +127,7 @@ func marshalData(msg map[string]interface{}) []byte {
 }
 
 func publishMsg(channel *amqp.Channel, queueName string, msg map[string]interface{}) {
-
+	logger.Info("file:- consensus.go, func:- publishMsg()")
 	body := marshalData(msg)
 
 	err := channel.Publish(
@@ -139,7 +149,7 @@ type msgType struct {
 }
 
 func (ch *chain) runElastico(msg *Message) {
-
+	logger.Info("file:- consensus.go, func:- runElastico()")
 	// if elastico is running for previous epoch then wait for it to reset and get finished
 	for stateEnv := os.Getenv("ELASTICO_STATE"); stateEnv != "" && stateEnv != strconv.Itoa(ElasticoStates["Reset"]); {
 		stateEnv = os.Getenv("ELASTICO_STATE")
@@ -172,6 +182,7 @@ func (ch *chain) runElastico(msg *Message) {
 }
 
 func (ch *chain) main() {
+	logger.Info("file:- consensus.go, func:- main()")
 	var timer <-chan time.Time
 	var err error
 

@@ -66,7 +66,7 @@ Application: &ApplicationDefaults
         <<: *ApplicationCapabilities
 
 Orderer: &OrdererDefaults
-    OrdererType: solo
+    OrdererType: elastico
     Addresses:
         - 127.0.0.1:7050
     BatchTimeout: 2s
