@@ -33,7 +33,6 @@ func Consume(ch *amqp.Channel, queue amqp.Queue, elasticoObj *elastico.Elastico)
 		// get the message from the queue
 		msg, ok, err := ch.Get(queue.Name, true)
 		elastico.FailOnError(err, "error in get of queue", true)
-
 		if ok {
 			err = json.Unmarshal(msg.Body, &decodemsg)
 			elastico.FailOnError(err, "error in unmarshall", true)

@@ -13,17 +13,18 @@ type Queue struct {
 }
 
 func getallQueues() []Queue {
-	logger.Info("file:- allqueues.go, func:- getallQueues()")
-	manager := "rabbitmq0:15672/api/queues/"
+	manager := "http://rabbitmq0:15672/api/queues/"
 	client := &http.Client{}
-	req, _ := http.NewRequest("GET", manager, nil)
-	req.SetBasicAuth("guest",
-		"guest")
-	resp, _ := client.Do(req)
+	req, err1 := http.NewRequest("GET", manager, nil)
+	FailOnError(err1, "error in NewRequest", true)
 
+	req.SetBasicAuth("guest", "guest")
+	resp, err2 := client.Do(req)
 	value := make([]Queue, 0)
-	json.NewDecoder(resp.Body).Decode(&value)
-	logger.Infof("value size %s", strconv.Itoa(len(value)))
-	// fmt.Println(value)
+	FailOnError(err2, "error in client do", true)
+	if resp != nil {
+		json.NewDecoder(resp.Body).Decode(&value)
+		logger.Infof("value size %s\n", strconv.Itoa(len(value)))
+	}
 	return value
 }

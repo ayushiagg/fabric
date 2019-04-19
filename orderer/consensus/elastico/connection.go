@@ -12,9 +12,9 @@ var logger = flogging.MustGetLogger("orderer.consensus.elastico")
 // FailOnError :-
 func FailOnError(err error, msg string, exit bool) {
 	// logging the error
-	logger.Info("file:- connection.go, func:- FailOnError() Error found! ")
-	logger.Info(msg)
 	if err != nil {
+		logger.Info("file:- connection.go, func:- FailOnError() Error found! ")
+		logger.Info(msg)
 		if exit {
 			os.Exit(1)
 		}

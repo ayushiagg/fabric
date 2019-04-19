@@ -9,6 +9,7 @@ package elastico
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strconv"
 	"time"
@@ -148,15 +149,54 @@ type msgType struct {
 	Type string
 }
 
+// EState :
+type EState struct {
+	State string
+}
+
+// GetState :-
+func GetState(path string) string {
+
+	if _, err := os.Stat(path); err == nil {
+		// path/to/whatever exists
+		file, _ := os.Open(path)
+		decoder := json.NewDecoder(file)
+		config := EState{}
+		err := decoder.Decode(&config)
+		FailOnError(err, "error in decoding config", true)
+		return config.State
+
+	} else if os.IsNotExist(err) {
+		// path/to/whatever does *not* exist
+		_, err := os.Create(path)
+		FailOnError(err, "fail to create", true)
+	}
+	return ""
+}
+
+// SetState :-
+func SetState(config EState, path string) {
+
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		_, err = os.Create(path)
+		FailOnError(err, "fail to create", true)
+	}
+	data, _ := json.Marshal(config)
+	err := ioutil.WriteFile(path, data, 0644)
+	FailOnError(err, "fail to write in file", true)
+}
 func (ch *chain) runElastico(msg *Message) {
 	logger.Info("file:- consensus.go, func:- runElastico()")
+	path := "/conf.json"
+	config := EState{}
+
 	// if elastico is running for previous epoch then wait for it to reset and get finished
-	for stateEnv := os.Getenv("ELASTICO_STATE"); stateEnv != "" && stateEnv != strconv.Itoa(ElasticoStates["Reset"]); {
-		stateEnv = os.Getenv("ELASTICO_STATE")
+	for stateEnv := GetState(path); stateEnv != "" && stateEnv != strconv.Itoa(ElasticoStates["Reset"]); {
+		stateEnv = GetState(path)
 	}
+	config.State = strconv.Itoa(ElasticoStates["NONE"])
 	// set the ELASTICO_STATE env to NONE
-	err := os.Setenv("ELASTICO_STATE", strconv.Itoa(ElasticoStates["NONE"]))
-	FailOnError(err, "fail to set the environment variable", true)
+	SetState(config, path)
 
 	conn := GetConnection()
 	channel := GetChannel(conn)
@@ -176,8 +216,8 @@ func (ch *chain) runElastico(msg *Message) {
 		publishMsg(channel, queueName.Name, newEpochMsg)
 	}
 	// Block will not go to BlockCutter till state is reset for the orderer
-	for StateEnv := os.Getenv("ELASTICO_STATE"); StateEnv != strconv.Itoa(ElasticoStates["Reset"]); {
-		StateEnv = os.Getenv("ELASTICO_STATE")
+	for StateEnv := GetState(path); StateEnv != strconv.Itoa(ElasticoStates["Reset"]); {
+		StateEnv = GetState(path)
 	}
 }
 

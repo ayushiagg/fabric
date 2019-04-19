@@ -1706,6 +1706,7 @@ func (e *Elastico) Execute(exchangeName string, epoch string, Txn NewEpochMsg) s
 		executing the functions based on the running state
 	*/
 	logger.Info("file:- elastico.go, func:- Execute()")
+	config := EState{}
 	// initial state of elastico node
 	if e.state == ElasticoStates["NONE"] {
 		e.executePoW()
@@ -1810,10 +1811,13 @@ func (e *Elastico) Execute(exchangeName string, epoch string, Txn NewEpochMsg) s
 	} else if e.state == ElasticoStates["ReceivedR"] {
 
 		e.state = ElasticoStates["Reset"]
-		os.Setenv("ELASTICO_STATE", strconv.Itoa(ElasticoStates["Reset"]))
+		config.State = strconv.Itoa(ElasticoStates["Reset"])
+		SetState(config, "/conf.json")
 		// Now, the node can be reset
 		return "reset"
 	}
+	config.State = strconv.Itoa(e.state)
+	SetState(config, "/conf.json")
 	return ""
 }
 
