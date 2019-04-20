@@ -51,8 +51,8 @@ func Consume(ch *amqp.Channel, queue amqp.Queue, elasticoObj *elastico.Elastico)
 				var newEpochMessage elastico.NewEpochMsg
 				err := json.Unmarshal(decodemsg.Data, &newEpochMessage)
 				elastico.FailOnError(err, "fail to decode new epoch msg", true)
-				// set he exchange name as Epoch Num
-				exchangeName := decodemsg.Epoch
+				// set the exchange name as Epoch Num
+				exchangeName := "epoch" + decodemsg.Epoch
 				// declare the exchange
 				errExchange := ch.ExchangeDeclare(exchangeName, "fanout", true, false, false, false, nil)
 				elastico.FailOnError(errExchange, "Failed to declare a exchange", true)
