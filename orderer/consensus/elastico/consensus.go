@@ -159,7 +159,8 @@ func GetState(path string) string {
 
 	if _, err := os.Stat(path); err == nil {
 		// path/to/whatever exists
-		file, _ := os.Open(path)
+		file, errOpen := os.Open(path)
+		FailOnError(errOpen, "error in opening the file", true)
 		defer file.Close()
 		decoder := json.NewDecoder(file)
 		config := EState{}
