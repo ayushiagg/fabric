@@ -159,7 +159,7 @@ type Elastico struct {
 	// only when this node is the member of directory committee
 	CommitteeList map[int64][]IDENTITY
 	// only when this node is not the member of directory committee
-	committeeMembers []IDENTITY
+	CommitteeMembers []IDENTITY
 	isDirectory      bool
 	isFinal          bool
 	EpochRandomness  string
@@ -217,7 +217,7 @@ func (e *Elastico) reset() {
 	// only when this node is the member of directory committee
 	e.CommitteeList = make(map[int64][]IDENTITY)
 	// only when this node is not the member of directory committee
-	e.committeeMembers = make([]IDENTITY, 0)
+	e.CommitteeMembers = make([]IDENTITY, 0)
 
 	e.Identity = IDENTITY{}
 	e.CommitteeID = -1
@@ -345,7 +345,7 @@ func (e *Elastico) ElasticoInit() {
 
 	e.CommitteeList = make(map[int64][]IDENTITY)
 
-	e.committeeMembers = make([]IDENTITY, 0)
+	e.CommitteeMembers = make([]IDENTITY, 0)
 
 	e.CommitteeID = -1
 	// for setting EpochRandomness
@@ -1497,7 +1497,7 @@ func (e *Elastico) sendPrePrepare(prePrepareMsg map[string]interface{}) {
 		Send pre-prepare msgs to all committee members
 	*/
 	logger.Info("file:- elastico.go, func:- sendPrePrepare()")
-	for _, nodeID := range e.committeeMembers {
+	for _, nodeID := range e.CommitteeMembers {
 
 		// dont send pre-prepare msg to self
 		if e.Identity.isEqual(&nodeID) == false {
@@ -1514,7 +1514,7 @@ func (e *Elastico) sendCommit(commitMsgList []map[string]interface{}) {
 	logger.Info("file:- elastico.go, func:- sendCommit()")
 	for _, commitMsg := range commitMsgList {
 
-		for _, nodeID := range e.committeeMembers {
+		for _, nodeID := range e.CommitteeMembers {
 
 			nodeID.send(commitMsg)
 		}
@@ -1529,7 +1529,7 @@ func (e *Elastico) sendPrepare(prepareMsgList []map[string]interface{}) {
 	// send prepare msg list to committee members
 	for _, preparemsg := range prepareMsgList {
 
-		for _, nodeID := range e.committeeMembers {
+		for _, nodeID := range e.CommitteeMembers {
 
 			nodeID.send(preparemsg)
 		}
@@ -1688,7 +1688,7 @@ func (e *Elastico) RunInteractiveConsistency(epoch string) {
 	*/
 	logger.Info("file:- elastico.go, func:- RunInteractiveConsistency()")
 	if e.isFinalMember() == true {
-		for _, nodeID := range e.committeeMembers {
+		for _, nodeID := range e.CommitteeMembers {
 
 			logger.Warnf("sent the Int. commitments  %s to %s", e.Port, nodeID.Port)
 			commitments := mapToList(e.commitments)
@@ -1730,7 +1730,7 @@ func (e *Elastico) Execute(exchangeName string, epoch string, Txn NewEpochMsg) s
 		if e.flag == false {
 
 			// logging the bad nodes
-			// logger.Errorf("member with invalid POW %s with commMembers : %s", e.Identity, e.committeeMembers)
+			// logger.Errorf("member with invalid POW %s with commMembers : %s", e.Identity, e.CommitteeMembers)
 		}
 		// Now The node should go for Intra committee consensus
 		// initial state for the PBFT
@@ -1907,7 +1907,7 @@ func (e *Elastico) sendCommitment(epoch string) {
 	if e.isFinalMember() == true {
 
 		HashRi := e.getCommitment()
-		for _, nodeID := range e.committeeMembers {
+		for _, nodeID := range e.CommitteeMembers {
 
 			// logger.Warn("sent the commitment by ", e.Port, " to ", nodeID.Port)
 			data := map[string]interface{}{"Identity": e.Identity, "HashRi": HashRi}
@@ -3191,7 +3191,7 @@ func (e *Elastico) receiveViews(msg DecodeMsgType) {
 
 			// ToDo: verify this union thing
 			// union of committee members wrt directory member
-			e.committeeMembers = e.unionViews(e.committeeMembers, commMembers)
+			e.CommitteeMembers = e.unionViews(e.CommitteeMembers, commMembers)
 			// union of final committee members wrt directory member
 			e.finalCommitteeMembers = e.unionViews(e.finalCommitteeMembers, finalMembers)
 			// received the members
