@@ -122,31 +122,31 @@ type Elastico struct {
 		txn_block - block of txns that the committee will agree on(intra committee consensus block)
 		set_of_Rs - set of Ris obtained from the final committee of previous epoch
 		newset_of_Rs - In the present epoch, set of Ris obtained from the final committee
-		CommitteeConsensusData - a dictionary of committee ids that contains a dictionary of the txn block and the signatures
-		FinalBlockbyFinalCommittee - a dictionary of txn block and the signatures by the final committee members
+		CommitteeConsensusData - a dictionary of committee ids that contains a dictionary of the Txn block and the signatures
+		FinalBlockbyFinalCommittee - a dictionary of Txn block and the signatures by the final committee members
 		state - state in which a node is running
 		MergedBlock - list of txns of different committees after their intra committee consensus
 		FinalBlock - agreed list of txns after pbft run by final committee
 		RcommitmentSet - set of H(Ri)s received from the final committee after the consistency protocol [previous epoch values]
 		NewRcommitmentSet - For the present it contains the set of H(Ri)s received from the final committee after the consistency protocol
-		finalCommitteeMembers - members of the final committee received from the directory committee
-		txn- transactions stored by the directory members
-		response - final block to be received by the client
-		flag- to denote a bad or good node
-		views - stores the ports of processes from which committee member views have been received
-		primary- boolean to denote the primary node in the committee for PBFT run
-		viewID - view number of the pbft
-		prePrepareMsgLog - log of pre-prepare msgs received during PBFT
-		prepareMsgLog - log of prepare msgs received during PBFT
-		commitMsgLog - log of commit msgs received during PBFT
-		preparedData - data after prepared state
-		committedData - data after committed state
+		FinalCommitteeMembers - members of the final committee received from the directory committee
+		Txn- transactions stored by the directory members
+		Response - final block to be received by the client
+		Flag- to denote a bad or good node
+		Views - stores the ports of processes from which committee member Views have been received
+		Primary- boolean to denote the Primary node in the committee for PBFT run
+		ViewID - view number of the pbft
+		PrePrepareMsgLog - log of pre-prepare msgs received during PBFT
+		PrepareMsgLog - log of prepare msgs received during PBFT
+		CommitMsgLog - log of commit msgs received during PBFT
+		PreparedData - data after prepared state
+		CommittedData - data after committed state
 		Finalpre_prepareMsgLog - log of pre-prepare msgs received during PBFT run by final committee
 		FinalprepareMsgLog - log of prepare msgs received during PBFT run by final committee
 		FinalcommitMsgLog - log of commit msgs received during PBFT run by final committee
 		FinalpreparedData - data after prepared state in final pbft run
 		FinalcommittedData - data after committed state in final pbft run
-		faulty - Flag denotes whether this node is faulty or not
+		Faulty - Flag denotes whether this node is Faulty or not
 	*/
 	Conn         *amqp.Connection
 	IP           string
@@ -178,20 +178,20 @@ type Elastico struct {
 	FinalBlock                     FinalBlockData
 	RcommitmentSet                 map[string]bool
 	NewRcommitmentSet              map[string]bool
-	finalCommitteeMembers          []IDENTITY
+	FinalCommitteeMembers          []IDENTITY
 	// only when this is the member of the directory committee
-	txn                   map[int64][]*Message
-	response              []FinalCommittedBlock
-	flag                  bool
-	views                 map[string]bool
-	primary               bool
-	viewID                int
-	faulty                bool
-	prePrepareMsgLog      map[string]PrePrepareMsg
-	prepareMsgLog         map[int]map[int]map[string][]PrepareMsgData
-	commitMsgLog          map[int]map[int]map[string][]CommitMsgData
-	preparedData          map[int]map[int][]*Message
-	committedData         map[int]map[int][]*Message
+	Txn                   map[int64][]*Message
+	Response              []FinalCommittedBlock
+	Flag                  bool
+	Views                 map[string]bool
+	Primary               bool
+	ViewID                int
+	Faulty                bool
+	PrePrepareMsgLog      map[string]PrePrepareMsg
+	PrepareMsgLog         map[int]map[int]map[string][]PrepareMsgData
+	CommitMsgLog          map[int]map[int]map[string][]CommitMsgData
+	PreparedData          map[int]map[int][]*Message
+	CommittedData         map[int]map[int][]*Message
 	FinalPrePrepareMsgLog map[string]PrePrepareMsg
 	FinalPrepareMsgLog    map[int]map[int]map[string][]PrepareMsgData
 	FinalcommitMsgLog     map[int]map[int]map[string][]CommitMsgData
@@ -245,22 +245,22 @@ func (e *Elastico) reset() {
 
 	e.RcommitmentSet = e.NewRcommitmentSet
 	e.NewRcommitmentSet = make(map[string]bool)
-	e.finalCommitteeMembers = make([]IDENTITY, 0)
+	e.FinalCommitteeMembers = make([]IDENTITY, 0)
 
 	// only when this is the member of the directory committee
-	e.txn = make(map[int64][]*Message)
-	e.response = make([]FinalCommittedBlock, 0)
-	e.flag = true
-	e.views = make(map[string]bool)
-	e.primary = false
-	e.viewID = 0
-	e.faulty = false
+	e.Txn = make(map[int64][]*Message)
+	e.Response = make([]FinalCommittedBlock, 0)
+	e.Flag = true
+	e.Views = make(map[string]bool)
+	e.Primary = false
+	e.ViewID = 0
+	e.Faulty = false
 
-	e.prePrepareMsgLog = make(map[string]PrePrepareMsg)
-	e.prepareMsgLog = make(map[int]map[int]map[string][]PrepareMsgData)
-	e.commitMsgLog = make(map[int]map[int]map[string][]CommitMsgData)
-	e.preparedData = make(map[int]map[int][]*Message)
-	e.committedData = make(map[int]map[int][]*Message)
+	e.PrePrepareMsgLog = make(map[string]PrePrepareMsg)
+	e.PrepareMsgLog = make(map[int]map[int]map[string][]PrepareMsgData)
+	e.CommitMsgLog = make(map[int]map[int]map[string][]CommitMsgData)
+	e.PreparedData = make(map[int]map[int][]*Message)
+	e.CommittedData = make(map[int]map[int][]*Message)
 	e.FinalPrePrepareMsgLog = make(map[string]PrePrepareMsg)
 	e.FinalPrepareMsgLog = make(map[int]map[int]map[string][]PrepareMsgData)
 	e.FinalcommitMsgLog = make(map[int]map[int]map[string][]CommitMsgData)
@@ -377,21 +377,21 @@ func (e *Elastico) ElasticoInit() {
 
 	e.RcommitmentSet = make(map[string]bool)
 	e.NewRcommitmentSet = make(map[string]bool)
-	e.finalCommitteeMembers = make([]IDENTITY, 0)
+	e.FinalCommitteeMembers = make([]IDENTITY, 0)
 
-	e.txn = make(map[int64][]*Message)
-	e.response = make([]FinalCommittedBlock, 0)
-	e.flag = true
-	e.views = make(map[string]bool)
-	e.primary = false
-	e.viewID = 0
-	e.faulty = false
+	e.Txn = make(map[int64][]*Message)
+	e.Response = make([]FinalCommittedBlock, 0)
+	e.Flag = true
+	e.Views = make(map[string]bool)
+	e.Primary = false
+	e.ViewID = 0
+	e.Faulty = false
 
-	e.prePrepareMsgLog = make(map[string]PrePrepareMsg)
-	e.prepareMsgLog = make(map[int]map[int]map[string][]PrepareMsgData)
-	e.commitMsgLog = make(map[int]map[int]map[string][]CommitMsgData)
-	e.preparedData = make(map[int]map[int][]*Message)
-	e.committedData = make(map[int]map[int][]*Message)
+	e.PrePrepareMsgLog = make(map[string]PrePrepareMsg)
+	e.PrepareMsgLog = make(map[int]map[int]map[string][]PrepareMsgData)
+	e.CommitMsgLog = make(map[int]map[int]map[string][]CommitMsgData)
+	e.PreparedData = make(map[int]map[int][]*Message)
+	e.CommittedData = make(map[int]map[int][]*Message)
 	e.FinalPrePrepareMsgLog = make(map[string]PrePrepareMsg)
 	e.FinalPrepareMsgLog = make(map[int]map[int]map[string][]PrepareMsgData)
 	e.FinalcommitMsgLog = make(map[int]map[int]map[string][]CommitMsgData)
@@ -405,7 +405,7 @@ func (e *Elastico) executePoW() {
 		execute PoW
 	*/
 	logger.Info("file:- elastico.go, func:- executePoW()")
-	if e.flag {
+	if e.Flag {
 		// compute Pow for good node
 		e.computePoW()
 	} else {
@@ -699,15 +699,15 @@ func (e *Elastico) runPBFT(epoch string) {
 	*/
 	logger.Info("file:- elastico.go, func:- runPBFT()")
 	if e.State == ElasticoStates["PBFT_NONE"] {
-		if e.primary {
+		if e.Primary {
 			prePrepareMsg := e.constructPrePrepare(epoch) //construct pre-prepare msg
 			// multicasts the pre-prepare msg to replicas
-			// ToDo: what if primary does not send the pre-prepare to one of the nodes
+			// ToDo: what if Primary does not send the pre-prepare to one of the nodes
 			e.sendPrePrepare(prePrepareMsg)
 
-			// change the state of primary to pre-prepared
+			// change the state of Primary to pre-prepared
 			e.State = ElasticoStates["PBFT_PRE_PREPARE_SENT"]
-			// primary will log the pre-prepare msg for itself
+			// Primary will log the pre-prepare msg for itself
 			prePrepareMsgEncoded, _ := json.Marshal(prePrepareMsg["data"])
 
 			var decodedMsg PrePrepareMsg
@@ -717,7 +717,7 @@ func (e *Elastico) runPBFT(epoch string) {
 
 		} else {
 
-			// for non-primary members
+			// for non-Primary members
 			if e.isPrePrepared() {
 				e.State = ElasticoStates["PBFT_PRE_PREPARE"]
 			}
@@ -725,7 +725,7 @@ func (e *Elastico) runPBFT(epoch string) {
 
 	} else if e.State == ElasticoStates["PBFT_PRE_PREPARE"] {
 
-		if e.primary == false {
+		if e.Primary == false {
 
 			// construct prepare msg
 			// ToDo: verify whether the pre-prepare msg comes from various primaries or not
@@ -735,7 +735,7 @@ func (e *Elastico) runPBFT(epoch string) {
 		}
 
 	} else if e.State == ElasticoStates["PBFT_PREPARE_SENT"] || e.State == ElasticoStates["PBFT_PRE_PREPARE_SENT"] {
-		// ToDo: if, primary has not changed its state to "PBFT_PREPARE_SENT"
+		// ToDo: if, Primary has not changed its state to "PBFT_PREPARE_SENT"
 		if e.isPrepared() {
 
 			// logging.warning("prepared done by %s" , str(e.Port))
@@ -765,13 +765,13 @@ func (e *Elastico) isCommitted() bool {
 	*/
 	logger.Info("file:- elastico.go, func:- isCommitted()")
 	// collect committed data
-	committedData := make(map[int]map[int][]*Message)
+	CommittedData := make(map[int]map[int][]*Message)
 	f := (c - 1) / 3
 	// check for received request messages
-	for socket := range e.prePrepareMsgLog {
-		prePrepareMsg := e.prePrepareMsgLog[socket]
+	for socket := range e.PrePrepareMsgLog {
+		prePrepareMsg := e.PrePrepareMsgLog[socket]
 		// In current View Id
-		if prePrepareMsg.PrePrepareData.ViewID == e.viewID {
+		if prePrepareMsg.PrePrepareData.ViewID == e.ViewID {
 			// request msg of pre-prepare request
 			requestMsg := prePrepareMsg.Message
 			// digest of the message
@@ -779,19 +779,19 @@ func (e *Elastico) isCommitted() bool {
 			// get sequence number of this msg
 			seqnum := prePrepareMsg.PrePrepareData.Seq
 
-			if _, ok := e.preparedData[e.viewID]; ok == true {
-				_, okk := e.preparedData[e.viewID][seqnum]
+			if _, ok := e.PreparedData[e.ViewID]; ok == true {
+				_, okk := e.PreparedData[e.ViewID][seqnum]
 				if okk == true {
-					if txnHexdigest(e.preparedData[e.viewID][seqnum]) == digest {
+					if txnHexdigest(e.PreparedData[e.ViewID][seqnum]) == digest {
 						// pre-prepared matched and prepared is also true, check for commits
-						if _, okkk := e.commitMsgLog[e.viewID]; okkk == true {
+						if _, okkk := e.CommitMsgLog[e.ViewID]; okkk == true {
 
-							if _, okkkk := e.commitMsgLog[e.viewID][seqnum]; okkkk == true {
+							if _, okkkk := e.CommitMsgLog[e.ViewID][seqnum]; okkkk == true {
 
 								count := 0
-								for replicaID := range e.commitMsgLog[e.viewID][seqnum] {
+								for replicaID := range e.CommitMsgLog[e.ViewID][seqnum] {
 
-									for _, msg := range e.commitMsgLog[e.viewID][seqnum][replicaID] {
+									for _, msg := range e.CommitMsgLog[e.ViewID][seqnum][replicaID] {
 
 										if msg.Digest == digest {
 
@@ -803,18 +803,18 @@ func (e *Elastico) isCommitted() bool {
 								// ToDo: condition check
 								if count >= 2*f+1 {
 
-									if _, presentView := committedData[e.viewID]; presentView == false {
+									if _, presentView := CommittedData[e.ViewID]; presentView == false {
 
-										committedData[e.viewID] = make(map[int][]*Message)
+										CommittedData[e.ViewID] = make(map[int][]*Message)
 									}
-									if _, presentSeq := committedData[e.viewID][seqnum]; presentSeq == false {
+									if _, presentSeq := CommittedData[e.ViewID][seqnum]; presentSeq == false {
 
-										committedData[e.viewID][seqnum] = make([]*Message, 0)
+										CommittedData[e.ViewID][seqnum] = make([]*Message, 0)
 									}
 
-									for _, txn := range requestMsg {
+									for _, Txn := range requestMsg {
 
-										committedData[e.viewID][seqnum] = append(committedData[e.viewID][seqnum], txn)
+										CommittedData[e.ViewID][seqnum] = append(CommittedData[e.ViewID][seqnum], Txn)
 									}
 								}
 							} else {
@@ -843,9 +843,9 @@ func (e *Elastico) isCommitted() bool {
 		}
 	}
 
-	if len(committedData) > 0 {
+	if len(CommittedData) > 0 {
 
-		e.committedData = committedData
+		e.CommittedData = CommittedData
 		logger.Info("committed check done by port - ", e.Port)
 		return true
 	}
@@ -862,8 +862,8 @@ func (e *Elastico) logPrePrepareMsg(msg PrePrepareMsg) {
 	Port := identityobj.Port
 	// create a socket
 	socket := IP + ":" + Port
-	e.prePrepareMsgLog[socket] = msg
-	logger.Info("logging the pre-prepare--", e.prePrepareMsgLog)
+	e.PrePrepareMsgLog[socket] = msg
+	logger.Info("logging the pre-prepare--", e.PrePrepareMsgLog)
 }
 
 func (e *Elastico) logFinalPrePrepareMsg(msg PrePrepareMsg) {
@@ -886,15 +886,15 @@ func (e *Elastico) isPrepared() bool {
 	*/
 	logger.Info("file:- elastico.go, func:- isPrepared()")
 	// collect prepared data
-	preparedData := make(map[int]map[int][]*Message)
+	PreparedData := make(map[int]map[int][]*Message)
 	f := (c - 1) / 3
 	// check for received request messages
-	for socket := range e.prePrepareMsgLog {
+	for socket := range e.PrePrepareMsgLog {
 
 		// In current View Id
-		socketMap := e.prePrepareMsgLog[socket]
+		socketMap := e.PrePrepareMsgLog[socket]
 		prePrepareData := socketMap.PrePrepareData
-		if prePrepareData.ViewID == e.viewID {
+		if prePrepareData.ViewID == e.ViewID {
 
 			// request msg of pre-prepare request
 			requestMsg := socketMap.Message
@@ -903,10 +903,10 @@ func (e *Elastico) isPrepared() bool {
 			// get sequence number of this msg
 			seqnum := prePrepareData.Seq
 			// find Prepare msgs for this view and sequence number
-			_, ok := e.prepareMsgLog[e.viewID]
+			_, ok := e.PrepareMsgLog[e.ViewID]
 
 			if ok == true {
-				prepareMsgLogViewID := e.prepareMsgLog[e.viewID]
+				prepareMsgLogViewID := e.PrepareMsgLog[e.ViewID]
 				_, okk := prepareMsgLogViewID[seqnum]
 				if okk == true {
 					// need to find matching prepare msgs from different replicas atleast c/2 + 1
@@ -925,28 +925,28 @@ func (e *Elastico) isPrepared() bool {
 					// condition for Prepared state
 					if count >= 2*f {
 
-						if _, ok := preparedData[e.viewID]; ok == false {
+						if _, ok := PreparedData[e.ViewID]; ok == false {
 
-							preparedData[e.viewID] = make(map[int][]*Message)
+							PreparedData[e.ViewID] = make(map[int][]*Message)
 						}
-						preparedViewID := preparedData[e.viewID]
+						preparedViewID := PreparedData[e.ViewID]
 						if _, ok := preparedViewID[seqnum]; ok == false {
 
 							preparedViewID[seqnum] = make([]*Message, 0)
 						}
-						for _, txn := range requestMsg {
+						for _, Txn := range requestMsg {
 
-							preparedViewID[seqnum] = append(preparedViewID[seqnum], txn)
+							preparedViewID[seqnum] = append(preparedViewID[seqnum], Txn)
 						}
-						preparedData[e.viewID][seqnum] = preparedViewID[seqnum]
+						PreparedData[e.ViewID][seqnum] = preparedViewID[seqnum]
 					}
 				}
 			}
 
 		}
 	}
-	if len(preparedData) > 0 {
-		e.preparedData = preparedData
+	if len(PreparedData) > 0 {
+		e.PreparedData = PreparedData
 		logger.Info("prepared check done")
 		return true
 	}
@@ -961,17 +961,17 @@ func (e *Elastico) runFinalPBFT(epoch string) {
 	logger.Info("file:- elastico.go, func:- runFinalPBFT()")
 	if e.State == ElasticoStates["FinalPBFT_NONE"] {
 
-		if e.primary {
+		if e.Primary {
 
-			fmt.Println("port of final primary- ", e.Port)
+			fmt.Println("port of final Primary- ", e.Port)
 			// construct pre-prepare msg
 			finalPrePreparemsg := e.constructFinalPrePrepare(epoch)
 			// multicasts the pre-prepare msg to replicas
 			e.sendPrePrepare(finalPrePreparemsg)
 
-			// change the state of primary to pre-prepared
+			// change the state of Primary to pre-prepared
 			e.State = ElasticoStates["FinalPBFT_PRE_PREPARE_SENT"]
-			// primary will log the pre-prepare msg for itself
+			// Primary will log the pre-prepare msg for itself
 
 			prePrepareMsgEncoded, _ := json.Marshal(finalPrePreparemsg["data"])
 
@@ -983,7 +983,7 @@ func (e *Elastico) runFinalPBFT(epoch string) {
 
 		} else {
 
-			// for non-primary members
+			// for non-Primary members
 			if e.isFinalprePrepared() {
 				e.State = ElasticoStates["FinalPBFT_PRE_PREPARE"]
 			}
@@ -991,7 +991,7 @@ func (e *Elastico) runFinalPBFT(epoch string) {
 
 	} else if e.State == ElasticoStates["FinalPBFT_PRE_PREPARE"] {
 
-		if e.primary == false {
+		if e.Primary == false {
 
 			// construct prepare msg
 			FinalpreparemsgList := e.constructFinalPrepare(epoch)
@@ -1000,7 +1000,7 @@ func (e *Elastico) runFinalPBFT(epoch string) {
 		}
 	} else if e.State == ElasticoStates["FinalPBFT_PREPARE_SENT"] || e.State == ElasticoStates["FinalPBFT_PRE_PREPARE_SENT"] {
 
-		// ToDo: primary has not changed its state to "FinalPBFT_PREPARE_SENT"
+		// ToDo: Primary has not changed its state to "FinalPBFT_PREPARE_SENT"
 		if e.isFinalPrepared() {
 
 			fmt.Println("final prepared done")
@@ -1015,11 +1015,11 @@ func (e *Elastico) runFinalPBFT(epoch string) {
 	} else if e.State == ElasticoStates["FinalPBFT_COMMIT_SENT"] {
 
 		if e.isFinalCommitted() {
-			for viewID := range e.FinalcommittedData {
+			for ViewID := range e.FinalcommittedData {
 
-				for seqnum := range e.FinalcommittedData[viewID] {
+				for seqnum := range e.FinalcommittedData[ViewID] {
 
-					msgList := e.FinalcommittedData[viewID][seqnum]
+					msgList := e.FinalcommittedData[ViewID][seqnum]
 
 					e.FinalBlock.Txns = e.unionTxns(e.FinalBlock.Txns, msgList)
 				}
@@ -1044,14 +1044,14 @@ func (e *Elastico) unionTxns(actualTxns, receivedTxns []*Message) []*Message {
 	logger.Info("file:- elastico.go, func:- unionTxns()")
 	for _, transaction := range receivedTxns {
 
-		flag := true
-		for _, txn := range actualTxns {
-			if txn.isEqual(transaction) {
-				flag = false
+		Flag := true
+		for _, Txn := range actualTxns {
+			if Txn.isEqual(transaction) {
+				Flag = false
 				break
 			}
 		}
-		if flag {
+		if Flag {
 			actualTxns = append(actualTxns, transaction)
 		}
 	}
@@ -1064,7 +1064,7 @@ func (e *Elastico) isFinalPrepared() bool {
 	*/
 	logger.Info("file:- elastico.go, func:- isFinalPrepared()")
 	//  collect prepared data
-	preparedData := make(map[int]map[int][]*Message)
+	PreparedData := make(map[int]map[int][]*Message)
 	f := (c - 1) / 3
 	//  check for received request messages
 	for socket := range e.FinalPrePrepareMsgLog {
@@ -1072,7 +1072,7 @@ func (e *Elastico) isFinalPrepared() bool {
 		//  In current View Id
 		socketMap := e.FinalPrePrepareMsgLog[socket]
 		prePrepareData := socketMap.PrePrepareData
-		if prePrepareData.ViewID == e.viewID {
+		if prePrepareData.ViewID == e.ViewID {
 
 			//  request msg of pre-prepare request
 			requestMsg := socketMap.Message
@@ -1082,8 +1082,8 @@ func (e *Elastico) isFinalPrepared() bool {
 			//  get sequence number of this msg
 			seqnum := prePrepareData.Seq
 			//  find Prepare msgs for this view and sequence number
-			if _, presentView := e.FinalPrepareMsgLog[e.viewID]; presentView == true {
-				prepareMsgLogViewID := e.FinalPrepareMsgLog[e.viewID]
+			if _, presentView := e.FinalPrepareMsgLog[e.ViewID]; presentView == true {
+				prepareMsgLogViewID := e.FinalPrepareMsgLog[e.ViewID]
 				if _, presentSeq := prepareMsgLogViewID[seqnum]; presentSeq == true {
 
 					//  need to find matching prepare msgs from different replicas atleast c//2 + 1
@@ -1106,24 +1106,24 @@ func (e *Elastico) isFinalPrepared() bool {
 					//  condition for Prepared state
 					if count >= 2*f {
 
-						if _, ok := preparedData[e.viewID]; ok == false {
+						if _, ok := PreparedData[e.ViewID]; ok == false {
 
-							preparedData[e.viewID] = make(map[int][]*Message)
+							PreparedData[e.ViewID] = make(map[int][]*Message)
 						} else {
 							logger.Error("view not there in prepared data")
 						}
-						preparedViewID := preparedData[e.viewID]
+						preparedViewID := PreparedData[e.ViewID]
 						if _, ok := preparedViewID[seqnum]; ok == false {
 
 							preparedViewID[seqnum] = make([]*Message, 0)
 						} else {
 							logger.Error("seq not there in prepared data")
 						}
-						for _, txn := range requestMsg {
+						for _, Txn := range requestMsg {
 
-							preparedViewID[seqnum] = append(preparedViewID[seqnum], txn)
+							preparedViewID[seqnum] = append(preparedViewID[seqnum], Txn)
 						}
-						preparedData[e.viewID][seqnum] = preparedViewID[seqnum]
+						PreparedData[e.ViewID][seqnum] = preparedViewID[seqnum]
 					} else {
 						logger.Error("count is less than 2f")
 					}
@@ -1139,9 +1139,9 @@ func (e *Elastico) isFinalPrepared() bool {
 			logger.Error("pre-prepare data view id not matched")
 		}
 	}
-	if len(preparedData) > 0 {
+	if len(PreparedData) > 0 {
 
-		e.FinalpreparedData = preparedData
+		e.FinalpreparedData = PreparedData
 		return true
 	}
 	logger.Error("len of prepared data == 0")
@@ -1154,28 +1154,28 @@ func (e *Elastico) isFinalCommitted() bool {
 	*/
 	logger.Info("file:- elastico.go, func:- isFinalCommitted()")
 	// collect committed data
-	committedData := make(map[int]map[int][]*Message)
+	CommittedData := make(map[int]map[int][]*Message)
 	f := (c - 1) / 3
 	// check for received request messages
 	for socket := range e.FinalPrePrepareMsgLog {
 		prePrepareMsg := e.FinalPrePrepareMsgLog[socket]
 		// In current View Id
-		if prePrepareMsg.PrePrepareData.ViewID == e.viewID {
+		if prePrepareMsg.PrePrepareData.ViewID == e.ViewID {
 			// request msg of pre-prepare request
 			requestMsg := prePrepareMsg.Message
 			// digest of the message
 			digest := prePrepareMsg.PrePrepareData.Digest
 			// get sequence number of this msg
 			seqnum := prePrepareMsg.PrePrepareData.Seq
-			if _, presentView := e.FinalpreparedData[e.viewID]; presentView == true {
-				if _, presentSeq := e.FinalpreparedData[e.viewID][seqnum]; presentSeq == true {
-					if txnHexdigest(e.FinalpreparedData[e.viewID][seqnum]) == digest {
+			if _, presentView := e.FinalpreparedData[e.ViewID]; presentView == true {
+				if _, presentSeq := e.FinalpreparedData[e.ViewID][seqnum]; presentSeq == true {
+					if txnHexdigest(e.FinalpreparedData[e.ViewID][seqnum]) == digest {
 						// pre-prepared matched and prepared is also true, check for commits
-						if _, ok := e.FinalcommitMsgLog[e.viewID]; ok == true {
-							if _, okk := e.FinalcommitMsgLog[e.viewID][seqnum]; okk == true {
+						if _, ok := e.FinalcommitMsgLog[e.ViewID]; ok == true {
+							if _, okk := e.FinalcommitMsgLog[e.ViewID][seqnum]; okk == true {
 								count := 0
-								for replicaID := range e.FinalcommitMsgLog[e.viewID][seqnum] {
-									for _, msg := range e.FinalcommitMsgLog[e.viewID][seqnum][replicaID] {
+								for replicaID := range e.FinalcommitMsgLog[e.ViewID][seqnum] {
+									for _, msg := range e.FinalcommitMsgLog[e.ViewID][seqnum][replicaID] {
 
 										if msg.Digest == digest {
 											count++
@@ -1185,17 +1185,17 @@ func (e *Elastico) isFinalCommitted() bool {
 								}
 								// ToDo: condition check
 								if count >= 2*f+1 {
-									if _, presentview := committedData[e.viewID]; presentview == false {
+									if _, presentview := CommittedData[e.ViewID]; presentview == false {
 
-										committedData[e.viewID] = make(map[int][]*Message)
+										CommittedData[e.ViewID] = make(map[int][]*Message)
 									}
-									if _, presentSeq := committedData[e.viewID][seqnum]; presentSeq == false {
+									if _, presentSeq := CommittedData[e.ViewID][seqnum]; presentSeq == false {
 
-										committedData[e.viewID][seqnum] = make([]*Message, 0)
+										CommittedData[e.ViewID][seqnum] = make([]*Message, 0)
 									}
-									for _, txn := range requestMsg {
+									for _, Txn := range requestMsg {
 
-										committedData[e.viewID][seqnum] = append(committedData[e.viewID][seqnum], txn)
+										CommittedData[e.ViewID][seqnum] = append(CommittedData[e.ViewID][seqnum], Txn)
 									}
 								}
 
@@ -1223,9 +1223,9 @@ func (e *Elastico) isFinalCommitted() bool {
 			logger.Error("wrong view in is committed")
 		}
 	}
-	if len(committedData) > 0 {
+	if len(CommittedData) > 0 {
 
-		e.FinalcommittedData = committedData
+		e.FinalcommittedData = CommittedData
 		return true
 	}
 	return false
@@ -1233,10 +1233,10 @@ func (e *Elastico) isFinalCommitted() bool {
 
 func (e *Elastico) isPrePrepared() bool {
 	/*
-		if the node received the pre-prepare msg from the primary
+		if the node received the pre-prepare msg from the Primary
 	*/
 	logger.Info("file:- elastico.go, func:- isPrePrepared()")
-	return len(e.prePrepareMsgLog) > 0
+	return len(e.PrePrepareMsgLog) > 0
 }
 
 func (e *Elastico) isFinalprePrepared() bool {
@@ -1268,12 +1268,12 @@ func (t *Message) hexdigest() string {
 	return hashVal
 }
 
-// txnHexdigest - Hex digest of txn List
+// txnHexdigest - Hex digest of Txn List
 func txnHexdigest(txnList []*Message) string {
 	/*
 		return hexdigest for a list of transactions
 	*/
-	logger.Info("file:- elastico.go, func:- hexdigest of txn list()")
+	logger.Info("file:- elastico.go, func:- hexdigest of Txn list()")
 	// ToDo : Sort the Txns based on hash value
 	txnDigestList := make([]string, len(txnList))
 	for i := 0; i < len(txnList); i++ {
@@ -1300,12 +1300,12 @@ func (e *Elastico) Sign(digest []byte) string {
 
 func (e *Elastico) constructPrePrepare(epoch string) map[string]interface{} {
 	/*
-		construct pre-prepare msg , done by primary
+		construct pre-prepare msg , done by Primary
 	*/
 	logger.Info("file:- elastico.go, func:- constructPrePrepare()")
 	txnBlockList := e.TxnBlock
 	// ToDo: make prePrepareContents Ordered Dict for signatures purpose
-	prePrepareContents := PrePrepareContents{Type: "pre-prepare", ViewID: e.viewID, Seq: 1, Digest: txnHexdigest(txnBlockList)}
+	prePrepareContents := PrePrepareContents{Type: "pre-prepare", ViewID: e.ViewID, Seq: 1, Digest: txnHexdigest(txnBlockList)}
 
 	prePrepareContentsDigest := e.digestPrePrepareMsg(prePrepareContents)
 
@@ -1336,15 +1336,15 @@ func (e *Elastico) constructPrepare(epoch string) []map[string]interface{} {
 	logger.Info("file:- elastico.go, func:- constructPrepare()")
 	prepareMsgList := make([]map[string]interface{}, 0)
 	//  loop over all pre-prepare msgs
-	for socketID := range e.prePrepareMsgLog {
+	for socketID := range e.PrePrepareMsgLog {
 
-		msg := e.prePrepareMsgLog[socketID]
+		msg := e.PrePrepareMsgLog[socketID]
 		prePreparedData := msg.PrePrepareData
 		seqnum := prePreparedData.Seq
 		digest := prePreparedData.Digest
 
 		//  make prepare_contents Ordered Dict for signatures purpose
-		prepareContents := PrepareContents{Type: "prepare", ViewID: e.viewID, Seq: seqnum, Digest: digest}
+		prepareContents := PrepareContents{Type: "prepare", ViewID: e.ViewID, Seq: seqnum, Digest: digest}
 		PrepareContentsDigest := e.digestPrepareMsg(prepareContents)
 		data := map[string]interface{}{"PrepareData": prepareContents, "Sign": e.Sign(PrepareContentsDigest), "Identity": e.Identity}
 		preparemsg := map[string]interface{}{"data": data, "type": "prepare", "epoch": epoch}
@@ -1368,7 +1368,7 @@ func (e *Elastico) constructFinalPrepare(epoch string) []map[string]interface{} 
 		digest := prePreparedData.Digest
 		//  make prepare_contents Ordered Dict for signatures purpose
 
-		prepareContents := PrepareContents{Type: "Finalprepare", ViewID: e.viewID, Seq: seqnum, Digest: digest}
+		prepareContents := PrepareContents{Type: "Finalprepare", ViewID: e.ViewID, Seq: seqnum, Digest: digest}
 		PrepareContentsDigest := e.digestPrepareMsg(prepareContents)
 
 		data := map[string]interface{}{"PrepareData": prepareContents, "Sign": e.Sign(PrepareContentsDigest), "Identity": e.Identity}
@@ -1401,13 +1401,13 @@ func (e *Elastico) constructCommit(epoch string) []map[string]interface{} {
 	logger.Info("file:- elastico.go, func:- constructCommit()")
 	commitMsges := make([]map[string]interface{}, 0)
 
-	for viewID := range e.preparedData {
+	for ViewID := range e.PreparedData {
 
-		for seqnum := range e.preparedData[viewID] {
+		for seqnum := range e.PreparedData[ViewID] {
 
-			digest := txnHexdigest(e.preparedData[viewID][seqnum])
+			digest := txnHexdigest(e.PreparedData[ViewID][seqnum])
 			// make commit_contents Ordered Dict for signatures purpose
-			commitContents := CommitContents{Type: "commit", ViewID: viewID, Seq: seqnum, Digest: digest}
+			commitContents := CommitContents{Type: "commit", ViewID: ViewID, Seq: seqnum, Digest: digest}
 			commitContentsDigest := e.digestCommitMsg(commitContents)
 			data := map[string]interface{}{"Sign": e.Sign(commitContentsDigest), "CommitData": commitContents, "Identity": e.Identity}
 			commitMsg := map[string]interface{}{"data": data, "type": "commit", "epoch": epoch}
@@ -1426,13 +1426,13 @@ func (e *Elastico) constructFinalCommit(epoch string) []map[string]interface{} {
 	logger.Info("file:- elastico.go, func:- constructFinalCommit()")
 	commitMsges := make([]map[string]interface{}, 0)
 
-	for viewID := range e.FinalpreparedData {
+	for ViewID := range e.FinalpreparedData {
 
-		for seqnum := range e.FinalpreparedData[viewID] {
+		for seqnum := range e.FinalpreparedData[ViewID] {
 
-			digest := txnHexdigest(e.FinalpreparedData[viewID][seqnum])
+			digest := txnHexdigest(e.FinalpreparedData[ViewID][seqnum])
 			//  make commit_contents Ordered Dict for signatures purpose
-			commitContents := CommitContents{Type: "Finalcommit", ViewID: viewID, Seq: seqnum, Digest: digest}
+			commitContents := CommitContents{Type: "Finalcommit", ViewID: ViewID, Seq: seqnum, Digest: digest}
 			commitContentsDigest := e.digestCommitMsg(commitContents)
 
 			data := map[string]interface{}{"Sign": e.Sign(commitContentsDigest), "CommitData": commitContents, "Identity": e.Identity}
@@ -1477,12 +1477,12 @@ func (e *Elastico) digestCommitMsg(msg CommitContents) []byte {
 
 func (e *Elastico) constructFinalPrePrepare(epoch string) map[string]interface{} {
 	/*
-		construct pre-prepare msg , done by primary final
+		construct pre-prepare msg , done by Primary final
 	*/
 	logger.Info("file:- elastico.go, func:- constructFinalPrePrepare()")
 	txnBlockList := e.MergedBlock
 	// ToDo :- make pre_prepare_contents Ordered Dict for signatures purpose
-	prePrepareContents := PrePrepareContents{Type: "Finalpre-prepare", ViewID: e.viewID, Seq: 1, Digest: txnHexdigest(txnBlockList)}
+	prePrepareContents := PrePrepareContents{Type: "Finalpre-prepare", ViewID: e.ViewID, Seq: 1, Digest: txnHexdigest(txnBlockList)}
 
 	prePrepareContentsDigest := e.digestPrePrepareMsg(prePrepareContents)
 
@@ -1561,8 +1561,8 @@ func (e *Elastico) receiveTxns(epochTxn NewEpochMsg) {
 	// loop in sorted order of committee ids
 	var iden int64
 	for iden = 0; iden < numOfCommittees; iden++ {
-		e.txn[iden] = make([]*Message, 1)
-		e.txn[iden][0] = epochTxn.Data
+		e.Txn[iden] = make([]*Message, 1)
+		e.Txn[iden][0] = epochTxn.Data
 	}
 }
 
@@ -1574,12 +1574,12 @@ func (e *Elastico) isFinalMember() bool {
 	return e.IsFinal
 }
 
-// SendtoFinal :- Each committee member sends the signed value(txn block after intra committee consensus along with signatures to final committee
+// SendtoFinal :- Each committee member sends the signed value(Txn block after intra committee consensus along with signatures to final committee
 func (e *Elastico) SendtoFinal(epoch string) {
 
 	logger.Info("file:- elastico.go, func:- SendtoFinal()")
-	for viewID := range e.committedData {
-		committedDataViewID := e.committedData[viewID]
+	for ViewID := range e.CommittedData {
+		committedDataViewID := e.CommittedData[ViewID]
 		for seqnum := range committedDataViewID {
 
 			msgList := committedDataViewID[seqnum]
@@ -1587,9 +1587,9 @@ func (e *Elastico) SendtoFinal(epoch string) {
 			e.TxnBlock = e.unionTxns(e.TxnBlock, msgList)
 		}
 	}
-	// logger.Warn("size of fin committee members", len(e.finalCommitteeMembers))
-	// logger.Warn("size of txns in txn block", len(e.TxnBlock))
-	for _, finalID := range e.finalCommitteeMembers {
+	// logger.Warn("size of fin committee members", len(e.FinalCommitteeMembers))
+	// logger.Warn("size of txns in Txn block", len(e.TxnBlock))
+	for _, finalID := range e.FinalCommitteeMembers {
 
 		//  here TxnBlock is a set, since sets are unordered hence can't sign them. So convert set to list for signing
 		TxnBlock := e.TxnBlock
@@ -1619,13 +1619,13 @@ func (e *Elastico) checkCountForConsensusData() {
 		check the sufficient count for consensus data
 	*/
 	logger.Info("file:- elastico.go, func:- checkCountForConsensusData()")
-	flag := false
+	Flag := false
 	var commID int64
 	for commID = 0; commID < int64(math.Pow(2, float64(s))); commID++ {
 
 		if _, ok := e.CommitteeConsensusData[commID]; ok == false {
 
-			flag = true
+			Flag = true
 			break
 
 		} else {
@@ -1633,14 +1633,14 @@ func (e *Elastico) checkCountForConsensusData() {
 			for txnBlockDigest := range e.CommitteeConsensusData[commID] {
 
 				if len(e.CommitteeConsensusData[commID][txnBlockDigest]) <= c/2 {
-					flag = true
+					Flag = true
 					logger.Warn("bad committee id for intra committee block")
 					break
 				}
 			}
 		}
 	}
-	if flag == false {
+	if Flag == false {
 
 		// when sufficient number of blocks from each committee are received
 		logger.Info("good going for verify and merge")
@@ -1727,7 +1727,7 @@ func (e *Elastico) Execute(exchangeName string, epoch string, Txn NewEpochMsg) s
 	} else if e.State == ElasticoStates["Receiving Committee Members"] {
 
 		// when a node is part of some committee
-		if e.flag == false {
+		if e.Flag == false {
 
 			// logging the bad nodes
 			// logger.Errorf("member with invalid POW %s with commMembers : %s", e.Identity, e.CommitteeMembers)
@@ -1772,7 +1772,7 @@ func (e *Elastico) Execute(exchangeName string, epoch string, Txn NewEpochMsg) s
 
 	} else if e.isFinalMember() && e.State == ElasticoStates["CommitmentSentToFinal"] {
 
-		// broadcast final txn block to ntw
+		// broadcast final Txn block to ntw
 		if len(e.Commitments) >= c/2+1 {
 			logger.Info("Commitments received sucess")
 			e.RunInteractiveConsistency(epoch)
@@ -1785,7 +1785,7 @@ func (e *Elastico) Execute(exchangeName string, epoch string, Txn NewEpochMsg) s
 		}
 	} else if e.isFinalMember() && e.State == ElasticoStates["InteractiveConsistencyAchieved"] {
 
-		// broadcast final txn block to ntw
+		// broadcast final Txn block to ntw
 		logger.Info("Consistency received sucess")
 		e.BroadcastFinalTxn(epoch, exchangeName)
 	} else if e.State == ElasticoStates["FinalBlockReceived"] {
@@ -1922,7 +1922,7 @@ func (e *Elastico) checkCountForFinalData() {
 	/*
 		check the sufficient counts for final data
 	*/
-	//  collect final blocks sent by final committee and add the blocks to the response
+	//  collect final blocks sent by final committee and add the blocks to the Response
 
 	logger.Info("file:- elastico.go, func:- checkCountForFinalData()")
 	for txnBlockDigest := range e.FinalBlockbyFinalCommittee {
@@ -1930,11 +1930,11 @@ func (e *Elastico) checkCountForFinalData() {
 		if len(e.FinalBlockbyFinalCommittee[txnBlockDigest]) >= c/2+1 {
 
 			TxnList := e.FinalBlockbyFinalCommitteeTxns[txnBlockDigest]
-			//  create the final committed block that contatins the txnlist and set of signatures and identities to that txn list
+			//  create the final committed block that contatins the txnlist and set of signatures and identities to that Txn list
 			finalCommittedBlock := FinalCommittedBlock{TxnList, e.FinalBlockbyFinalCommittee[txnBlockDigest]}
-			logger.Info("response received by final committee")
-			//  add the block to the response
-			e.response = append(e.response, finalCommittedBlock)
+			logger.Info("Response received by final committee")
+			//  add the block to the Response
+			e.Response = append(e.Response, finalCommittedBlock)
 
 		} else {
 
@@ -1942,7 +1942,7 @@ func (e *Elastico) checkCountForFinalData() {
 		}
 	}
 
-	if len(e.response) > 0 {
+	if len(e.Response) > 0 {
 
 		logger.Warnf("final block sent the block to client by %s", e.Port)
 		e.State = ElasticoStates["FinalBlockSentToClient"]
@@ -2055,14 +2055,14 @@ func (e *Elastico) receiveDirectoryMember(msg DecodeMsgType) {
 	if e.verifyPoW(identityobj) {
 		if len(e.CurDirectory) < c {
 			// check whether identityobj is already present or not
-			flag := true
+			Flag := true
 			for _, obj := range e.CurDirectory {
 				if identityobj.isEqual(&obj) {
-					flag = false
+					Flag = false
 					break
 				}
 			}
-			if flag {
+			if Flag {
 				// append the object if not already present
 				e.CurDirectory = append(e.CurDirectory, identityobj)
 			}
@@ -2097,14 +2097,14 @@ func (e *Elastico) receiveNewNode(msg DecodeMsgType, epoch string) {
 
 		} else if len(e.CommitteeList[identityobj.CommitteeID]) < c {
 			// Add the Identity in committee
-			flag := true
+			Flag := true
 			for _, obj := range e.CommitteeList[identityobj.CommitteeID] {
 				if identityobj.isEqual(&obj) {
-					flag = false
+					Flag = false
 					break
 				}
 			}
-			if flag {
+			if Flag {
 				e.CommitteeList[identityobj.CommitteeID] = append(e.CommitteeList[identityobj.CommitteeID], identityobj)
 				if len(e.CommitteeList[identityobj.CommitteeID]) == c {
 					// check that if all committees are full
@@ -2125,7 +2125,7 @@ func (e *Elastico) checkCommitteeFull(epoch string) {
 
 	logger.Info("file:- elastico.go, func:- checkCommitteeFull()")
 	commList := e.CommitteeList
-	flag := 0
+	Flag := 0
 	numOfCommittees := int64(math.Pow(2, float64(s)))
 	// iterating over all committee ids
 	for iden := int64(0); iden < numOfCommittees; iden++ {
@@ -2134,11 +2134,11 @@ func (e *Elastico) checkCommitteeFull(epoch string) {
 		if ok == false || len(commList[iden]) < c {
 
 			logger.Warnf("committees not full  - bad miss id : %s", strconv.FormatInt(iden, 10))
-			flag = 1
+			Flag = 1
 			break
 		}
 	}
-	if flag == 0 {
+	if Flag == 0 {
 
 		logger.Info("committees full  - good")
 		if e.State == ElasticoStates["RunAsDirectory after-TxnReceived"] {
@@ -2146,30 +2146,30 @@ func (e *Elastico) checkCommitteeFull(epoch string) {
 			// notify the final members
 			e.notifyFinalCommittee(epoch)
 			// multicast the txns and committee members to the nodes
-			MulticastCommittee(commList, e.Identity, e.txn, epoch)
+			MulticastCommittee(commList, e.Identity, e.Txn, epoch)
 			// change the state after multicast
 			e.State = ElasticoStates["RunAsDirectory after-TxnMulticast"]
 		}
 	}
 }
 
-// MulticastCommittee :- each node getting views of its committee members from directory members
+// MulticastCommittee :- each node getting Views of its committee members from directory members
 func MulticastCommittee(commList map[int64][]IDENTITY, identityobj IDENTITY, txns map[int64][]*Message, epoch string) {
 
 	logger.Info("file:- elastico.go, func:- MulticastCommittee()")
 	// get the final committee members with the fixed committee id
-	finalCommitteeMembers := commList[finNum]
+	FinalCommitteeMembers := commList[finNum]
 	for CommitteeID, commMembers := range commList {
 
-		// find the primary Identity, Take the first Identity
-		// ToDo: fix this, many nodes can be primary
+		// find the Primary Identity, Take the first Identity
+		// ToDo: fix this, many nodes can be Primary
 		primaryID := commMembers[0]
 		for _, memberID := range commMembers {
 
 			// send the committee members , final committee members
-			data := map[string]interface{}{"CommitteeMembers": commMembers, "FinalCommitteeMembers": finalCommitteeMembers, "Identity": identityobj}
+			data := map[string]interface{}{"CommitteeMembers": commMembers, "FinalCommitteeMembers": FinalCommitteeMembers, "Identity": identityobj}
 
-			// give txns only to the primary node
+			// give txns only to the Primary node
 			if memberID.isEqual(&primaryID) {
 				data["Txns"] = txns[CommitteeID]
 			} else {
@@ -2177,8 +2177,8 @@ func MulticastCommittee(commList map[int64][]IDENTITY, identityobj IDENTITY, txn
 			}
 			fmt.Println("epoch : ", epoch)
 			// construct the msg
-			msg := map[string]interface{}{"data": data, "type": "committee members views", "epoch": epoch}
-			// send the committee member views to nodes
+			msg := map[string]interface{}{"data": data, "type": "committee members Views", "epoch": epoch}
+			// send the committee member Views to nodes
 			memberID.send(msg)
 		}
 	}
@@ -2329,7 +2329,7 @@ func (e *Elastico) receiveIntraCommitteeBlock(msg DecodeMsgType) {
 				e.CommitteeConsensusDataTxns[identityobj.CommitteeID][TxnBlockDigest] = TxnBlock
 			}
 
-			// add signatures for the txn block
+			// add signatures for the Txn block
 			e.CommitteeConsensusData[identityobj.CommitteeID][TxnBlockDigest] = append(e.CommitteeConsensusData[identityobj.CommitteeID][TxnBlockDigest], signature)
 
 		} else {
@@ -2397,7 +2397,7 @@ func (e *Elastico) receive(msg DecodeMsgType, epoch string) {
 	} else if msg.Type == "newNode" && e.IsDirectory {
 		e.receiveNewNode(msg, epoch)
 
-	} else if msg.Type == "committee members views" && e.IsDirectory == false {
+	} else if msg.Type == "committee members Views" && e.IsDirectory == false {
 		e.receiveViews(msg)
 
 	} else if msg.Type == "hash" && e.isFinalMember() {
@@ -2481,7 +2481,7 @@ func (e *Elastico) receiveFinalTxnBlock(msg DecodeMsgType) {
 		PK := identityobj.PK
 		if e.verifySign(sign, receivedCommitmentDigest, &PK) && e.verifySignTxnList(finalTxnBlockSignature, finalTxnBlock, &PK) {
 
-			// list init for final txn block
+			// list init for final Txn block
 			finaltxnBlockDigest := txnHexdigest(finalTxnBlock)
 			if _, ok := e.FinalBlockbyFinalCommittee[finaltxnBlockDigest]; ok == false {
 				e.FinalBlockbyFinalCommittee[finaltxnBlockDigest] = make([]IdentityAndSign, 0)
@@ -2492,16 +2492,16 @@ func (e *Elastico) receiveFinalTxnBlock(msg DecodeMsgType) {
 			identityAndSign := IdentityAndSign{finalTxnBlockSignature, identityobj}
 
 			// check whether this combination of Identity and sign already exists or not
-			flag := true
+			Flag := true
 			for _, idSignObj := range e.FinalBlockbyFinalCommittee[finaltxnBlockDigest] {
 
 				if idSignObj.isEqual(identityAndSign) {
 					// it exists
-					flag = false
+					Flag = false
 					break
 				}
 			}
-			if flag {
+			if Flag {
 				// appending the Identity and sign of final member
 				e.FinalBlockbyFinalCommittee[finaltxnBlockDigest] = append(e.FinalBlockbyFinalCommittee[finaltxnBlockDigest], identityAndSign)
 			}
@@ -2638,18 +2638,18 @@ func (e *Elastico) verifyPrePrepare(msg PrePrepareMsg) bool {
 	}
 	// check the view is same or not
 	prePreparedDataView := prePreparedData.ViewID
-	if prePreparedDataView != e.viewID {
+	if prePreparedDataView != e.ViewID {
 
 		logger.Error("wrong view in  verify pre-prepare")
 		return false
 	}
 	// check if already accepted a pre-prepare msg for view v and sequence num n with different digest
 	seqnum := prePreparedData.Seq
-	for socket := range e.prePrepareMsgLog {
+	for socket := range e.PrePrepareMsgLog {
 
-		prePrepareMsgLogSocket := e.prePrepareMsgLog[socket]
+		prePrepareMsgLogSocket := e.PrePrepareMsgLog[socket]
 		prePrepareMsgLogData := prePrepareMsgLogSocket.PrePrepareData
-		if prePrepareMsgLogData.ViewID == e.viewID && prePrepareMsgLogData.Seq == seqnum {
+		if prePrepareMsgLogData.ViewID == e.ViewID && prePrepareMsgLogData.Seq == seqnum {
 
 			if prePreparedDataTxnDigest != prePrepareMsgLogData.Digest {
 
@@ -2718,7 +2718,7 @@ func (e *Elastico) verifyFinalPrePrepare(msg PrePrepareMsg) bool {
 	}
 	// check the view is same or not
 	prePreparedDataView := prePreparedData.ViewID
-	if prePreparedDataView != e.viewID {
+	if prePreparedDataView != e.ViewID {
 
 		logger.Warn("wrong view in  verify final pre-prepare")
 		return false
@@ -2727,10 +2727,10 @@ func (e *Elastico) verifyFinalPrePrepare(msg PrePrepareMsg) bool {
 	seqnum := prePreparedData.Seq
 	for socket := range e.FinalPrePrepareMsgLog {
 
-		prePrepareMsgLogSocket := e.prePrepareMsgLog[socket]
+		prePrepareMsgLogSocket := e.PrePrepareMsgLog[socket]
 		prePrepareMsgLogData := prePrepareMsgLogSocket.PrePrepareData
 
-		if prePrepareMsgLogData.ViewID == e.viewID && prePrepareMsgLogData.Seq == seqnum {
+		if prePrepareMsgLogData.ViewID == e.ViewID && prePrepareMsgLogData.Seq == seqnum {
 
 			if prePreparedDataTxnDigest != prePrepareMsgLogData.Digest {
 
@@ -2763,8 +2763,8 @@ func (e *Elastico) verifyCommit(msg CommitMsg) bool {
 	}
 
 	// check the view is same or not
-	viewID := commitData.ViewID
-	if viewID != e.viewID {
+	ViewID := commitData.ViewID
+	if ViewID != e.ViewID {
 		return false
 	}
 	return true
@@ -2777,17 +2777,17 @@ func (e *Elastico) logCommitMsg(msg CommitMsg) {
 	logger.Info("file:- elastico.go, func:- logCommitMsg()")
 	identityobj := msg.Identity
 	commitContents := msg.CommitData
-	viewID := commitContents.ViewID
+	ViewID := commitContents.ViewID
 	seqnum := commitContents.Seq
 	socketID := msg.Identity.IP + ":" + msg.Identity.Port
 
 	// add msgs for this view
-	if _, ok := e.commitMsgLog[viewID]; ok == false {
+	if _, ok := e.CommitMsgLog[ViewID]; ok == false {
 
-		e.commitMsgLog[viewID] = make(map[int]map[string][]CommitMsgData)
+		e.CommitMsgLog[ViewID] = make(map[int]map[string][]CommitMsgData)
 	}
 
-	commitMsgLogViewID := e.commitMsgLog[viewID]
+	commitMsgLogViewID := e.CommitMsgLog[ViewID]
 	// add msgs for this sequence num
 	if _, ok := commitMsgLogViewID[seqnum]; ok == false {
 
@@ -2807,7 +2807,7 @@ func (e *Elastico) logCommitMsg(msg CommitMsg) {
 	// append msg
 	commitMsgLogSocket := commitMsgLogSeq[socketID]
 	commitMsgLogSocket = append(commitMsgLogSocket, msgDetails)
-	e.commitMsgLog[viewID][seqnum][socketID] = commitMsgLogSocket
+	e.CommitMsgLog[ViewID][seqnum][socketID] = commitMsgLogSocket
 }
 
 func (e *Elastico) processCommitMsg(msg DecodeMsgType) {
@@ -2857,17 +2857,17 @@ func (e *Elastico) logFinalCommitMsg(msg CommitMsg) {
 	logger.Info("file:- elastico.go, func:- logFinalCommitMsg()")
 	identityobj := msg.Identity
 	commitContents := msg.CommitData
-	viewID := commitContents.ViewID
+	ViewID := commitContents.ViewID
 	seqnum := commitContents.Seq
 
 	socketID := identityobj.IP + ":" + identityobj.Port
 	// add msgs for this view
-	_, ok := e.FinalcommitMsgLog[viewID]
+	_, ok := e.FinalcommitMsgLog[ViewID]
 	if ok == false {
 
-		e.FinalcommitMsgLog[viewID] = make(map[int]map[string][]CommitMsgData)
+		e.FinalcommitMsgLog[ViewID] = make(map[int]map[string][]CommitMsgData)
 	}
-	commitMsgLogViewID := e.FinalcommitMsgLog[viewID]
+	commitMsgLogViewID := e.FinalcommitMsgLog[ViewID]
 	// add msgs for this sequence num
 	_, okk := commitMsgLogViewID[seqnum]
 	if okk == false {
@@ -2889,7 +2889,7 @@ func (e *Elastico) logFinalCommitMsg(msg CommitMsg) {
 	// append msg
 	commitMsgLogSocket := commitMsgLogSeq[socketID]
 	commitMsgLogSocket = append(commitMsgLogSocket, msgDetails)
-	e.FinalcommitMsgLog[viewID][seqnum][socketID] = commitMsgLogSocket
+	e.FinalcommitMsgLog[ViewID][seqnum][socketID] = commitMsgLogSocket
 
 }
 
@@ -2938,16 +2938,16 @@ func (e *Elastico) logPrepareMsg(msg PrepareMsg) {
 	logger.Info("file:- elastico.go, func:- logPrepareMsg()")
 	identityobj := msg.Identity
 	prepareData := msg.PrepareData
-	viewID := prepareData.ViewID
+	ViewID := prepareData.ViewID
 	seqnum := prepareData.Seq
 
 	socketID := identityobj.IP + ":" + identityobj.Port
 	// add msgs for this view
-	if _, ok := e.prepareMsgLog[viewID]; ok == false {
+	if _, ok := e.PrepareMsgLog[ViewID]; ok == false {
 
-		e.prepareMsgLog[viewID] = make(map[int]map[string][]PrepareMsgData)
+		e.PrepareMsgLog[ViewID] = make(map[int]map[string][]PrepareMsgData)
 	}
-	prepareMsgLogViewID := e.prepareMsgLog[viewID]
+	prepareMsgLogViewID := e.PrepareMsgLog[ViewID]
 	// add msgs for this sequence num
 	if _, ok := prepareMsgLogViewID[seqnum]; ok == false {
 
@@ -2968,7 +2968,7 @@ func (e *Elastico) logPrepareMsg(msg PrepareMsg) {
 	// append msg to prepare msg log
 	prepareMsgLogSocket := prepareMsgLogSeq[socketID]
 	prepareMsgLogSocket = append(prepareMsgLogSocket, msgDetails)
-	e.prepareMsgLog[viewID][seqnum][socketID] = prepareMsgLogSocket
+	e.PrepareMsgLog[ViewID][seqnum][socketID] = prepareMsgLogSocket
 
 }
 
@@ -2997,21 +2997,21 @@ func (e *Elastico) verifyPrepare(msg PrepareMsg) bool {
 	}
 
 	// check the view is same or not
-	viewID := prepareData.ViewID
+	ViewID := prepareData.ViewID
 	seq := prepareData.Seq
 	digest := prepareData.Digest
-	if viewID != e.viewID {
+	if ViewID != e.ViewID {
 
 		logger.Error("wrong view in verify prepares")
 		return false
 	}
 	// verifying the digest of request msg
-	for socketID := range e.prePrepareMsgLog {
+	for socketID := range e.PrePrepareMsgLog {
 
-		prePrepareMsg := e.prePrepareMsgLog[socketID]
+		prePrepareMsg := e.PrePrepareMsgLog[socketID]
 		prePrepareData := prePrepareMsg.PrePrepareData
 
-		if prePrepareData.ViewID == viewID && prePrepareData.Seq == seq && prePrepareData.Digest == digest {
+		if prePrepareData.ViewID == ViewID && prePrepareData.Seq == seq && prePrepareData.Digest == digest {
 			return true
 		}
 	}
@@ -3042,11 +3042,11 @@ func (e *Elastico) verifyFinalPrepare(msg PrepareMsg) bool {
 		logger.Warn("wrong sign in verify final prepares")
 		return false
 	}
-	viewID := prepareData.ViewID
+	ViewID := prepareData.ViewID
 	seq := prepareData.Seq
 	digest := prepareData.Digest
 	// check the view is same or not
-	if viewID != e.viewID {
+	if ViewID != e.ViewID {
 
 		logger.Warn("wrong view in verify final prepares")
 		return false
@@ -3057,7 +3057,7 @@ func (e *Elastico) verifyFinalPrepare(msg PrepareMsg) bool {
 		prePrepareMsg := e.FinalPrePrepareMsgLog[socketID]
 		prePrepareData := prePrepareMsg.PrePrepareData
 
-		if prePrepareData.ViewID == viewID && prePrepareData.Seq == seq && prePrepareData.Digest == digest {
+		if prePrepareData.ViewID == ViewID && prePrepareData.Seq == seq && prePrepareData.Digest == digest {
 
 			return true
 		}
@@ -3091,18 +3091,18 @@ func (e *Elastico) logFinalPrepareMsg(msg PrepareMsg) {
 	logger.Info("file:- elastico.go, func:- logFinalPrepareMsg()")
 	identityobj := msg.Identity
 	prepareData := msg.PrepareData
-	viewID := prepareData.ViewID
+	ViewID := prepareData.ViewID
 	seqnum := prepareData.Seq
 
 	socketID := identityobj.IP + ":" + identityobj.Port
 
 	// add msgs for this view
-	if _, ok := e.FinalPrepareMsgLog[viewID]; ok == false {
+	if _, ok := e.FinalPrepareMsgLog[ViewID]; ok == false {
 
-		e.FinalPrepareMsgLog[viewID] = make(map[int]map[string][]PrepareMsgData)
+		e.FinalPrepareMsgLog[ViewID] = make(map[int]map[string][]PrepareMsgData)
 	}
 
-	prepareMsgLogViewID := e.FinalPrepareMsgLog[viewID]
+	prepareMsgLogViewID := e.FinalPrepareMsgLog[ViewID]
 	// add msgs for this sequence num
 	if _, ok := prepareMsgLogViewID[seqnum]; ok == false {
 
@@ -3123,7 +3123,7 @@ func (e *Elastico) logFinalPrepareMsg(msg PrepareMsg) {
 	// append msg to prepare msg log
 	prepareMsgLogSocket := prepareMsgLogSeq[socketID]
 	prepareMsgLogSocket = append(prepareMsgLogSocket, msgDetails)
-	e.FinalPrepareMsgLog[viewID][seqnum][socketID] = prepareMsgLogSocket
+	e.FinalPrepareMsgLog[ViewID][seqnum][socketID] = prepareMsgLogSocket
 }
 
 func (e *Elastico) unionViews(nodeData, incomingData []IDENTITY) []IDENTITY {
@@ -3134,16 +3134,16 @@ func (e *Elastico) unionViews(nodeData, incomingData []IDENTITY) []IDENTITY {
 	logger.Info("file:- elastico.go, func:- unionViews()")
 	for _, data := range incomingData {
 
-		flag := false
+		Flag := false
 		for _, nodeID := range nodeData {
 
 			// data is present already in nodeData
 			if nodeID.isEqual(&data) {
-				flag = true
+				Flag = true
 				break
 			}
 		}
-		if flag == false {
+		if Flag == false {
 			// Adding the new Identity
 			nodeData = append(nodeData, data)
 		}
@@ -3164,38 +3164,38 @@ func (e *Elastico) receiveViews(msg DecodeMsgType) {
 	var decodeMsg ViewsMsg
 
 	err := json.Unmarshal(msg.Data, &decodeMsg)
-	// fmt.Println("views msg---", decodeMsg)
-	FailOnError(err, "fail to decode views msg", true)
+	// fmt.Println("Views msg---", decodeMsg)
+	FailOnError(err, "fail to decode Views msg", true)
 
 	identityobj := decodeMsg.Identity
 
 	if e.verifyPoW(identityobj) {
 
-		if _, ok := e.views[identityobj.Port]; ok == false {
+		if _, ok := e.Views[identityobj.Port]; ok == false {
 
-			// union of committe members views
-			e.views[identityobj.Port] = true
+			// union of committe members Views
+			e.Views[identityobj.Port] = true
 
 			commMembers := decodeMsg.CommitteeMembers
 			finalMembers := decodeMsg.FinalCommitteeMembers
 			Txns := decodeMsg.Txns
 
-			// update the txn block
+			// update the Txn block
 			// ToDo: txnblock should be ordered, not set
 			if len(Txns) > 0 {
 
 				e.TxnBlock = e.unionTxns(e.TxnBlock, Txns)
-				logger.Infof("I am primary %s", e.Port)
-				e.primary = true
+				logger.Infof("I am Primary %s", e.Port)
+				e.Primary = true
 			}
 
 			// ToDo: verify this union thing
 			// union of committee members wrt directory member
 			e.CommitteeMembers = e.unionViews(e.CommitteeMembers, commMembers)
 			// union of final committee members wrt directory member
-			e.finalCommitteeMembers = e.unionViews(e.finalCommitteeMembers, finalMembers)
+			e.FinalCommitteeMembers = e.unionViews(e.FinalCommitteeMembers, finalMembers)
 			// received the members
-			if e.State == ElasticoStates["Formed Committee"] && len(e.views) >= c/2+1 {
+			if e.State == ElasticoStates["Formed Committee"] && len(e.Views) >= c/2+1 {
 
 				e.State = ElasticoStates["Receiving Committee Members"]
 			}
