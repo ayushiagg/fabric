@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"os"
+	"strconv"
 
 	"github.com/hyperledger/fabric/common/flogging"
 	elastico "github.com/hyperledger/fabric/orderer/consensus/elastico"
@@ -15,7 +16,7 @@ var logger = flogging.MustGetLogger("orderer.consensus.elastico.consumer")
 func ExecuteConsume(ch *amqp.Channel, Queue string, decodeMsg elastico.DecodeMsgType, exchangeName string, newEpochMessage elastico.NewEpochMsg, elasticoObj *elastico.Elastico) {
 	logger.Info("file:- consumer.go, func:- ExecuteConsume()")
 	for {
-		logger.Info("Orderer State - %s %s ", os.Getenv("ORDERER_HOST"), elasticoObj.State)
+		logger.Infof("Orderer State - %s %s ", os.Getenv("ORDERER_HOST"), strconv.Itoa(elasticoObj.State))
 		response := elasticoObj.Execute(exchangeName, decodeMsg.Epoch, newEpochMessage)
 		if response == "reset" {
 			break
@@ -26,7 +27,6 @@ func ExecuteConsume(ch *amqp.Channel, Queue string, decodeMsg elastico.DecodeMsg
 
 //Consume :-
 func Consume(ch *amqp.Channel, queue amqp.Queue, elasticoObj *elastico.Elastico) {
-	logger.Info("file:- consumer.go, func:- Consume()")
 	var decodemsg elastico.DecodeMsgType
 	// consume all the messages one by one
 	for ; queue.Messages > 0; queue.Messages-- {
@@ -36,7 +36,8 @@ func Consume(ch *amqp.Channel, queue amqp.Queue, elasticoObj *elastico.Elastico)
 		if ok {
 			err = json.Unmarshal(msg.Body, &decodemsg)
 			elastico.FailOnError(err, "error in unmarshall", true)
-			if decodemsg.Type == "Start New Epoch" {
+			if decodemsg.Type == "StartNewEpoch" {
+
 				var newEpochMessage elastico.NewEpochMsg
 				err := json.Unmarshal(decodemsg.Data, &newEpochMessage)
 				elastico.FailOnError(err, "fail to decode new epoch msg", true)
@@ -59,7 +60,6 @@ func Consume(ch *amqp.Channel, queue amqp.Queue, elasticoObj *elastico.Elastico)
 
 // Run :-
 func Run(ch *amqp.Channel, queueName string, elasticoObj *elastico.Elastico) {
-	logger.Info("file:- consumer.go, func:- Run()")
 	defer ch.Close()
 	for {
 		// count the number of messages that are in the queue

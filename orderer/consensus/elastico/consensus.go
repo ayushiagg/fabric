@@ -160,17 +160,22 @@ func GetState(path string) string {
 	if _, err := os.Stat(path); err == nil {
 		// path/to/whatever exists
 		file, _ := os.Open(path)
+		defer file.Close()
 		decoder := json.NewDecoder(file)
 		config := EState{}
 		err := decoder.Decode(&config)
-		FailOnError(err, "error in decoding config", true)
+		if err != nil {
+			FailOnError(err, "error in decoding config", false)
+			return ""
+		}
 		return config.State
 
-	} else if os.IsNotExist(err) {
-		// path/to/whatever does *not* exist
-		_, err := os.Create(path)
-		FailOnError(err, "fail to create", true)
-	}
+	} // else if os.IsNotExist(err) {
+	// 	// path/to/whatever does *not* exist
+	// 	// file, err := os.Create(path)
+	// 	// defer file.Close()
+	// 	// FailOnError(err, "fail to create", true)
+	// }
 	return ""
 }
 
@@ -178,12 +183,13 @@ func GetState(path string) string {
 func SetState(config EState, path string) {
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		_, err = os.Create(path)
-		FailOnError(err, "fail to create", true)
+		file, err1 := os.Create(path)
+		defer file.Close()
+		FailOnError(err1, "fail to create", true)
 	}
 	data, _ := json.Marshal(config)
-	err := ioutil.WriteFile(path, data, 0644)
-	FailOnError(err, "fail to write in file", true)
+	err2 := ioutil.WriteFile(path, data, 0644)
+	FailOnError(err2, "fail to write in file", true)
 }
 func (ch *chain) runElastico(msg *Message) {
 	logger.Info("file:- consensus.go, func:- runElastico()")
@@ -207,7 +213,7 @@ func (ch *chain) runElastico(msg *Message) {
 
 	//construct the new epoch msg
 	newEpochMsg := make(map[string]interface{})
-	newEpochMsg["Type"] = "Start new epoch"
+	newEpochMsg["Type"] = "StartNewEpoch"
 	newEpochMsg["Epoch"] = RandomGen(64).String()
 	newEpochMsg["Data"] = msg
 

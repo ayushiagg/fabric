@@ -671,7 +671,7 @@ func (e *Elastico) verifyPoW(identityobj IDENTITY) bool {
 
 	// public key
 	rsaPublickey := identityobj.PK
-	IP := identityobj.IP
+	IP := identityobj.IP + identityobj.Port
 	// nonce := int(PoW["Nonce"].(float64))
 	nonce := PoW.Nonce
 
@@ -684,9 +684,12 @@ func (e *Elastico) verifyPoW(identityobj IDENTITY) bool {
 	digest.Write([]byte(strconv.Itoa(nonce)))
 
 	hashVal := fmt.Sprintf("%x", digest.Sum(nil))
-	if strings.HasPrefix(hashVal, zeroString) && hashVal == hash {
+	if strings.HasPrefix(hash, zeroString) && hashVal == hash {
 		// Found a valid Pow, If this doesn't match with PoW["Hash"] then Doesnt verify!
 		return true
+	}
+	if hashVal != hash {
+		logger.Error("hashes mismatch")
 	}
 	logger.Error("POW not verified - prefix not found")
 	return false

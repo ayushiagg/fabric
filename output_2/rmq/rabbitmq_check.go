@@ -48,8 +48,8 @@ func main() {
 	// }
 	// fmt.Println("")
 	// setEnv("ELASTICO_STATE", "Envset")
-	_ = getallQueues()
-
+	// _ = getallQueues()
+	setEnv("ELASTICO_STATE", "Envset")
 }
 
 // EState :
@@ -82,7 +82,7 @@ func getallQueues() []Queue {
 }
 
 func setEnv(envName string, envVal string) {
-	path := "/conf.json"
+	path := "conf.json"
 	var file *os.File
 	config := EState{}
 	if _, err := os.Stat(path); err == nil {
@@ -95,6 +95,7 @@ func setEnv(envName string, envVal string) {
 		}
 		fmt.Println(config.State)
 		config.State = "2"
+		fmt.Println(config.State)
 
 	} else if os.IsNotExist(err) {
 		// path/to/whatever does *not* exist
