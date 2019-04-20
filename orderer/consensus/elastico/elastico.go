@@ -118,7 +118,7 @@ type Elastico struct {
 		is_final - whether the node belongs to final committee or not
 		epoch_randomness - r-bit random string generated at the end of previous epoch
 		Ri - r-bit random string
-		commitments - set of H(Ri) received by final committee node members and H(Ri) is sent by the final committee node only
+		Commitments - set of H(Ri) received by final committee node members and H(Ri) is sent by the final committee node only
 		txn_block - block of txns that the committee will agree on(intra committee consensus block)
 		set_of_Rs - set of Ris obtained from the final committee of previous epoch
 		newset_of_Rs - In the present epoch, set of Ris obtained from the final committee
@@ -165,9 +165,9 @@ type Elastico struct {
 	EpochRandomness  string
 	Ri               string
 	// only when this node is the member of final committee
-	commitments                    map[string]bool
-	txnBlock                       []*Message
-	setOfRs                        map[string]bool
+	Commitments                    map[string]bool
+	TxnBlock                       []*Message
+	SetOfRs                        map[string]bool
 	newsetOfRs                     map[string]bool
 	CommitteeConsensusData         map[int64]map[string][]string
 	CommitteeConsensusDataTxns     map[int64]map[string][]*Message
@@ -228,9 +228,9 @@ func (e *Elastico) reset() {
 	e.IsFinal = false
 
 	// only when this node is the member of final committee
-	e.commitments = make(map[string]bool)
-	e.txnBlock = make([]*Message, 0)
-	e.setOfRs = e.newsetOfRs
+	e.Commitments = make(map[string]bool)
+	e.TxnBlock = make([]*Message, 0)
+	e.SetOfRs = e.newsetOfRs
 	e.newsetOfRs = make(map[string]bool)
 	e.CommitteeConsensusData = make(map[int64]map[string][]string)
 	e.CommitteeConsensusDataTxns = make(map[int64]map[string][]*Message)
@@ -351,11 +351,11 @@ func (e *Elastico) ElasticoInit() {
 	// for setting EpochRandomness
 	e.initER()
 
-	e.commitments = make(map[string]bool)
+	e.Commitments = make(map[string]bool)
 
-	e.txnBlock = make([]*Message, 0)
+	e.TxnBlock = make([]*Message, 0)
 
-	e.setOfRs = make(map[string]bool)
+	e.SetOfRs = make(map[string]bool)
 
 	e.newsetOfRs = make(map[string]bool)
 
@@ -430,7 +430,7 @@ func (e *Elastico) computePoW() {
 		// If it is the first epoch , randomsetR will be an empty set .
 		// otherwise randomsetR will be any c/2 + 1 random strings Ri that node receives from the previous epoch
 		randomsetR := make([]string, 0)
-		if len(e.setOfRs) > 0 {
+		if len(e.SetOfRs) > 0 {
 			e.EpochRandomness, randomsetR = e.xorR()
 		}
 		// 	compute the digest
@@ -486,7 +486,7 @@ func (e *Elastico) xorR() (string, []string) {
 	logger.Info("file:- elastico.go, func:- xorR()")
 	// find xor of any random c/2 + 1 r-bit strings to set the epoch randomness
 	listOfRs := make([]string, 0)
-	for R := range e.setOfRs {
+	for R := range e.SetOfRs {
 		listOfRs = append(listOfRs, R)
 	}
 	randomset := sample(listOfRs, c/2+1) //get random c/2 + 1 strings from list of Rs
@@ -657,13 +657,13 @@ func (e *Elastico) verifyPoW(identityobj IDENTITY) bool {
 	EpochRandomness := identityobj.EpochRandomness
 	listOfRs := PoW.SetOfRs
 	// listOfRs := PoW["SetOfRs"].([]interface{})
-	setOfRs := make([]string, len(listOfRs))
+	SetOfRs := make([]string, len(listOfRs))
 	for i := range listOfRs {
-		setOfRs[i] = listOfRs[i] //.(string)
+		SetOfRs[i] = listOfRs[i] //.(string)
 	}
 
-	if len(setOfRs) > 0 {
-		xorVal := xorbinary(setOfRs)
+	if len(SetOfRs) > 0 {
+		xorVal := xorbinary(SetOfRs)
 		EpochRandomness = fmt.Sprintf("%0"+strconv.FormatInt(r, 10)+"b\n", xorVal)
 	}
 
@@ -1303,7 +1303,7 @@ func (e *Elastico) constructPrePrepare(epoch string) map[string]interface{} {
 		construct pre-prepare msg , done by primary
 	*/
 	logger.Info("file:- elastico.go, func:- constructPrePrepare()")
-	txnBlockList := e.txnBlock
+	txnBlockList := e.TxnBlock
 	// ToDo: make prePrepareContents Ordered Dict for signatures purpose
 	prePrepareContents := PrePrepareContents{Type: "pre-prepare", ViewID: e.viewID, Seq: 1, Digest: txnHexdigest(txnBlockList)}
 
@@ -1584,16 +1584,16 @@ func (e *Elastico) SendtoFinal(epoch string) {
 
 			msgList := committedDataViewID[seqnum]
 
-			e.txnBlock = e.unionTxns(e.txnBlock, msgList)
+			e.TxnBlock = e.unionTxns(e.TxnBlock, msgList)
 		}
 	}
 	// logger.Warn("size of fin committee members", len(e.finalCommitteeMembers))
-	// logger.Warn("size of txns in txn block", len(e.txnBlock))
+	// logger.Warn("size of txns in txn block", len(e.TxnBlock))
 	for _, finalID := range e.finalCommitteeMembers {
 
-		//  here txnBlock is a set, since sets are unordered hence can't sign them. So convert set to list for signing
-		txnBlock := e.txnBlock
-		data := map[string]interface{}{"Txnblock": txnBlock, "Sign": e.signTxnList(txnBlock), "Identity": e.Identity}
+		//  here TxnBlock is a set, since sets are unordered hence can't sign them. So convert set to list for signing
+		TxnBlock := e.TxnBlock
+		data := map[string]interface{}{"Txnblock": TxnBlock, "Sign": e.signTxnList(TxnBlock), "Identity": e.Identity}
 		msg := map[string]interface{}{"data": data, "type": "intraCommitteeBlock", "epoch": epoch}
 		finalID.send(msg)
 	}
@@ -1666,10 +1666,10 @@ func (e *Elastico) verifyAndMergeConsensusData() {
 				if len(e.CommitteeConsensusData[committeeid][txnBlockDigest]) >= c/2+1 {
 
 					// get the txns from the digest
-					txnBlock := e.CommitteeConsensusDataTxns[committeeid][txnBlockDigest]
-					if len(txnBlock) > 0 {
+					TxnBlock := e.CommitteeConsensusDataTxns[committeeid][txnBlockDigest]
+					if len(TxnBlock) > 0 {
 
-						e.mergedBlock = e.unionTxns(e.mergedBlock, txnBlock)
+						e.mergedBlock = e.unionTxns(e.mergedBlock, TxnBlock)
 					}
 				}
 			}
@@ -1690,9 +1690,9 @@ func (e *Elastico) RunInteractiveConsistency(epoch string) {
 	if e.isFinalMember() == true {
 		for _, nodeID := range e.CommitteeMembers {
 
-			logger.Warnf("sent the Int. commitments  %s to %s", e.Port, nodeID.Port)
-			commitments := mapToList(e.commitments)
-			data := map[string]interface{}{"Identity": e.Identity, "commitments": commitments}
+			logger.Warnf("sent the Int. Commitments  %s to %s", e.Port, nodeID.Port)
+			Commitments := mapToList(e.Commitments)
+			data := map[string]interface{}{"Identity": e.Identity, "Commitments": Commitments}
 			msg := map[string]interface{}{"data": data, "type": "InteractiveConsistency", "epoch": epoch}
 			nodeID.send(msg)
 		}
@@ -1773,8 +1773,8 @@ func (e *Elastico) Execute(exchangeName string, epoch string, Txn NewEpochMsg) s
 	} else if e.isFinalMember() && e.State == ElasticoStates["CommitmentSentToFinal"] {
 
 		// broadcast final txn block to ntw
-		if len(e.commitments) >= c/2+1 {
-			logger.Info("commitments received sucess")
+		if len(e.Commitments) >= c/2+1 {
+			logger.Info("Commitments received sucess")
 			e.RunInteractiveConsistency(epoch)
 		}
 	} else if e.isFinalMember() && e.State == ElasticoStates["InteractiveConsistencyStarted"] {
@@ -1895,7 +1895,7 @@ func (e *Elastico) getCommitment() string {
 	commitment.Write([]byte(e.Ri))
 	hashVal := fmt.Sprintf("%x", commitment.Sum(nil))
 	logger.Infof("commitment Ri-- %s of port %s", e.Ri, e.Port)
-	logger.Infof("commitments H(Ri)-- %s", hashVal)
+	logger.Infof("Commitments H(Ri)-- %s", hashVal)
 	return hashVal
 }
 
@@ -2217,10 +2217,10 @@ func (e *Elastico) receiveHash(msg DecodeMsgType) {
 	identityobj := decodeMsg.Identity
 	HashRi := decodeMsg.HashRi
 	if e.verifyPoW(identityobj) {
-		e.commitments[HashRi] = true
-		logger.Info("commitment received-of port", e.Port, e.commitments)
+		e.Commitments[HashRi] = true
+		logger.Info("commitment received-of port", e.Port, e.Commitments)
 	} else {
-		logger.Error("PoW not verified in receiving commitments")
+		logger.Error("PoW not verified in receiving Commitments")
 	}
 }
 
@@ -2269,7 +2269,7 @@ func (e *Elastico) receiveRandomStringBroadcast(msg DecodeMsgType) {
 			}
 		} else {
 			logger.Warn("Ri's Commitment not found in CommitmentSet Ri -- ", Ri)
-			logger.Warn("commitments present ", e.newRcommitmentSet)
+			logger.Warn("Commitments present ", e.newRcommitmentSet)
 		}
 	} else {
 		logger.Error("POW invalid")
@@ -2371,15 +2371,15 @@ func (e *Elastico) receiveConsistency(msg DecodeMsgType) {
 	identityobj := decodeMsg.Identity
 
 	if e.verifyPoW(identityobj) {
-		commitments := decodeMsg.Commitments
+		Commitments := decodeMsg.Commitments
 		if len(e.EpochcommitmentSet) == 0 {
-			for _, commitment := range commitments {
+			for _, commitment := range Commitments {
 				e.EpochcommitmentSet[commitment] = true
 			}
 		} else {
-			e.EpochcommitmentSet = intersection(e.EpochcommitmentSet, commitments)
+			e.EpochcommitmentSet = intersection(e.EpochcommitmentSet, Commitments)
 		}
-		// logger.Info("received Int. Consistency commitments! ", len(e.EpochcommitmentSet), " port :", e.Port, " commitments : ", commitments)
+		// logger.Info("received Int. Consistency Commitments! ", len(e.EpochcommitmentSet), " port :", e.Port, " Commitments : ", Commitments)
 	} else {
 		logger.Error("pow invalid for intra committee block")
 	}
@@ -2522,7 +2522,7 @@ func (e *Elastico) receiveFinalTxnBlock(msg DecodeMsgType) {
 				}
 
 			}
-			// union of commitments
+			// union of Commitments
 			e.unionSet(receivedCommitments)
 
 		} else {
@@ -3184,7 +3184,7 @@ func (e *Elastico) receiveViews(msg DecodeMsgType) {
 			// ToDo: txnblock should be ordered, not set
 			if len(Txns) > 0 {
 
-				e.txnBlock = e.unionTxns(e.txnBlock, Txns)
+				e.TxnBlock = e.unionTxns(e.TxnBlock, Txns)
 				logger.Infof("I am primary %s", e.Port)
 				e.primary = true
 			}
