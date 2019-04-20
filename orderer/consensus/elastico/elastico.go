@@ -168,7 +168,7 @@ type Elastico struct {
 	Commitments                    map[string]bool
 	TxnBlock                       []*Message
 	SetOfRs                        map[string]bool
-	newsetOfRs                     map[string]bool
+	NewsetOfRs                     map[string]bool
 	CommitteeConsensusData         map[int64]map[string][]string
 	CommitteeConsensusDataTxns     map[int64]map[string][]*Message
 	finalBlockbyFinalCommittee     map[string][]IdentityAndSign
@@ -230,8 +230,8 @@ func (e *Elastico) reset() {
 	// only when this node is the member of final committee
 	e.Commitments = make(map[string]bool)
 	e.TxnBlock = make([]*Message, 0)
-	e.SetOfRs = e.newsetOfRs
-	e.newsetOfRs = make(map[string]bool)
+	e.SetOfRs = e.NewsetOfRs
+	e.NewsetOfRs = make(map[string]bool)
 	e.CommitteeConsensusData = make(map[int64]map[string][]string)
 	e.CommitteeConsensusDataTxns = make(map[int64]map[string][]*Message)
 	e.finalBlockbyFinalCommittee = make(map[string][]IdentityAndSign)
@@ -357,7 +357,7 @@ func (e *Elastico) ElasticoInit() {
 
 	e.SetOfRs = make(map[string]bool)
 
-	e.newsetOfRs = make(map[string]bool)
+	e.NewsetOfRs = make(map[string]bool)
 
 	e.CommitteeConsensusData = make(map[int64]map[string][]string)
 
@@ -1802,7 +1802,7 @@ func (e *Elastico) Execute(exchangeName string, epoch string, Txn NewEpochMsg) s
 			logger.Info("insufficient Rs")
 		}
 	} else if e.State == ElasticoStates["BroadcastedR"] {
-		if len(e.newsetOfRs) >= c/2+1 {
+		if len(e.NewsetOfRs) >= c/2+1 {
 			logger.Info("received the set of Rs")
 			e.State = ElasticoStates["ReceivedR"]
 		} else {
@@ -2259,9 +2259,9 @@ func (e *Elastico) receiveRandomStringBroadcast(msg DecodeMsgType) {
 
 		if _, ok := e.newRcommitmentSet[HashRi]; ok {
 
-			e.newsetOfRs[Ri] = true
+			e.NewsetOfRs[Ri] = true
 
-			if len(e.newsetOfRs) >= c/2+1 {
+			if len(e.NewsetOfRs) >= c/2+1 {
 				logger.Info("received the set of Rs")
 				e.State = ElasticoStates["ReceivedR"]
 			} else {
