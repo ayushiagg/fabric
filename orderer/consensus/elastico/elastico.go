@@ -160,7 +160,7 @@ type Elastico struct {
 	CommitteeList map[int64][]IDENTITY
 	// only when this node is not the member of directory committee
 	CommitteeMembers []IDENTITY
-	isDirectory      bool
+	IsDirectory      bool
 	isFinal          bool
 	EpochRandomness  string
 	Ri               string
@@ -224,7 +224,7 @@ func (e *Elastico) reset() {
 	var Ri string
 	e.Ri = Ri
 
-	e.isDirectory = false
+	e.IsDirectory = false
 	e.isFinal = false
 
 	// only when this node is the member of final committee
@@ -602,7 +602,7 @@ func (e *Elastico) formCommittee(exchangeName string, epoch string) {
 	logger.Info("file:- elastico.go, func:- formCommittee()")
 	if len(e.CurDirectory) < c {
 
-		e.isDirectory = true
+		e.IsDirectory = true
 
 		data := map[string]interface{}{"Identity": e.Identity}
 		msg := map[string]interface{}{"data": data, "type": "directoryMember", "epoch": epoch}
@@ -1718,7 +1718,7 @@ func (e *Elastico) Execute(exchangeName string, epoch string, Txn NewEpochMsg) s
 
 		// form committee, when formed Identity
 		e.formCommittee(exchangeName, epoch)
-	} else if e.isDirectory && e.State == ElasticoStates["RunAsDirectory"] {
+	} else if e.IsDirectory && e.State == ElasticoStates["RunAsDirectory"] {
 
 		logger.Infof("The directory member :- %s ", e.Port)
 		e.receiveTxns(Txn)
@@ -2394,10 +2394,10 @@ func (e *Elastico) receive(msg DecodeMsgType, epoch string) {
 	if msg.Type == "directoryMember" {
 		e.receiveDirectoryMember(msg)
 
-	} else if msg.Type == "newNode" && e.isDirectory {
+	} else if msg.Type == "newNode" && e.IsDirectory {
 		e.receiveNewNode(msg, epoch)
 
-	} else if msg.Type == "committee members views" && e.isDirectory == false {
+	} else if msg.Type == "committee members views" && e.IsDirectory == false {
 		e.receiveViews(msg)
 
 	} else if msg.Type == "hash" && e.isFinalMember() {
