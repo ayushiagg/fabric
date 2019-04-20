@@ -123,12 +123,12 @@ type Elastico struct {
 		set_of_Rs - set of Ris obtained from the final committee of previous epoch
 		newset_of_Rs - In the present epoch, set of Ris obtained from the final committee
 		CommitteeConsensusData - a dictionary of committee ids that contains a dictionary of the txn block and the signatures
-		finalBlockbyFinalCommittee - a dictionary of txn block and the signatures by the final committee members
+		FinalBlockbyFinalCommittee - a dictionary of txn block and the signatures by the final committee members
 		state - state in which a node is running
-		mergedBlock - list of txns of different committees after their intra committee consensus
-		finalBlock - agreed list of txns after pbft run by final committee
+		MergedBlock - list of txns of different committees after their intra committee consensus
+		FinalBlock - agreed list of txns after pbft run by final committee
 		RcommitmentSet - set of H(Ri)s received from the final committee after the consistency protocol [previous epoch values]
-		newRcommitmentSet - For the present it contains the set of H(Ri)s received from the final committee after the consistency protocol
+		NewRcommitmentSet - For the present it contains the set of H(Ri)s received from the final committee after the consistency protocol
 		finalCommitteeMembers - members of the final committee received from the directory committee
 		txn- transactions stored by the directory members
 		response - final block to be received by the client
@@ -171,13 +171,13 @@ type Elastico struct {
 	NewsetOfRs                     map[string]bool
 	CommitteeConsensusData         map[int64]map[string][]string
 	CommitteeConsensusDataTxns     map[int64]map[string][]*Message
-	finalBlockbyFinalCommittee     map[string][]IdentityAndSign
-	finalBlockbyFinalCommitteeTxns map[string][]*Message
+	FinalBlockbyFinalCommittee     map[string][]IdentityAndSign
+	FinalBlockbyFinalCommitteeTxns map[string][]*Message
 	State                          int
-	mergedBlock                    []*Message
-	finalBlock                     FinalBlockData
+	MergedBlock                    []*Message
+	FinalBlock                     FinalBlockData
 	RcommitmentSet                 map[string]bool
-	newRcommitmentSet              map[string]bool
+	NewRcommitmentSet              map[string]bool
 	finalCommitteeMembers          []IDENTITY
 	// only when this is the member of the directory committee
 	txn                   map[int64][]*Message
@@ -234,17 +234,17 @@ func (e *Elastico) reset() {
 	e.NewsetOfRs = make(map[string]bool)
 	e.CommitteeConsensusData = make(map[int64]map[string][]string)
 	e.CommitteeConsensusDataTxns = make(map[int64]map[string][]*Message)
-	e.finalBlockbyFinalCommittee = make(map[string][]IdentityAndSign)
-	e.finalBlockbyFinalCommitteeTxns = make(map[string][]*Message)
+	e.FinalBlockbyFinalCommittee = make(map[string][]IdentityAndSign)
+	e.FinalBlockbyFinalCommitteeTxns = make(map[string][]*Message)
 	e.State = ElasticoStates["NONE"]
-	e.mergedBlock = make([]*Message, 0)
+	e.MergedBlock = make([]*Message, 0)
 
-	e.finalBlock = FinalBlockData{}
-	e.finalBlock.Sent = false
-	e.finalBlock.Txns = make([]*Message, 0)
+	e.FinalBlock = FinalBlockData{}
+	e.FinalBlock.Sent = false
+	e.FinalBlock.Txns = make([]*Message, 0)
 
-	e.RcommitmentSet = e.newRcommitmentSet
-	e.newRcommitmentSet = make(map[string]bool)
+	e.RcommitmentSet = e.NewRcommitmentSet
+	e.NewRcommitmentSet = make(map[string]bool)
 	e.finalCommitteeMembers = make([]IDENTITY, 0)
 
 	// only when this is the member of the directory committee
@@ -363,20 +363,20 @@ func (e *Elastico) ElasticoInit() {
 
 	e.CommitteeConsensusDataTxns = make(map[int64]map[string][]*Message)
 
-	e.finalBlockbyFinalCommittee = make(map[string][]IdentityAndSign)
+	e.FinalBlockbyFinalCommittee = make(map[string][]IdentityAndSign)
 
-	e.finalBlockbyFinalCommitteeTxns = make(map[string][]*Message)
+	e.FinalBlockbyFinalCommitteeTxns = make(map[string][]*Message)
 
 	e.State = ElasticoStates["NONE"]
 
-	e.mergedBlock = make([]*Message, 0)
+	e.MergedBlock = make([]*Message, 0)
 
-	e.finalBlock = FinalBlockData{}
-	e.finalBlock.Sent = false
-	e.finalBlock.Txns = make([]*Message, 0)
+	e.FinalBlock = FinalBlockData{}
+	e.FinalBlock.Sent = false
+	e.FinalBlock.Txns = make([]*Message, 0)
 
 	e.RcommitmentSet = make(map[string]bool)
-	e.newRcommitmentSet = make(map[string]bool)
+	e.NewRcommitmentSet = make(map[string]bool)
 	e.finalCommitteeMembers = make([]IDENTITY, 0)
 
 	e.txn = make(map[int64][]*Message)
@@ -1021,7 +1021,7 @@ func (e *Elastico) runFinalPBFT(epoch string) {
 
 					msgList := e.FinalcommittedData[viewID][seqnum]
 
-					e.finalBlock.Txns = e.unionTxns(e.finalBlock.Txns, msgList)
+					e.FinalBlock.Txns = e.unionTxns(e.FinalBlock.Txns, msgList)
 				}
 			}
 			e.State = ElasticoStates["FinalPBFT_COMMITTED"]
@@ -1480,7 +1480,7 @@ func (e *Elastico) constructFinalPrePrepare(epoch string) map[string]interface{}
 		construct pre-prepare msg , done by primary final
 	*/
 	logger.Info("file:- elastico.go, func:- constructFinalPrePrepare()")
-	txnBlockList := e.mergedBlock
+	txnBlockList := e.MergedBlock
 	// ToDo :- make pre_prepare_contents Ordered Dict for signatures purpose
 	prePrepareContents := PrePrepareContents{Type: "Finalpre-prepare", ViewID: e.viewID, Seq: 1, Digest: txnHexdigest(txnBlockList)}
 
@@ -1669,13 +1669,13 @@ func (e *Elastico) verifyAndMergeConsensusData() {
 					TxnBlock := e.CommitteeConsensusDataTxns[committeeid][txnBlockDigest]
 					if len(TxnBlock) > 0 {
 
-						e.mergedBlock = e.unionTxns(e.mergedBlock, TxnBlock)
+						e.MergedBlock = e.unionTxns(e.MergedBlock, TxnBlock)
 					}
 				}
 			}
 		}
 	}
-	if len(e.mergedBlock) > 0 {
+	if len(e.MergedBlock) > 0 {
 		fmt.Println("final committee port - ", e.Port, "has merged data")
 		e.State = ElasticoStates["Merged Consensus Data"]
 	}
@@ -1795,7 +1795,7 @@ func (e *Elastico) Execute(exchangeName string, epoch string, Txn NewEpochMsg) s
 	} else if e.isFinalMember() && e.State == ElasticoStates["FinalBlockSentToClient"] {
 
 		// broadcast Ri is done when received commitment has atleast c/2  + 1 signatures
-		if len(e.newRcommitmentSet) >= c/2+1 {
+		if len(e.NewRcommitmentSet) >= c/2+1 {
 			logger.Info("broadacst R by port--", e.Port)
 			e.BroadcastR(epoch, exchangeName)
 		} else {
@@ -1858,10 +1858,10 @@ func (e *Elastico) BroadcastFinalTxn(epoch string, exchangeName string) bool {
 	logger.Info("file:- elastico.go, func:- BroadcastFinalTxn()")
 	commitmentList := mapToList(e.EpochcommitmentSet)
 	commitmentDigest := e.digestCommitments(commitmentList)
-	data := map[string]interface{}{"CommitSet": commitmentList, "Signature": e.Sign(commitmentDigest), "Identity": e.Identity, "FinalBlock": e.finalBlock.Txns, "FinalBlockSign": e.signTxnList(e.finalBlock.Txns)}
-	// logger.Warn("finalblock-", e.finalBlock.Txns)
+	data := map[string]interface{}{"CommitSet": commitmentList, "Signature": e.Sign(commitmentDigest), "Identity": e.Identity, "FinalBlock": e.FinalBlock.Txns, "FinalBlockSign": e.signTxnList(e.FinalBlock.Txns)}
+	// logger.Warn("finalblock-", e.FinalBlock.Txns)
 	// final Block sent to ntw
-	e.finalBlock.Sent = true
+	e.FinalBlock.Sent = true
 	// A final node which is already in received state should not change its state
 	if e.State != ElasticoStates["FinalBlockReceived"] {
 
@@ -1925,20 +1925,20 @@ func (e *Elastico) checkCountForFinalData() {
 	//  collect final blocks sent by final committee and add the blocks to the response
 
 	logger.Info("file:- elastico.go, func:- checkCountForFinalData()")
-	for txnBlockDigest := range e.finalBlockbyFinalCommittee {
+	for txnBlockDigest := range e.FinalBlockbyFinalCommittee {
 
-		if len(e.finalBlockbyFinalCommittee[txnBlockDigest]) >= c/2+1 {
+		if len(e.FinalBlockbyFinalCommittee[txnBlockDigest]) >= c/2+1 {
 
-			TxnList := e.finalBlockbyFinalCommitteeTxns[txnBlockDigest]
+			TxnList := e.FinalBlockbyFinalCommitteeTxns[txnBlockDigest]
 			//  create the final committed block that contatins the txnlist and set of signatures and identities to that txn list
-			finalCommittedBlock := FinalCommittedBlock{TxnList, e.finalBlockbyFinalCommittee[txnBlockDigest]}
+			finalCommittedBlock := FinalCommittedBlock{TxnList, e.FinalBlockbyFinalCommittee[txnBlockDigest]}
 			logger.Info("response received by final committee")
 			//  add the block to the response
 			e.response = append(e.response, finalCommittedBlock)
 
 		} else {
 
-			// logger.Error("less block signs : ", len(e.finalBlockbyFinalCommittee[txnBlockDigest]))
+			// logger.Error("less block signs : ", len(e.FinalBlockbyFinalCommittee[txnBlockDigest]))
 		}
 	}
 
@@ -2257,7 +2257,7 @@ func (e *Elastico) receiveRandomStringBroadcast(msg DecodeMsgType) {
 	if e.verifyPoW(identityobj) {
 		HashRi := e.hexdigest(Ri)
 
-		if _, ok := e.newRcommitmentSet[HashRi]; ok {
+		if _, ok := e.NewRcommitmentSet[HashRi]; ok {
 
 			e.NewsetOfRs[Ri] = true
 
@@ -2269,7 +2269,7 @@ func (e *Elastico) receiveRandomStringBroadcast(msg DecodeMsgType) {
 			}
 		} else {
 			logger.Warn("Ri's Commitment not found in CommitmentSet Ri -- ", Ri)
-			logger.Warn("Commitments present ", e.newRcommitmentSet)
+			logger.Warn("Commitments present ", e.NewRcommitmentSet)
 		}
 	} else {
 		logger.Error("POW invalid")
@@ -2483,9 +2483,9 @@ func (e *Elastico) receiveFinalTxnBlock(msg DecodeMsgType) {
 
 			// list init for final txn block
 			finaltxnBlockDigest := txnHexdigest(finalTxnBlock)
-			if _, ok := e.finalBlockbyFinalCommittee[finaltxnBlockDigest]; ok == false {
-				e.finalBlockbyFinalCommittee[finaltxnBlockDigest] = make([]IdentityAndSign, 0)
-				e.finalBlockbyFinalCommitteeTxns[finaltxnBlockDigest] = finalTxnBlock
+			if _, ok := e.FinalBlockbyFinalCommittee[finaltxnBlockDigest]; ok == false {
+				e.FinalBlockbyFinalCommittee[finaltxnBlockDigest] = make([]IdentityAndSign, 0)
+				e.FinalBlockbyFinalCommitteeTxns[finaltxnBlockDigest] = finalTxnBlock
 			}
 
 			// creating the object that contains the Identity and signature of the final member
@@ -2493,7 +2493,7 @@ func (e *Elastico) receiveFinalTxnBlock(msg DecodeMsgType) {
 
 			// check whether this combination of Identity and sign already exists or not
 			flag := true
-			for _, idSignObj := range e.finalBlockbyFinalCommittee[finaltxnBlockDigest] {
+			for _, idSignObj := range e.FinalBlockbyFinalCommittee[finaltxnBlockDigest] {
 
 				if idSignObj.isEqual(identityAndSign) {
 					// it exists
@@ -2503,14 +2503,14 @@ func (e *Elastico) receiveFinalTxnBlock(msg DecodeMsgType) {
 			}
 			if flag {
 				// appending the Identity and sign of final member
-				e.finalBlockbyFinalCommittee[finaltxnBlockDigest] = append(e.finalBlockbyFinalCommittee[finaltxnBlockDigest], identityAndSign)
+				e.FinalBlockbyFinalCommittee[finaltxnBlockDigest] = append(e.FinalBlockbyFinalCommittee[finaltxnBlockDigest], identityAndSign)
 			}
 
 			// block is signed by sufficient final members and when the final block has not been sent to the client yet
-			if len(e.finalBlockbyFinalCommittee[finaltxnBlockDigest]) >= c/2+1 && e.State != ElasticoStates["FinalBlockSentToClient"] {
+			if len(e.FinalBlockbyFinalCommittee[finaltxnBlockDigest]) >= c/2+1 && e.State != ElasticoStates["FinalBlockSentToClient"] {
 				// for final members, their state is updated only when they have also sent the finalblock to ntw
 				if e.isFinalMember() {
-					finalBlockSent := e.finalBlock.Sent
+					finalBlockSent := e.FinalBlock.Sent
 					if finalBlockSent {
 
 						e.State = ElasticoStates["FinalBlockReceived"]
@@ -2536,12 +2536,12 @@ func (e *Elastico) receiveFinalTxnBlock(msg DecodeMsgType) {
 
 func (e *Elastico) unionSet(receivedSet []string) {
 	logger.Info("file:- elastico.go, func:- unionSet()")
-	// logger.Info("lenn of commitment---", len(e.newRcommitmentSet))
+	// logger.Info("lenn of commitment---", len(e.NewRcommitmentSet))
 	// logger.Info("received set--", receivedSet)
 	for _, commitment := range receivedSet {
-		e.newRcommitmentSet[commitment] = true
+		e.NewRcommitmentSet[commitment] = true
 	}
-	// logger.Info("new lenn of commitment---", len(e.newRcommitmentSet))
+	// logger.Info("new lenn of commitment---", len(e.NewRcommitmentSet))
 }
 
 // ResetMsg - Reset msg
