@@ -170,12 +170,7 @@ func GetState(path string) string {
 		}
 		return config.State
 
-	} // else if os.IsNotExist(err) {
-	// 	// path/to/whatever does *not* exist
-	// 	// file, err := os.Create(path)
-	// 	// defer file.Close()
-	// 	// FailOnError(err, "fail to create", true)
-	// }
+	}
 	return ""
 }
 
@@ -184,15 +179,15 @@ func SetState(config EState, path string) {
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		file, err1 := os.Create(path)
-		defer file.Close()
 		FailOnError(err1, "fail to create", true)
+		defer file.Close()
 	}
-	data, _ := json.Marshal(config)
+	data, errMarshal := json.Marshal(config)
+	FailOnError(errMarshal, "error in marshalling the data", true)
 	err2 := ioutil.WriteFile(path, data, 0644)
 	FailOnError(err2, "fail to write in file", true)
 }
 func (ch *chain) runElastico(msg *Message) {
-	logger.Info("file:- consensus.go, func:- runElastico()")
 	path := "/conf.json"
 	config := EState{}
 
@@ -201,7 +196,6 @@ func (ch *chain) runElastico(msg *Message) {
 		stateEnv = GetState(path)
 	}
 	config.State = strconv.Itoa(ElasticoStates["NONE"])
-	// set the ELASTICO_STATE env to NONE
 	SetState(config, path)
 
 	conn := GetConnection()
@@ -228,7 +222,6 @@ func (ch *chain) runElastico(msg *Message) {
 }
 
 func (ch *chain) main() {
-	logger.Info("file:- consensus.go, func:- main()")
 	var timer <-chan time.Time
 	var err error
 

@@ -25,7 +25,6 @@ func GetChannel(connection *amqp.Connection) *amqp.Channel {
 	/*
 		get channel
 	*/
-	logger.Info("file:- connection.go, func:- GetChannel()")
 	channel, err := connection.Channel()               // create a channel
 	FailOnError(err, "Failed to open a channel", true) // report the error
 	return channel
@@ -36,7 +35,6 @@ func GetConnection() *amqp.Connection {
 	/*
 		establish a connection with RabbitMQ server
 	*/
-	logger.Info("file:- connection.go, func:- GetConnection()")
 	url := "rabbitmq0"
 	connection, err := amqp.Dial("amqp://guest:guest@" + url + ":5672/")
 	FailOnError(err, "Failed to connect to RabbitMQ", true) // report the error

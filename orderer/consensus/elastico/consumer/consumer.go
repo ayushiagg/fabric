@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"os"
-	"strconv"
 
 	"github.com/hyperledger/fabric/common/flogging"
 	elastico "github.com/hyperledger/fabric/orderer/consensus/elastico"
@@ -12,11 +11,22 @@ import (
 
 var logger = flogging.MustGetLogger("orderer.consensus.elastico.consumer")
 
+// StateName :-
+func StateName(stateNum int) string {
+	for k, v := range elastico.ElasticoStates {
+		if v == stateNum {
+			return k
+		}
+	}
+	return "error-state"
+}
+
 //ExecuteConsume :-
 func ExecuteConsume(ch *amqp.Channel, Queue string, decodeMsg elastico.DecodeMsgType, exchangeName string, newEpochMessage elastico.NewEpochMsg, elasticoObj *elastico.Elastico) {
-	logger.Info("file:- consumer.go, func:- ExecuteConsume()")
+	// logger.Info("file:- consumer.go, func:- ExecuteConsume()")
 	for {
-		logger.Infof("Orderer State - %s %s ", os.Getenv("ORDERER_HOST"), strconv.Itoa(elasticoObj.State))
+		statename := StateName(elasticoObj.State)
+		logger.Infof("Orderer State - %s , %s ", os.Getenv("ORDERER_HOST"), statename)
 		response := elasticoObj.Execute(exchangeName, decodeMsg.Epoch, newEpochMessage)
 		if response == "reset" {
 			break
@@ -67,16 +77,14 @@ func Run(ch *amqp.Channel, queueName string, elasticoObj *elastico.Elastico) {
 		elastico.FailOnError(err, "error in inspect", false)
 		if err == nil {
 			Consume(ch, queue, elasticoObj)
+			//ToDo:- Add reset for elastico node
 		}
 	}
 }
 
 func main() {
-	logger.Info("file:- consumer.go, func:- main()")
 	conn := elastico.GetConnection()
-	logger.Info("elastico-consumer -connection established")
 	ch := elastico.GetChannel(conn)
-	logger.Info("elastico-consumer -channel established")
 	defer conn.Close()
 
 	queueName := os.Getenv("ORDERER_HOST")
@@ -91,12 +99,8 @@ func main() {
 	)
 
 	elastico.FailOnError(err, "Failed to declare a queue", true)
-
-	logger.Info("elastico-consumer queue established")
 	elasticoObj := elastico.Elastico{}
 	elasticoObj.ElasticoInit()
-	logger.Info("elastico-consumer elastico init done")
-
+	logger.Info("elastico-consumer running start")
 	Run(ch, queue.Name, &elasticoObj)
-	logger.Info("elastico-consumer running done")
 }

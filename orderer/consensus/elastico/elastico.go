@@ -1573,7 +1573,7 @@ func (e *Elastico) isFinalMember() bool {
 	/*
 		tell whether this node is a final committee member or not
 	*/
-	logger.Info("file:- elastico.go, func:- isFinalMember()")
+	// logger.Info("file:- elastico.go, func:- isFinalMember()")
 	return e.IsFinal
 }
 
