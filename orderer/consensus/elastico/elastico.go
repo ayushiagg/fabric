@@ -161,7 +161,7 @@ type Elastico struct {
 	// only when this node is not the member of directory committee
 	CommitteeMembers []IDENTITY
 	IsDirectory      bool
-	isFinal          bool
+	IsFinal          bool
 	EpochRandomness  string
 	Ri               string
 	// only when this node is the member of final committee
@@ -225,7 +225,7 @@ func (e *Elastico) reset() {
 	e.Ri = Ri
 
 	e.IsDirectory = false
-	e.isFinal = false
+	e.IsFinal = false
 
 	// only when this node is the member of final committee
 	e.commitments = make(map[string]bool)
@@ -1571,7 +1571,7 @@ func (e *Elastico) isFinalMember() bool {
 		tell whether this node is a final committee member or not
 	*/
 	logger.Info("file:- elastico.go, func:- isFinalMember()")
-	return e.isFinal
+	return e.IsFinal
 }
 
 // SendtoFinal :- Each committee member sends the signed value(txn block after intra committee consensus along with signatures to final committee
@@ -2423,7 +2423,7 @@ func (e *Elastico) receive(msg DecodeMsgType, epoch string) {
 		FailOnError(err, "error in decoding final member msg", true)
 		identityobj := decodeMsg.Identity
 		if e.verifyPoW(identityobj) && e.CommitteeID == finNum {
-			e.isFinal = true
+			e.IsFinal = true
 		}
 	} else if msg.Type == "Finalpre-prepare" || msg.Type == "Finalprepare" || msg.Type == "Finalcommit" {
 		e.FinalpbftProcessMessage(msg)
