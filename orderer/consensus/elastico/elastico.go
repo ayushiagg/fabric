@@ -404,21 +404,20 @@ func (e *Elastico) executePoW() {
 	/*
 		execute PoW
 	*/
-	logger.Info("file:- elastico.go, func:- executePoW()")
-	if e.Flag {
-		// compute Pow for good node
-		e.computePoW()
-	} else {
-		// compute Pow for bad node
-		// e.computeFakePoW()
-	}
+	e.computePoW()
+	// if e.Flag {
+	// 	// compute Pow for good node
+	// } else {
+	// 	// compute Pow for bad node
+	// 	// e.computeFakePoW()
+	// }
 }
 
 func (e *Elastico) computePoW() {
 	/*
 		returns hash which satisfies the difficulty challenge(D) : PoW["Hash"]
 	*/
-	logger.Info("file:- elastico.go, func:- computePoW()")
+	// logger.Info("file:- elastico.go, func:- computePoW()")
 	zeroString := ""
 	for i := 0; i < D; i++ {
 		zeroString += "0"
@@ -495,12 +494,12 @@ func (e *Elastico) xorR() (string, []string) {
 	return xorString, randomset
 }
 
-func (e *Elastico) getCommitteeid() {
+//GetCommitteeid :-
+func (e *Elastico) GetCommitteeid() {
 	/*
 		sets last s-bit of PoW["Hash"] as Identity : CommitteeID
 	*/
-	logger.Info("file:- elastico.go, func:- getCommitteeid()")
-	// PoW := e.PoW["Hash"].(string)
+	// logger.Info("file:- elastico.go, func:- GetCommitteeid()")
 	PoW := e.PoW.Hash
 	bindigest := ""
 
@@ -513,7 +512,6 @@ func (e *Elastico) getCommitteeid() {
 	Identity := bindigest[len(bindigest)-s:]
 	iden, err := strconv.ParseInt(Identity, 2, 0) // converts binary string to integer
 	FailOnError(err, "binary to int conversion error", true)
-	// logger.Info("Committe id : ", iden)
 	e.CommitteeID = iden
 }
 
@@ -522,13 +520,12 @@ func (e *Elastico) formIdentity() {
 		Identity formation for a node
 		Identity consists of public key, ip, committee id, PoW, nonce, epoch randomness
 	*/
-	logger.Info("file:- elastico.go, func:- formIdentity()")
 	if e.State == ElasticoStates["PoW Computed"] {
 
 		PK := e.Key.PublicKey
 
 		// set the committee id acc to PoW solution
-		e.getCommitteeid()
+		e.GetCommitteeid()
 
 		e.Identity = IDENTITY{IP: e.IP, PK: PK, CommitteeID: e.CommitteeID, PoW: e.PoW, EpochRandomness: e.EpochRandomness, Port: e.Port}
 		// changed the state after Identity formation
@@ -538,7 +535,7 @@ func (e *Elastico) formIdentity() {
 
 // BroadcastToNetwork - Broadcast data to the whole ntw
 func BroadcastToNetwork(exchangeName string, msg map[string]interface{}) {
-	logger.Info("file:- elastico.go, func:- BroadcastToNetwork()")
+	// logger.Info("file:- elastico.go, func:- BroadcastToNetwork()")
 	conn := GetConnection()
 	defer conn.Close() // close the connection
 
@@ -599,7 +596,7 @@ func (e *Elastico) formCommittee(exchangeName string, epoch string) {
 	/*
 		creates directory committee if not yet created otherwise informs all the directory members
 	*/
-	logger.Info("file:- elastico.go, func:- formCommittee()")
+	// logger.Info("file:- elastico.go, func:- formCommittee()")
 	if len(e.CurDirectory) < c {
 
 		e.IsDirectory = true
@@ -1036,6 +1033,7 @@ func (t *Message) isEqual(transaction *Message) bool {
 	/*
 		compare two objs are equal or not
 	*/
+	//ToDo:- fix this
 	logger.Info("file:- elastico.go, func:- isEqual()")
 	return t.ConfigSeq == transaction.ConfigSeq
 }
@@ -1708,7 +1706,6 @@ func (e *Elastico) Execute(exchangeName string, epoch string, Txn NewEpochMsg) s
 	/*
 		executing the functions based on the running state
 	*/
-	logger.Info("file:- elastico.go, func:- Execute()")
 	config := EState{}
 	// initial state of elastico node
 	if e.State == ElasticoStates["NONE"] {
@@ -1723,7 +1720,7 @@ func (e *Elastico) Execute(exchangeName string, epoch string, Txn NewEpochMsg) s
 		e.formCommittee(exchangeName, epoch)
 	} else if e.IsDirectory && e.State == ElasticoStates["RunAsDirectory"] {
 
-		logger.Infof("The directory member :- %s ", e.Port)
+		logger.Infof("The directory member :- %s ", e.IP)
 		e.receiveTxns(Txn)
 		// directory member has received the txns for all committees
 		e.State = ElasticoStates["RunAsDirectory after-TxnReceived"]
@@ -2034,7 +2031,7 @@ func (i *IDENTITY) isEqual(identityobj *IDENTITY) bool {
 	// for i := range listOfRsIniobj {
 	// 	setOfRsIniobj[i] = listOfRsIniobj[i].(string)
 	// }
-	logger.Info("file:- elastico.go, func:- isEqual of identity()")
+	// logger.Info("file:- elastico.go, func:- isEqual of identity()")
 	if i.PK.N.Cmp(identityobj.PK.N) != 0 {
 		return false
 	}
@@ -2047,7 +2044,7 @@ type Dmsg struct {
 }
 
 func (e *Elastico) receiveDirectoryMember(msg DecodeMsgType) {
-	logger.Info("file:- elastico.go, func:- receiveDirectoryMember()")
+	logger.Infof("file:- elastico.go, func:- receiveDirectoryMember() by %s", e.IP)
 	var decodeMsg Dmsg
 
 	err := json.Unmarshal(msg.Data, &decodeMsg)
@@ -2071,7 +2068,7 @@ func (e *Elastico) receiveDirectoryMember(msg DecodeMsgType) {
 			}
 		}
 	} else {
-		logger.Error("PoW not valid of an incoming directory member", identityobj)
+		logger.Error("PoW not valid of an incoming directory member")
 	}
 
 }
@@ -2082,7 +2079,6 @@ type NewNodeMsg struct {
 }
 
 func (e *Elastico) receiveNewNode(msg DecodeMsgType, epoch string) {
-	logger.Info("file:- elastico.go, func:-receiveNewNode()")
 	var decodeMsg NewNodeMsg
 
 	err := json.Unmarshal(msg.Data, &decodeMsg)
@@ -2392,7 +2388,6 @@ func (e *Elastico) receive(msg DecodeMsgType, epoch string) {
 	/*
 		method to recieve messages for a node as per the type of a msg
 	*/
-	logger.Info("file:- elastico.go, func:- receive()")
 	// new node is added in directory committee if not yet formed
 	if msg.Type == "directoryMember" {
 		e.receiveDirectoryMember(msg)
@@ -3163,7 +3158,7 @@ type ViewsMsg struct {
 }
 
 func (e *Elastico) receiveViews(msg DecodeMsgType) {
-	logger.Info("file:- elastico.go, func:- receiveViews()")
+	// logger.Info("file:- elastico.go, func:- receiveViews()")
 	var decodeMsg ViewsMsg
 
 	err := json.Unmarshal(msg.Data, &decodeMsg)
@@ -3174,10 +3169,10 @@ func (e *Elastico) receiveViews(msg DecodeMsgType) {
 
 	if e.verifyPoW(identityobj) {
 
-		if _, ok := e.Views[identityobj.Port]; ok == false {
+		if _, ok := e.Views[identityobj.IP+identityobj.Port]; ok == false {
 
 			// union of committe members Views
-			e.Views[identityobj.Port] = true
+			e.Views[identityobj.IP+identityobj.Port] = true
 
 			commMembers := decodeMsg.CommitteeMembers
 			finalMembers := decodeMsg.FinalCommitteeMembers
@@ -3188,7 +3183,7 @@ func (e *Elastico) receiveViews(msg DecodeMsgType) {
 			if len(Txns) > 0 {
 
 				e.TxnBlock = e.unionTxns(e.TxnBlock, Txns)
-				logger.Infof("I am Primary %s", e.Port)
+				logger.Infof("I am Primary %s", e.IP)
 				e.Primary = true
 			}
 

@@ -120,7 +120,7 @@ func (ch *chain) MigrationStatus() migration.Status {
 }
 
 func marshalData(msg map[string]interface{}) []byte {
-	logger.Info("file:- consensus.go, func:- marshalData()")
+	// logger.Info("file:- consensus.go, func:- marshalData()")
 	body, err := json.Marshal(msg)
 	// fmt.Println("marshall data", body)
 	FailOnError(err, "error in marshal", true)
