@@ -194,7 +194,46 @@ func SetState(config EState, path string) {
 	err2 := ioutil.WriteFile(path, data, 0644)
 	FailOnError(err2, "fail to write in file", true)
 }
-func (ch *chain) runElastico(msg *Message) {
+
+func test(msg Transaction) {
+	body, err := json.Marshal(msg.Txn)
+	FailOnError(err, "error in marshalling the txn", true)
+
+	var res cb.Envelope
+	err = json.Unmarshal(body, &res)
+	FailOnError(err, "error in unmarshalling the txn", true)
+
+	if cmp.Equal(msg.Txn, res) {
+		logger.Info("two msgs are equal")
+	} else {
+
+		logger.Info("two msgs are NOT equal")
+	}
+}
+
+func declareDeliveryQueue(channel *amqp.Channel) {
+	queueName := "deliveryQueue"
+
+	_, err := channel.QueueDeclare(
+		queueName, //name of the queue
+		false,     // durable
+		false,     // delete when unused
+		false,     // exclusive
+		false,     // no-wait
+		nil,       // arguments
+	)
+
+	FailOnError(err, "Failed to declare a delivery queue", true)
+}
+
+func (ch *chain) runElastico(msg Transaction) []Transaction {
+
+	conn := GetConnection()
+	channel := GetChannel(conn)
+	defer conn.Close()
+	defer channel.Close()
+	declareDeliveryQueue(channel)
+	deliveryqueueName := "deliveryQueue"
 	path := "/conf.json"
 	config := EState{}
 
