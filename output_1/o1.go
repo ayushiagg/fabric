@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	n := 66
+	n := 50
 	for i := 0; i < n; i++ {
 
 		fmt.Println("- orderer" + strconv.Itoa(i) + ".example.com:7050")

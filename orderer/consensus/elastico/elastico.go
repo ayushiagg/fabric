@@ -1291,15 +1291,15 @@ func (t Transaction) Hexdigest() string {
 }
 
 // txnHexdigest - Hex digest of Txn List
-func txnHexdigest(txnList []*Message) string {
+func txnHexdigest(TxnList []Transaction) string {
 	/*
-		return hexdigest for a list of transactions
+		return Hexdigest for a list of transactions
 	*/
-	logger.Info("file:- elastico.go, func:- hexdigest of Txn list()")
+	logger.Info("file:- elastico.go, func:- Hexdigest of Txn list()")
 	// ToDo : Sort the Txns based on hash value
-	txnDigestList := make([]string, len(txnList))
-	for i := 0; i < len(txnList); i++ {
-		txnDigest := txnList[i].hexdigest()
+	txnDigestList := make([]string, len(TxnList))
+	for i := 0; i < len(TxnList); i++ {
+		txnDigest := TxnList[i].Hexdigest()
 		txnDigestList[i] = txnDigest
 	}
 	sort.Strings(txnDigestList)
@@ -1311,25 +1311,27 @@ func txnHexdigest(txnList []*Message) string {
 	return hashVal
 }
 
-//Sign :- sign the byte array
+//Sign :- Sign the byte array
 func (e *Elastico) Sign(digest []byte) string {
 	logger.Info("file:- elastico.go, func:- Sign()")
-	signed, err := rsa.SignPKCS1v15(rand.Reader, e.Key, crypto.SHA256, digest) // sign the digest
+	signed, err := rsa.SignPKCS1v15(rand.Reader, e.Key, crypto.SHA256, digest) // Sign the digest
 	FailOnError(err, "Error in Signing byte array", true)
 	signature := base64.StdEncoding.EncodeToString(signed) // encode to base64
 	return signature
 }
 
-func (e *Elastico) constructPrePrepare(epoch string) map[string]interface{} {
+// ConstructPrePrepare :-
+func (e *Elastico) ConstructPrePrepare(epoch string) map[string]interface{} {
 	/*
 		construct pre-prepare msg , done by Primary
 	*/
-	logger.Info("file:- elastico.go, func:- constructPrePrepare()")
+	// logger.Info("file:- elastico.go, func:- ConstructPrePrepare()")
 	txnBlockList := e.TxnBlock
+	logger.Infof("txn block size of construct prepare %s", strconv.Itoa(len(e.TxnBlock[0].Txn.Payload)))
 	// ToDo: make prePrepareContents Ordered Dict for signatures purpose
 	prePrepareContents := PrePrepareContents{Type: "pre-prepare", ViewID: e.ViewID, Seq: 1, Digest: txnHexdigest(txnBlockList)}
 
-	prePrepareContentsDigest := e.digestPrePrepareMsg(prePrepareContents)
+	prePrepareContentsDigest := e.DigestPrePrepareMsg(prePrepareContents)
 
 	data := map[string]interface{}{"Message": txnBlockList, "PrePrepareData": prePrepareContents, "Sign": e.Sign(prePrepareContentsDigest), "Identity": e.Identity}
 	prePrepareMsg := map[string]interface{}{"data": data, "type": "pre-prepare", "epoch": epoch}
@@ -1351,11 +1353,12 @@ type PrepareMsg struct {
 	Identity    IDENTITY
 }
 
-func (e *Elastico) constructPrepare(epoch string) []map[string]interface{} {
+// ConstructPrepare :-
+func (e *Elastico) ConstructPrepare(epoch string) []map[string]interface{} {
 	/*
 		construct prepare msg in the prepare phase
 	*/
-	logger.Info("file:- elastico.go, func:- constructPrepare()")
+	// logger.Info("file:- elastico.go, func:- ConstructPrepare()")
 	prepareMsgList := make([]map[string]interface{}, 0)
 	//  loop over all pre-prepare msgs
 	for socketID := range e.PrePrepareMsgLog {
@@ -1367,7 +1370,7 @@ func (e *Elastico) constructPrepare(epoch string) []map[string]interface{} {
 
 		//  make prepare_contents Ordered Dict for signatures purpose
 		prepareContents := PrepareContents{Type: "prepare", ViewID: e.ViewID, Seq: seqnum, Digest: digest}
-		PrepareContentsDigest := e.digestPrepareMsg(prepareContents)
+		PrepareContentsDigest := e.DigestPrepareMsg(prepareContents)
 		data := map[string]interface{}{"PrepareData": prepareContents, "Sign": e.Sign(PrepareContentsDigest), "Identity": e.Identity}
 		preparemsg := map[string]interface{}{"data": data, "type": "prepare", "epoch": epoch}
 		prepareMsgList = append(prepareMsgList, preparemsg)
@@ -1376,11 +1379,12 @@ func (e *Elastico) constructPrepare(epoch string) []map[string]interface{} {
 
 }
 
-func (e *Elastico) constructFinalPrepare(epoch string) []map[string]interface{} {
+// ConstructFinalPrepare :-
+func (e *Elastico) ConstructFinalPrepare(epoch string) []map[string]interface{} {
 	/*
 		construct prepare msg in the prepare phase
 	*/
-	logger.Info("file:- elastico.go, func:- constructFinalPrepare()")
+	logger.Info("file:- elastico.go, func:- ConstructFinalPrepare()")
 	FinalprepareMsgList := make([]map[string]interface{}, 0)
 	for socketID := range e.FinalPrePrepareMsgLog {
 
@@ -1391,7 +1395,7 @@ func (e *Elastico) constructFinalPrepare(epoch string) []map[string]interface{} 
 		//  make prepare_contents Ordered Dict for signatures purpose
 
 		prepareContents := PrepareContents{Type: "Finalprepare", ViewID: e.ViewID, Seq: seqnum, Digest: digest}
-		PrepareContentsDigest := e.digestPrepareMsg(prepareContents)
+		PrepareContentsDigest := e.DigestPrepareMsg(prepareContents)
 
 		data := map[string]interface{}{"PrepareData": prepareContents, "Sign": e.Sign(PrepareContentsDigest), "Identity": e.Identity}
 
@@ -1416,11 +1420,11 @@ type CommitMsg struct {
 	Identity   IDENTITY
 }
 
-func (e *Elastico) constructCommit(epoch string) []map[string]interface{} {
+// ConstructCommit :-
+func (e *Elastico) ConstructCommit(epoch string) []map[string]interface{} {
 	/*
 		Construct commit msgs
 	*/
-	logger.Info("file:- elastico.go, func:- constructCommit()")
 	commitMsges := make([]map[string]interface{}, 0)
 
 	for ViewID := range e.PreparedData {
@@ -1430,7 +1434,7 @@ func (e *Elastico) constructCommit(epoch string) []map[string]interface{} {
 			digest := txnHexdigest(e.PreparedData[ViewID][seqnum])
 			// make commit_contents Ordered Dict for signatures purpose
 			commitContents := CommitContents{Type: "commit", ViewID: ViewID, Seq: seqnum, Digest: digest}
-			commitContentsDigest := e.digestCommitMsg(commitContents)
+			commitContentsDigest := e.DigestCommitMsg(commitContents)
 			data := map[string]interface{}{"Sign": e.Sign(commitContentsDigest), "CommitData": commitContents, "Identity": e.Identity}
 			commitMsg := map[string]interface{}{"data": data, "type": "commit", "epoch": epoch}
 			commitMsges = append(commitMsges, commitMsg)
@@ -1441,11 +1445,12 @@ func (e *Elastico) constructCommit(epoch string) []map[string]interface{} {
 	return commitMsges
 }
 
-func (e *Elastico) constructFinalCommit(epoch string) []map[string]interface{} {
+// ConstructFinalCommit :-
+func (e *Elastico) ConstructFinalCommit(epoch string) []map[string]interface{} {
 	/*
 		Construct commit msgs
 	*/
-	logger.Info("file:- elastico.go, func:- constructFinalCommit()")
+	logger.Info("file:- elastico.go, func:- ConstructFinalCommit()")
 	commitMsges := make([]map[string]interface{}, 0)
 
 	for ViewID := range e.FinalpreparedData {
@@ -1455,7 +1460,7 @@ func (e *Elastico) constructFinalCommit(epoch string) []map[string]interface{} {
 			digest := txnHexdigest(e.FinalpreparedData[ViewID][seqnum])
 			//  make commit_contents Ordered Dict for signatures purpose
 			commitContents := CommitContents{Type: "Finalcommit", ViewID: ViewID, Seq: seqnum, Digest: digest}
-			commitContentsDigest := e.digestCommitMsg(commitContents)
+			commitContentsDigest := e.DigestCommitMsg(commitContents)
 
 			data := map[string]interface{}{"Sign": e.Sign(commitContentsDigest), "CommitData": commitContents, "Identity": e.Identity}
 			commitMsg := map[string]interface{}{"data": data, "type": "Finalcommit", "epoch": epoch}
@@ -1467,8 +1472,8 @@ func (e *Elastico) constructFinalCommit(epoch string) []map[string]interface{} {
 	return commitMsges
 }
 
-func (e *Elastico) digestPrePrepareMsg(msg PrePrepareContents) []byte {
-	logger.Info("file:- elastico.go, func:- digestPrePrepareMsg()")
+// DigestPrePrepareMsg :-
+func (e *Elastico) DigestPrePrepareMsg(msg PrePrepareContents) []byte {
 	digest := sha256.New()
 	digest.Write([]byte(msg.Type))
 	digest.Write([]byte(strconv.Itoa(msg.ViewID)))
@@ -1477,8 +1482,8 @@ func (e *Elastico) digestPrePrepareMsg(msg PrePrepareContents) []byte {
 	return digest.Sum(nil)
 }
 
-func (e *Elastico) digestPrepareMsg(msg PrepareContents) []byte {
-	logger.Info("file:- elastico.go, func:- digestPrepareMsg()")
+// DigestPrepareMsg :-
+func (e *Elastico) DigestPrepareMsg(msg PrepareContents) []byte {
 	digest := sha256.New()
 	digest.Write([]byte(msg.Type))
 	digest.Write([]byte(strconv.Itoa(msg.ViewID)))
@@ -1487,8 +1492,8 @@ func (e *Elastico) digestPrepareMsg(msg PrepareContents) []byte {
 	return digest.Sum(nil)
 }
 
-func (e *Elastico) digestCommitMsg(msg CommitContents) []byte {
-	logger.Info("file:- elastico.go, func:- digestCommitMsg()")
+// DigestCommitMsg :-
+func (e *Elastico) DigestCommitMsg(msg CommitContents) []byte {
 	digest := sha256.New()
 	digest.Write([]byte(msg.Type))
 	digest.Write([]byte(strconv.Itoa(msg.ViewID)))
@@ -1497,16 +1502,16 @@ func (e *Elastico) digestCommitMsg(msg CommitContents) []byte {
 	return digest.Sum(nil)
 }
 
-func (e *Elastico) constructFinalPrePrepare(epoch string) map[string]interface{} {
+// ConstructFinalPrePrepare :-
+func (e *Elastico) ConstructFinalPrePrepare(epoch string) map[string]interface{} {
 	/*
 		construct pre-prepare msg , done by Primary final
 	*/
-	logger.Info("file:- elastico.go, func:- constructFinalPrePrepare()")
 	txnBlockList := e.MergedBlock
 	// ToDo :- make pre_prepare_contents Ordered Dict for signatures purpose
 	prePrepareContents := PrePrepareContents{Type: "Finalpre-prepare", ViewID: e.ViewID, Seq: 1, Digest: txnHexdigest(txnBlockList)}
 
-	prePrepareContentsDigest := e.digestPrePrepareMsg(prePrepareContents)
+	prePrepareContentsDigest := e.DigestPrePrepareMsg(prePrepareContents)
 
 	data := map[string]interface{}{"Message": txnBlockList, "PrePrepareData": prePrepareContents, "Sign": e.Sign(prePrepareContentsDigest), "Identity": e.Identity}
 	prePrepareMsg := map[string]interface{}{"data": data, "type": "Finalpre-prepare", "epoch": epoch}
@@ -1514,67 +1519,69 @@ func (e *Elastico) constructFinalPrePrepare(epoch string) map[string]interface{}
 
 }
 
-func (e *Elastico) sendPrePrepare(prePrepareMsg map[string]interface{}) {
+// SendPrePrepare :-
+func (e *Elastico) SendPrePrepare(prePrepareMsg map[string]interface{}) {
 	/*
 		Send pre-prepare msgs to all committee members
 	*/
-	logger.Info("file:- elastico.go, func:- sendPrePrepare()")
 	for _, nodeID := range e.CommitteeMembers {
 
-		// dont send pre-prepare msg to self
-		if e.Identity.isEqual(&nodeID) == false {
+		// dont Send pre-prepare msg to self
+		if e.Identity.IsEqual(&nodeID) == false {
 
-			nodeID.send(prePrepareMsg)
+			nodeID.Send(prePrepareMsg)
 		}
 	}
 }
 
-func (e *Elastico) sendCommit(commitMsgList []map[string]interface{}) {
+// SendCommit :-
+func (e *Elastico) SendCommit(commitMsgList []map[string]interface{}) {
 	/*
-		send the commit msgs to the committee members
+		Send the commit msgs to the committee members
 	*/
-	logger.Info("file:- elastico.go, func:- sendCommit()")
 	for _, commitMsg := range commitMsgList {
 
 		for _, nodeID := range e.CommitteeMembers {
 
-			nodeID.send(commitMsg)
+			nodeID.Send(commitMsg)
 		}
 	}
 }
 
-func (e *Elastico) sendPrepare(prepareMsgList []map[string]interface{}) {
+// SendPrepare :-
+func (e *Elastico) SendPrepare(prepareMsgList []map[string]interface{}) {
 	/*
-		send the prepare msgs to the committee members
+		Send the prepare msgs to the committee members
 	*/
-	logger.Info("file:- elastico.go, func:- sendPrepare()")
-	// send prepare msg list to committee members
+	// logger.Info("file:- elastico.go, func:- SendPrepare()")
+	// Send prepare msg list to committee members
 	for _, preparemsg := range prepareMsgList {
 
 		for _, nodeID := range e.CommitteeMembers {
 
-			nodeID.send(preparemsg)
+			nodeID.Send(preparemsg)
 		}
 	}
 }
 
 // DecodeMsgType :-
 type DecodeMsgType struct {
-	Type  string
-	Data  json.RawMessage
-	Epoch string
+	Type    string
+	Data    json.RawMessage
+	Epoch   string
+	Orderer string
 }
 
 // NewEpochMsg   :-
 type NewEpochMsg struct {
-	Data *Message
+	Data Transaction
 }
 
-func (e *Elastico) receiveTxns(epochTxn NewEpochMsg) {
+// ReceiveTxns :-
+func (e *Elastico) ReceiveTxns(epochTxn Transaction) {
 	/*
-		directory node will receive transactions from client
+		directory node will Receive transactions from client
 	*/
-	logger.Info("file:- elastico.go, func:- receiveTxns()")
 	// Receive txns from client for an epoch
 	// var k int64
 	numOfCommittees := int64(math.Pow(2, float64(s)))
@@ -1583,16 +1590,17 @@ func (e *Elastico) receiveTxns(epochTxn NewEpochMsg) {
 	// loop in sorted order of committee ids
 	var iden int64
 	for iden = 0; iden < numOfCommittees; iden++ {
-		e.Txn[iden] = make([]*Message, 1)
-		e.Txn[iden][0] = epochTxn.Data
+		e.Txn[iden] = make([]Transaction, 1)
+		e.Txn[iden][0] = epochTxn
 	}
 }
 
-func (e *Elastico) isFinalMember() bool {
+// IsFinalMember :-
+func (e *Elastico) IsFinalMember() bool {
 	/*
 		tell whether this node is a final committee member or not
 	*/
-	// logger.Info("file:- elastico.go, func:- isFinalMember()")
+	// logger.Info("file:- elastico.go, func:- IsFinalMember()")
 	return e.IsFinal
 }
 
@@ -1606,41 +1614,41 @@ func (e *Elastico) SendtoFinal(epoch string) {
 
 			msgList := committedDataViewID[seqnum]
 
-			e.TxnBlock = e.unionTxns(e.TxnBlock, msgList)
+			e.TxnBlock = e.UnionTxns(e.TxnBlock, msgList)
 		}
 	}
-	// logger.Warn("size of fin committee members", len(e.FinalCommitteeMembers))
-	// logger.Warn("size of txns in Txn block", len(e.TxnBlock))
+	logger.Infof("size of fin committee members %s", strconv.Itoa(len(e.FinalCommitteeMembers)))
+	logger.Infof("size of txns in Txn block in Send t final func %s", strconv.Itoa(len(e.TxnBlock)))
 	for _, finalID := range e.FinalCommitteeMembers {
 
-		//  here TxnBlock is a set, since sets are unordered hence can't sign them. So convert set to list for signing
+		//  here TxnBlock is a set, since sets are unordered hence can't Sign them. So convert set to list for signing
 		TxnBlock := e.TxnBlock
-		data := map[string]interface{}{"Txnblock": TxnBlock, "Sign": e.signTxnList(TxnBlock), "Identity": e.Identity}
+		data := map[string]interface{}{"Txnblock": TxnBlock, "Sign": e.SignTxnList(TxnBlock), "Identity": e.Identity}
 		msg := map[string]interface{}{"data": data, "type": "intraCommitteeBlock", "epoch": epoch}
-		finalID.send(msg)
+		finalID.Send(msg)
 	}
 	e.State = ElasticoStates["Intra Consensus Result Sent to Final"]
 }
 
-func (e *Elastico) signTxnList(TxnBlock []*Message) string {
-	logger.Info("file:- elastico.go, func:- signTxnList()")
+// SignTxnList :-
+func (e *Elastico) SignTxnList(TxnBlock []Transaction) string {
 	// Sign the array of Transactions
 	digest := sha256.New()
 	for i := 0; i < len(TxnBlock); i++ {
-		txnDigest := TxnBlock[i].hexdigest() // Get the transaction digest
+		txnDigest := TxnBlock[i].Hexdigest() // Get the transaction digest
 		digest.Write([]byte(txnDigest))
 	}
-	signed, err := rsa.SignPKCS1v15(rand.Reader, e.Key, crypto.SHA256, digest.Sum(nil)) // sign the digest of Txn List
+	signed, err := rsa.SignPKCS1v15(rand.Reader, e.Key, crypto.SHA256, digest.Sum(nil)) // Sign the digest of Txn List
 	FailOnError(err, "Error in Signing Txn List", true)
 	signature := base64.StdEncoding.EncodeToString(signed) // encode to base64
 	return signature
 }
 
-func (e *Elastico) checkCountForConsensusData() {
+// CheckCountForConsensusData :-
+func (e *Elastico) CheckCountForConsensusData() {
 	/*
 		check the sufficient count for consensus data
 	*/
-	logger.Info("file:- elastico.go, func:- checkCountForConsensusData()")
 	Flag := false
 	var commID int64
 	for commID = 0; commID < int64(math.Pow(2, float64(s))); commID++ {
@@ -1654,7 +1662,7 @@ func (e *Elastico) checkCountForConsensusData() {
 
 			for txnBlockDigest := range e.CommitteeConsensusData[commID] {
 
-				if len(e.CommitteeConsensusData[commID][txnBlockDigest]) <= c/2 {
+				if len(e.CommitteeConsensusData[commID][txnBlockDigest]) <= C/2 {
 					Flag = true
 					logger.Warn("bad committee id for intra committee block")
 					break
@@ -1665,19 +1673,20 @@ func (e *Elastico) checkCountForConsensusData() {
 	if Flag == false {
 
 		// when sufficient number of blocks from each committee are received
-		logger.Info("good going for verify and merge")
-		e.verifyAndMergeConsensusData()
+		logger.Infof("good going for verify and merge by IP %s", e.IP)
+		e.VerifyAndMergeConsensusData()
 	}
 
 }
 
-func (e *Elastico) verifyAndMergeConsensusData() {
+// VerifyAndMergeConsensusData :-
+func (e *Elastico) VerifyAndMergeConsensusData() {
 	/*
 		each final committee member validates that the values received from the committees are signed by
-		atleast c/2 + 1 members of the proper committee and takes the ordered set union of all the inputs
+		atleast C/2 + 1 members of the proper committee and takes the ordered set union of all the inputs
 
 	*/
-	logger.Info("file:- elastico.go, func:- verifyAndMergeConsensusData()")
+	logger.Info("file:- elastico.go, func:- VerifyAndMergeConsensusData()")
 	var committeeid int64
 	for committeeid = 0; committeeid < int64(math.Pow(2, float64(s))); committeeid++ {
 
@@ -1685,20 +1694,21 @@ func (e *Elastico) verifyAndMergeConsensusData() {
 
 			for txnBlockDigest := range e.CommitteeConsensusData[committeeid] {
 
-				if len(e.CommitteeConsensusData[committeeid][txnBlockDigest]) >= c/2+1 {
+				if len(e.CommitteeConsensusData[committeeid][txnBlockDigest]) >= C/2+1 {
 
 					// get the txns from the digest
 					TxnBlock := e.CommitteeConsensusDataTxns[committeeid][txnBlockDigest]
 					if len(TxnBlock) > 0 {
 
-						e.MergedBlock = e.unionTxns(e.MergedBlock, TxnBlock)
+						e.MergedBlock = e.UnionTxns(e.MergedBlock, TxnBlock)
 					}
 				}
 			}
 		}
 	}
 	if len(e.MergedBlock) > 0 {
-		fmt.Println("final committee port - ", e.Port, "has merged data")
+		logger.Infof("merged block size greater than 0 for ip %s", e.IP)
+		// fmt.Println("final committee port - ", e.Port, "has merged data")
 		e.State = ElasticoStates["Merged Consensus Data"]
 	}
 }
@@ -1706,43 +1716,43 @@ func (e *Elastico) verifyAndMergeConsensusData() {
 // RunInteractiveConsistency :-
 func (e *Elastico) RunInteractiveConsistency(epoch string) {
 	/*
-		send the H(Ri) to the final committe members.This is done by a final committee member
+		Send the H(Ri) to the final committe members.This is done by a final committee member
 	*/
 	logger.Info("file:- elastico.go, func:- RunInteractiveConsistency()")
-	if e.isFinalMember() == true {
+	if e.IsFinalMember() == true {
 		for _, nodeID := range e.CommitteeMembers {
 
-			logger.Warnf("sent the Int. Commitments  %s to %s", e.Port, nodeID.Port)
-			Commitments := mapToList(e.Commitments)
+			logger.Warnf("sent the Int. Commitments  %s to %s", e.IP, nodeID.IP)
+			Commitments := MapToList(e.Commitments)
 			data := map[string]interface{}{"Identity": e.Identity, "Commitments": Commitments}
 			msg := map[string]interface{}{"data": data, "type": "InteractiveConsistency", "epoch": epoch}
-			nodeID.send(msg)
+			nodeID.Send(msg)
 		}
 		e.State = ElasticoStates["InteractiveConsistencyStarted"]
 	}
 }
 
 //Execute :-
-func (e *Elastico) Execute(exchangeName string, epoch string, Txn NewEpochMsg) string {
+func (e *Elastico) Execute(exchangeName string, epoch string, Txn Transaction) string {
 	/*
 		executing the functions based on the running state
 	*/
 	config := EState{}
 	// initial state of elastico node
 	if e.State == ElasticoStates["NONE"] {
-		e.executePoW()
+		e.ExecutePoW()
 	} else if e.State == ElasticoStates["PoW Computed"] {
 
 		// form Identity, when PoW computed
-		e.formIdentity()
+		e.FormIdentity()
 	} else if e.State == ElasticoStates["Formed Identity"] {
 
 		// form committee, when formed Identity
-		e.formCommittee(exchangeName, epoch)
+		e.FormCommittee(exchangeName, epoch)
 	} else if e.IsDirectory && e.State == ElasticoStates["RunAsDirectory"] {
 
 		logger.Infof("The directory member :- %s ", e.IP)
-		e.receiveTxns(Txn)
+		e.ReceiveTxns(Txn)
 		// directory member has received the txns for all committees
 		e.State = ElasticoStates["RunAsDirectory after-TxnReceived"]
 	} else if e.State == ElasticoStates["Receiving Committee Members"] {
@@ -1757,73 +1767,73 @@ func (e *Elastico) Execute(exchangeName string, epoch string, Txn NewEpochMsg) s
 		// initial state for the PBFT
 		e.State = ElasticoStates["PBFT_NONE"]
 		// run PBFT for intra-committee consensus
-		e.runPBFT(epoch)
+		e.RunPBFT(epoch)
 
 	} else if e.State == ElasticoStates["PBFT_NONE"] || e.State == ElasticoStates["PBFT_PRE_PREPARE"] || e.State == ElasticoStates["PBFT_PREPARE_SENT"] || e.State == ElasticoStates["PBFT_PREPARED"] || e.State == ElasticoStates["PBFT_COMMIT_SENT"] || e.State == ElasticoStates["PBFT_PRE_PREPARE_SENT"] {
 
 		// run pbft for intra consensus
-		e.runPBFT(epoch)
+		e.RunPBFT(epoch)
 	} else if e.State == ElasticoStates["PBFT_COMMITTED"] {
 
-		// send pbft consensus blocks to final committee members
-		logger.Infof("pbft finished by members %s", e.Port)
+		// Send pbft consensus blocks to final committee members
+		logger.Infof("pbft finished by members %s", e.IP)
 		e.SendtoFinal(epoch)
 
-	} else if e.isFinalMember() && e.State == ElasticoStates["Intra Consensus Result Sent to Final"] {
+	} else if e.IsFinalMember() && e.State == ElasticoStates["Intra Consensus Result Sent to Final"] {
 
 		// final committee node will collect blocks and merge them
-		e.checkCountForConsensusData()
+		e.CheckCountForConsensusData()
 
-	} else if e.isFinalMember() && e.State == ElasticoStates["Merged Consensus Data"] {
+	} else if e.IsFinalMember() && e.State == ElasticoStates["Merged Consensus Data"] {
 
 		// final committee member runs final pbft
 		e.State = ElasticoStates["FinalPBFT_NONE"]
-		fmt.Println("start pbft by final member with port--", e.Port)
-		e.runFinalPBFT(epoch)
+		fmt.Println("start pbft by final member with port--", e.IP)
+		e.RunFinalPBFT(epoch)
 
 	} else if e.State == ElasticoStates["FinalPBFT_NONE"] || e.State == ElasticoStates["FinalPBFT_PRE_PREPARE"] || e.State == ElasticoStates["FinalPBFT_PREPARE_SENT"] || e.State == ElasticoStates["FinalPBFT_PREPARED"] || e.State == ElasticoStates["FinalPBFT_COMMIT_SENT"] || e.State == ElasticoStates["FinalPBFT_PRE_PREPARE_SENT"] {
 
-		e.runFinalPBFT(epoch)
+		e.RunFinalPBFT(epoch)
 
-	} else if e.isFinalMember() && e.State == ElasticoStates["FinalPBFT_COMMITTED"] {
+	} else if e.IsFinalMember() && e.State == ElasticoStates["FinalPBFT_COMMITTED"] {
 
-		// send the commitment to other final committee members
-		e.sendCommitment(epoch)
-		logger.Warn("pbft finished by final committee", e.Port)
+		// Send the commitment to other final committee members
+		e.SendCommitment(epoch)
+		logger.Infof("pbft finished by final committee by %s", e.IP)
 
-	} else if e.isFinalMember() && e.State == ElasticoStates["CommitmentSentToFinal"] {
+	} else if e.IsFinalMember() && e.State == ElasticoStates["CommitmentSentToFinal"] {
 
 		// broadcast final Txn block to ntw
-		if len(e.Commitments) >= c/2+1 {
-			logger.Info("Commitments received sucess")
+		if len(e.Commitments) >= C/2+1 {
+			logger.Infof("Commitments received sucess by %s", e.IP)
 			e.RunInteractiveConsistency(epoch)
 		}
-	} else if e.isFinalMember() && e.State == ElasticoStates["InteractiveConsistencyStarted"] {
-		if len(e.EpochcommitmentSet) >= c/2+1 {
+	} else if e.IsFinalMember() && e.State == ElasticoStates["InteractiveConsistencyStarted"] {
+		if len(e.EpochcommitmentSet) >= C/2+1 {
 			e.State = ElasticoStates["InteractiveConsistencyAchieved"]
 		} else {
-			logger.Warn("Int. Consistency short : ", len(e.EpochcommitmentSet), " port :", e.Port)
+			logger.Warn("Int. Consistency short : ", len(e.EpochcommitmentSet), " port :", e.IP)
 		}
-	} else if e.isFinalMember() && e.State == ElasticoStates["InteractiveConsistencyAchieved"] {
+	} else if e.IsFinalMember() && e.State == ElasticoStates["InteractiveConsistencyAchieved"] {
 
 		// broadcast final Txn block to ntw
 		logger.Info("Consistency received sucess")
 		e.BroadcastFinalTxn(epoch, exchangeName)
 	} else if e.State == ElasticoStates["FinalBlockReceived"] {
 
-		e.checkCountForFinalData()
+		e.CheckCountForFinalData()
 
-	} else if e.isFinalMember() && e.State == ElasticoStates["FinalBlockSentToClient"] {
+	} else if e.IsFinalMember() && e.State == ElasticoStates["FinalBlockSentToClient"] {
 
-		// broadcast Ri is done when received commitment has atleast c/2  + 1 signatures
-		if len(e.NewRcommitmentSet) >= c/2+1 {
+		// broadcast Ri is done when received commitment has atleast C/2  + 1 signatures
+		if len(e.NewRcommitmentSet) >= C/2+1 {
 			logger.Info("broadacst R by port--", e.Port)
 			e.BroadcastR(epoch, exchangeName)
 		} else {
 			logger.Info("insufficient Rs")
 		}
 	} else if e.State == ElasticoStates["BroadcastedR"] {
-		if len(e.NewsetOfRs) >= c/2+1 {
+		if len(e.NewsetOfRs) >= C/2+1 {
 			logger.Info("received the set of Rs")
 			e.State = ElasticoStates["ReceivedR"]
 		} else {
@@ -1832,18 +1842,16 @@ func (e *Elastico) Execute(exchangeName string, epoch string, Txn NewEpochMsg) s
 	} else if e.State == ElasticoStates["ReceivedR"] {
 
 		e.State = ElasticoStates["Reset"]
-		config.State = strconv.Itoa(ElasticoStates["Reset"])
-		SetState(config, "/conf.json")
-		// Now, the node can be reset
-		return "reset"
+		// Now, the node can be Reset
+		return "Reset"
 	}
 	config.State = strconv.Itoa(e.State)
 	SetState(config, "/conf.json")
 	return ""
 }
 
-func (e *Elastico) digestCommitments(receivedCommitments []string) []byte {
-	logger.Info("file:- elastico.go, func:- digestCommitments()")
+// DigestCommitments :-
+func (e *Elastico) DigestCommitments(receivedCommitments []string) []byte {
 	digest := sha256.New()
 	for _, commitment := range receivedCommitments {
 		digest.Write([]byte(commitment))
@@ -1851,8 +1859,9 @@ func (e *Elastico) digestCommitments(receivedCommitments []string) []byte {
 	return digest.Sum(nil)
 }
 
-func mapToList(m map[string]bool) []string {
-	logger.Info("file:- elastico.go, func:- mapToList()")
+// MapToList :-
+func MapToList(m map[string]bool) []string {
+	logger.Info("file:- elastico.go, func:- MapToList()")
 	commitmentList := make([]string, len(m))
 	i := 0
 	for commitment := range m {
@@ -1876,10 +1885,9 @@ func (e *Elastico) BroadcastFinalTxn(epoch string, exchangeName string) bool {
 	// 	logger.Info("Consistency false")
 	// 	return false
 	// }
-	logger.Info("file:- elastico.go, func:- BroadcastFinalTxn()")
-	commitmentList := mapToList(e.EpochcommitmentSet)
-	commitmentDigest := e.digestCommitments(commitmentList)
-	data := map[string]interface{}{"CommitSet": commitmentList, "Signature": e.Sign(commitmentDigest), "Identity": e.Identity, "FinalBlock": e.FinalBlock.Txns, "FinalBlockSign": e.signTxnList(e.FinalBlock.Txns)}
+	commitmentList := MapToList(e.EpochcommitmentSet)
+	commitmentDigest := e.DigestCommitments(commitmentList)
+	data := map[string]interface{}{"CommitSet": commitmentList, "Signature": e.Sign(commitmentDigest), "Identity": e.Identity, "FinalBlock": e.FinalBlock.Txns, "FinalBlockSign": e.SignTxnList(e.FinalBlock.Txns)}
 	// logger.Warn("finalblock-", e.FinalBlock.Txns)
 	// final Block sent to ntw
 	e.FinalBlock.Sent = true
@@ -1893,24 +1901,24 @@ func (e *Elastico) BroadcastFinalTxn(epoch string, exchangeName string) bool {
 	return true
 }
 
-func (e *Elastico) generateRandomstrings() {
+// GenerateRandomstrings :-
+func (e *Elastico) GenerateRandomstrings() {
 	/*
-		Generate r-bit random strings
+		Generate R-bit random strings
 	*/
-	logger.Info("file:- elastico.go, func:- generateRandomstrings()")
-	if e.isFinalMember() {
-		Ri := RandomGen(r)
-		e.Ri = fmt.Sprintf("%0"+strconv.FormatInt(r, 10)+"b\n", Ri)
+	if e.IsFinalMember() {
+		Ri := RandomGen(R)
+		e.Ri = fmt.Sprintf("%0"+strconv.FormatInt(R, 10)+"b\n", Ri)
 	}
 }
 
-func (e *Elastico) getCommitment() string {
+// GetCommitment :-
+func (e *Elastico) GetCommitment() string {
 	/*
 		generate commitment for random string Ri. This is done by a final committee member
 	*/
-	logger.Info("file:- elastico.go, func:- getCommitment()")
 	if e.Ri == "" {
-		e.generateRandomstrings()
+		e.GenerateRandomstrings()
 	}
 	commitment := sha256.New()
 	commitment.Write([]byte(e.Ri))
@@ -1920,35 +1928,46 @@ func (e *Elastico) getCommitment() string {
 	return hashVal
 }
 
-func (e *Elastico) sendCommitment(epoch string) {
+// SendCommitment :-
+func (e *Elastico) SendCommitment(epoch string) {
 	/*
-		send the H(Ri) to the final committe members.This is done by a final committee member
+		Send the H(Ri) to the final committe members.This is done by a final committee member
 	*/
-	logger.Info("file:- elastico.go, func:- sendCommitment()")
-	if e.isFinalMember() == true {
+	logger.Infof("file:- elastico.go, func:- SendCommitment() by %s", e.IP)
+	if e.IsFinalMember() == true {
 
-		HashRi := e.getCommitment()
+		HashRi := e.GetCommitment()
 		for _, nodeID := range e.CommitteeMembers {
 
 			// logger.Warn("sent the commitment by ", e.Port, " to ", nodeID.Port)
 			data := map[string]interface{}{"Identity": e.Identity, "HashRi": HashRi}
 			msg := map[string]interface{}{"data": data, "type": "hash", "epoch": epoch}
-			nodeID.send(msg)
+			nodeID.Send(msg)
 		}
 		e.State = ElasticoStates["CommitmentSentToFinal"]
 	}
 }
 
-func (e *Elastico) checkCountForFinalData() {
+// GetResponseSize :-
+func (e *Elastico) GetResponseSize() int {
+	return len(e.Response)
+}
+
+// GetResponse :-
+func (e *Elastico) GetResponse() []FinalCommittedBlock {
+	return e.Response
+}
+
+// CheckCountForFinalData :-
+func (e *Elastico) CheckCountForFinalData() {
 	/*
 		check the sufficient counts for final data
 	*/
 	//  collect final blocks sent by final committee and add the blocks to the Response
 
-	logger.Info("file:- elastico.go, func:- checkCountForFinalData()")
 	for txnBlockDigest := range e.FinalBlockbyFinalCommittee {
 
-		if len(e.FinalBlockbyFinalCommittee[txnBlockDigest]) >= c/2+1 {
+		if len(e.FinalBlockbyFinalCommittee[txnBlockDigest]) >= C/2+1 {
 
 			TxnList := e.FinalBlockbyFinalCommitteeTxns[txnBlockDigest]
 			//  create the final committed block that contatins the txnlist and set of signatures and identities to that Txn list
@@ -1965,7 +1984,7 @@ func (e *Elastico) checkCountForFinalData() {
 
 	if len(e.Response) > 0 {
 
-		logger.Warnf("final block sent the block to client by %s", e.Port)
+		logger.Warnf("final block sent the block to client by %s", e.IP)
 		e.State = ElasticoStates["FinalBlockSentToClient"]
 	}
 }
@@ -1973,7 +1992,7 @@ func (e *Elastico) checkCountForFinalData() {
 // BroadcastR :- broadcast Ri to all the network, final member will do this
 func (e *Elastico) BroadcastR(epoch string, exchangeName string) {
 	logger.Info("file:- elastico.go, func:- BroadcastR()")
-	if e.isFinalMember() {
+	if e.IsFinalMember() {
 		// logger.Info("Broadcast Ri , -", e.Ri, " by ", e.Port)
 		data := map[string]interface{}{"Ri": e.Ri, "Identity": e.Identity}
 
@@ -1989,7 +2008,7 @@ func (e *Elastico) BroadcastR(epoch string, exchangeName string) {
 }
 
 // Consume :-
-func (e *Elastico) Consume(channel *amqp.Channel, queueName string, Txn NewEpochMsg, epoch string) {
+func (e *Elastico) Consume(channel *amqp.Channel, queueName string, Txn Transaction, epoch string) {
 	/*
 		consume the msgs for this node
 	*/
@@ -2011,8 +2030,8 @@ func (e *Elastico) Consume(channel *amqp.Channel, queueName string, Txn NewEpoch
 				FailOnError(err, "error in unmarshall", true)
 
 				if decodedmsg.Epoch == epoch {
-					// consume the msg by taking the action in receive
-					e.receive(decodedmsg, epoch)
+					// consume the msg by taking the action in Receive
+					e.Receive(decodedmsg, epoch)
 				} //else if decodedmsg.Epoch > epoch {
 				// 	requeueMsgs = append(requeueMsgs, msg.Body)
 				// 	logger.Warn("Need to requeue msgs! type - ", decodedmsg.Type, " epoch - ", decodedmsg.Epoch, " present epoch : ", epoch)
@@ -2032,7 +2051,8 @@ func (i *IDENTITY) IdentityInit() {
 	i.PoW = PoWmsg{}
 }
 
-func (i *IDENTITY) isEqual(identityobj *IDENTITY) bool {
+// IsEqual :-
+func (i *IDENTITY) IsEqual(Identityobj *IDENTITY) bool {
 	/*
 		checking two objects of Identity class are equal or not
 
@@ -2047,16 +2067,16 @@ func (i *IDENTITY) isEqual(identityobj *IDENTITY) bool {
 	// 	setOfRsInI[i] = listOfRsInI[i].(string)
 	// }
 
-	// listOfRsIniobj := identityobj.PoW["SetOfRs"].([]interface{})
+	// listOfRsIniobj := Identityobj.PoW["SetOfRs"].([]interface{})
 	// setOfRsIniobj := make([]string, len(listOfRsIniobj))
 	// for i := range listOfRsIniobj {
 	// 	setOfRsIniobj[i] = listOfRsIniobj[i].(string)
 	// }
-	// logger.Info("file:- elastico.go, func:- isEqual of identity()")
-	if i.PK.N.Cmp(identityobj.PK.N) != 0 {
+	// logger.Info("file:- elastico.go, func:- IsEqual of identity()")
+	if i.PK.N.Cmp(Identityobj.PK.N) != 0 {
 		return false
 	}
-	return i.IP == identityobj.IP && i.PK.E == identityobj.PK.E && i.CommitteeID == identityobj.CommitteeID && i.PoW.Hash == identityobj.PoW.Hash && i.PoW.Nonce == identityobj.PoW.Nonce && i.EpochRandomness == identityobj.EpochRandomness && i.Port == identityobj.Port
+	return i.IP == Identityobj.IP && i.PK.E == Identityobj.PK.E && i.CommitteeID == Identityobj.CommitteeID && i.PoW.Hash == Identityobj.PoW.Hash && i.PoW.Nonce == Identityobj.PoW.Nonce && i.EpochRandomness == Identityobj.EpochRandomness && i.Port == Identityobj.Port
 }
 
 // Dmsg :- structure for directory msg
@@ -2064,28 +2084,29 @@ type Dmsg struct {
 	Identity IDENTITY
 }
 
-func (e *Elastico) receiveDirectoryMember(msg DecodeMsgType) {
-	logger.Infof("file:- elastico.go, func:- receiveDirectoryMember() by %s", e.IP)
+// ReceiveDirectoryMember :-
+func (e *Elastico) ReceiveDirectoryMember(msg DecodeMsgType) {
+	logger.Infof("file:- elastico.go, func:- ReceiveDirectoryMember() by %s", e.IP)
 	var decodeMsg Dmsg
 
 	err := json.Unmarshal(msg.Data, &decodeMsg)
 	FailOnError(err, "fail to decode directory member msg", true)
 
-	identityobj := decodeMsg.Identity
+	Identityobj := decodeMsg.Identity
 	// verify the PoW of the sender
-	if e.verifyPoW(identityobj) {
-		if len(e.CurDirectory) < c {
-			// check whether identityobj is already present or not
+	if e.VerifyPoW(Identityobj) {
+		if len(e.CurDirectory) < C {
+			// check whether Identityobj is already present or not
 			Flag := true
 			for _, obj := range e.CurDirectory {
-				if identityobj.isEqual(&obj) {
+				if Identityobj.IsEqual(&obj) {
 					Flag = false
 					break
 				}
 			}
 			if Flag {
 				// append the object if not already present
-				e.CurDirectory = append(e.CurDirectory, identityobj)
+				e.CurDirectory = append(e.CurDirectory, Identityobj)
 			}
 		}
 	} else {
@@ -2099,36 +2120,37 @@ type NewNodeMsg struct {
 	Identity IDENTITY
 }
 
-func (e *Elastico) receiveNewNode(msg DecodeMsgType, epoch string) {
+// ReceiveNewNode :-
+func (e *Elastico) ReceiveNewNode(msg DecodeMsgType, epoch string) {
 	var decodeMsg NewNodeMsg
 
 	err := json.Unmarshal(msg.Data, &decodeMsg)
 	FailOnError(err, "decode error in new node msg", true)
-	// new node is added to the corresponding committee list if committee list has less than c members
-	identityobj := decodeMsg.Identity
+	// new node is added to the corresponding committee list if committee list has less than C members
+	Identityobj := decodeMsg.Identity
 	// verify the PoW
-	if e.verifyPoW(identityobj) {
-		_, ok := e.CommitteeList[identityobj.CommitteeID]
+	if e.VerifyPoW(Identityobj) {
+		_, ok := e.CommitteeList[Identityobj.CommitteeID]
 		if ok == false {
 
 			// Add the Identity in committee
-			e.CommitteeList[identityobj.CommitteeID] = make([]IDENTITY, 0)
-			e.CommitteeList[identityobj.CommitteeID] = append(e.CommitteeList[identityobj.CommitteeID], identityobj)
+			e.CommitteeList[Identityobj.CommitteeID] = make([]IDENTITY, 0)
+			e.CommitteeList[Identityobj.CommitteeID] = append(e.CommitteeList[Identityobj.CommitteeID], Identityobj)
 
-		} else if len(e.CommitteeList[identityobj.CommitteeID]) < c {
+		} else if len(e.CommitteeList[Identityobj.CommitteeID]) < C {
 			// Add the Identity in committee
 			Flag := true
-			for _, obj := range e.CommitteeList[identityobj.CommitteeID] {
-				if identityobj.isEqual(&obj) {
+			for _, obj := range e.CommitteeList[Identityobj.CommitteeID] {
+				if Identityobj.IsEqual(&obj) {
 					Flag = false
 					break
 				}
 			}
 			if Flag {
-				e.CommitteeList[identityobj.CommitteeID] = append(e.CommitteeList[identityobj.CommitteeID], identityobj)
-				if len(e.CommitteeList[identityobj.CommitteeID]) == c {
+				e.CommitteeList[Identityobj.CommitteeID] = append(e.CommitteeList[Identityobj.CommitteeID], Identityobj)
+				if len(e.CommitteeList[Identityobj.CommitteeID]) == C {
 					// check that if all committees are full
-					e.checkCommitteeFull(epoch)
+					e.CheckCommitteeFull(epoch)
 				}
 			}
 		}
@@ -2138,12 +2160,12 @@ func (e *Elastico) receiveNewNode(msg DecodeMsgType, epoch string) {
 	}
 }
 
-func (e *Elastico) checkCommitteeFull(epoch string) {
+// CheckCommitteeFull :-
+func (e *Elastico) CheckCommitteeFull(epoch string) {
 	/*
 		directory member checks whether the committees are full or not
 	*/
 
-	logger.Info("file:- elastico.go, func:- checkCommitteeFull()")
 	commList := e.CommitteeList
 	Flag := 0
 	numOfCommittees := int64(math.Pow(2, float64(s)))
@@ -2151,7 +2173,7 @@ func (e *Elastico) checkCommitteeFull(epoch string) {
 	for iden := int64(0); iden < numOfCommittees; iden++ {
 
 		_, ok := commList[iden]
-		if ok == false || len(commList[iden]) < c {
+		if ok == false || len(commList[iden]) < C {
 
 			logger.Warnf("committees not full  - bad miss id : %s", strconv.FormatInt(iden, 10))
 			Flag = 1
@@ -2164,7 +2186,7 @@ func (e *Elastico) checkCommitteeFull(epoch string) {
 		if e.State == ElasticoStates["RunAsDirectory after-TxnReceived"] {
 
 			// notify the final members
-			e.notifyFinalCommittee(epoch)
+			e.NotifyFinalCommittee(epoch)
 			// multicast the txns and committee members to the nodes
 			MulticastCommittee(commList, e.Identity, e.Txn, epoch)
 			// change the state after multicast
@@ -2174,11 +2196,10 @@ func (e *Elastico) checkCommitteeFull(epoch string) {
 }
 
 // MulticastCommittee :- each node getting Views of its committee members from directory members
-func MulticastCommittee(commList map[int64][]IDENTITY, identityobj IDENTITY, txns map[int64][]*Message, epoch string) {
+func MulticastCommittee(commList map[int64][]IDENTITY, Identityobj IDENTITY, txns map[int64][]Transaction, epoch string) {
 
-	logger.Info("file:- elastico.go, func:- MulticastCommittee()")
 	// get the final committee members with the fixed committee id
-	FinalCommitteeMembers := commList[finNum]
+	FinalCommitteeMembers := commList[FinNum]
 	for CommitteeID, commMembers := range commList {
 
 		// find the Primary Identity, Take the first Identity
@@ -2186,36 +2207,36 @@ func MulticastCommittee(commList map[int64][]IDENTITY, identityobj IDENTITY, txn
 		primaryID := commMembers[0]
 		for _, memberID := range commMembers {
 
-			// send the committee members , final committee members
-			data := map[string]interface{}{"CommitteeMembers": commMembers, "FinalCommitteeMembers": FinalCommitteeMembers, "Identity": identityobj}
+			// Send the committee members , final committee members
+			data := map[string]interface{}{"CommitteeMembers": commMembers, "FinalCommitteeMembers": FinalCommitteeMembers, "Identity": Identityobj}
 
 			// give txns only to the Primary node
-			if memberID.isEqual(&primaryID) {
+			if memberID.IsEqual(&primaryID) {
 				data["Txns"] = txns[CommitteeID]
 			} else {
-				data["Txns"] = make([]*Message, 0)
+				data["Txns"] = make([]Transaction, 0)
 			}
 			fmt.Println("epoch : ", epoch)
 			// construct the msg
 			msg := map[string]interface{}{"data": data, "type": "committee members Views", "epoch": epoch}
-			// send the committee member Views to nodes
-			memberID.send(msg)
+			// Send the committee member Views to nodes
+			memberID.Send(msg)
 		}
 	}
 }
 
-func (e *Elastico) notifyFinalCommittee(epoch string) {
+// NotifyFinalCommittee :-
+func (e *Elastico) NotifyFinalCommittee(epoch string) {
 	/*
 		notify the members of the final committee that they are the final committee members
 	*/
-	logger.Info("file:- elastico.go, func:- notifyFinalCommittee()")
-	finalCommList := e.CommitteeList[finNum]
+	finalCommList := e.CommitteeList[FinNum]
 	fmt.Println("len of final comm--", len(finalCommList))
 	for _, finalMember := range finalCommList {
 		data := map[string]interface{}{"Identity": e.Identity}
 		// construct the msg
 		msg := map[string]interface{}{"data": data, "type": "notify final member", "epoch": epoch}
-		finalMember.send(msg)
+		finalMember.Send(msg)
 	}
 }
 
@@ -2225,18 +2246,18 @@ type CommitmentMsg struct {
 	HashRi   string
 }
 
-func (e *Elastico) receiveHash(msg DecodeMsgType) {
+// ReceiveHash :-
+func (e *Elastico) ReceiveHash(msg DecodeMsgType) {
 
-	logger.Info("file:- elastico.go, func:- receiveHash()")
 	// receiving H(Ri) by final committe members
 	var decodeMsg CommitmentMsg
 	err := json.Unmarshal(msg.Data, &decodeMsg)
 
 	FailOnError(err, "fail to decode hash msg", true)
 
-	identityobj := decodeMsg.Identity
+	Identityobj := decodeMsg.Identity
 	HashRi := decodeMsg.HashRi
-	if e.verifyPoW(identityobj) {
+	if e.VerifyPoW(Identityobj) {
 		e.Commitments[HashRi] = true
 		logger.Info("commitment received-of port", e.Port, e.Commitments)
 	} else {
@@ -2250,38 +2271,39 @@ type BroadcastRmsg struct {
 	Identity IDENTITY
 }
 
-func (e *Elastico) hexdigest(data string) string {
+// Hexdigest :-
+func (e *Elastico) Hexdigest(data string) string {
 	/*
 		Digest of data
 	*/
-	logger.Info("file:- elastico.go, func:- hexdigest of Elastico()")
+	logger.Info("file:- elastico.go, func:- Hexdigest of Elastico()")
 	digest := sha256.New()
 	digest.Write([]byte(data))
 
-	hashVal := fmt.Sprintf("%x", digest.Sum(nil)) // convert to hexdigest
+	hashVal := fmt.Sprintf("%x", digest.Sum(nil)) // convert to Hexdigest
 	return hashVal
 }
 
-func (e *Elastico) receiveRandomStringBroadcast(msg DecodeMsgType) {
+// ReceiveRandomStringBroadcast :-
+func (e *Elastico) ReceiveRandomStringBroadcast(msg DecodeMsgType) {
 
-	logger.Info("file:- elastico.go, func:-receiveRandomStringBroadcast()")
 	var decodeMsg BroadcastRmsg
 
 	err := json.Unmarshal(msg.Data, &decodeMsg)
 
 	FailOnError(err, "fail to decode random string msg", true)
 
-	identityobj := decodeMsg.Identity
+	Identityobj := decodeMsg.Identity
 	Ri := decodeMsg.Ri
 
-	if e.verifyPoW(identityobj) {
-		HashRi := e.hexdigest(Ri)
+	if e.VerifyPoW(Identityobj) {
+		HashRi := e.Hexdigest(Ri)
 
 		if _, ok := e.NewRcommitmentSet[HashRi]; ok {
 
 			e.NewsetOfRs[Ri] = true
 
-			if len(e.NewsetOfRs) >= c/2+1 {
+			if len(e.NewsetOfRs) >= C/2+1 {
 				logger.Info("received the set of Rs")
 				e.State = ElasticoStates["ReceivedR"]
 			} else {
@@ -2298,59 +2320,59 @@ func (e *Elastico) receiveRandomStringBroadcast(msg DecodeMsgType) {
 
 // IntraBlockMsg - intra block msg
 type IntraBlockMsg struct {
-	Txnblock []*Message
+	Txnblock []Transaction
 	Sign     string
 	Identity IDENTITY
 }
 
-func (e *Elastico) verifySignTxnList(TxnBlockSignature string, TxnBlock []*Message, PublicKey *rsa.PublicKey) bool {
-	logger.Info("file:- elastico.go, func:- verifySignTxnList()")
+// VerifySignTxnList :-
+func (e *Elastico) VerifySignTxnList(TxnBlockSignature string, TxnBlock []Transaction, PublicKey *rsa.PublicKey) bool {
 	signed, err := base64.StdEncoding.DecodeString(TxnBlockSignature) // Decode the base64 encoded signature
 	FailOnError(err, "Decode error of signature", true)
 	// Sign the array of Transactions
 	digest := sha256.New()
 	for i := 0; i < len(TxnBlock); i++ {
-		txnDigest := TxnBlock[i].hexdigest() // Get the transaction digest
+		txnDigest := TxnBlock[i].Hexdigest() // Get the transaction digest
 		digest.Write([]byte(txnDigest))
 	}
-	err = rsa.VerifyPKCS1v15(PublicKey, crypto.SHA256, digest.Sum(nil), signed) // verify the sign of digest of Txn List
+	err = rsa.VerifyPKCS1v15(PublicKey, crypto.SHA256, digest.Sum(nil), signed) // verify the Sign of digest of Txn List
 	if err != nil {
 		return false
 	}
 	return true
 }
 
-func (e *Elastico) receiveIntraCommitteeBlock(msg DecodeMsgType) {
-
-	logger.Info("file:- elastico.go, func:- receiveIntraCommitteeBlock()")
+// ReceiveIntraCommitteeBlock :-
+func (e *Elastico) ReceiveIntraCommitteeBlock(msg DecodeMsgType) {
 
 	// final committee member receives the final set of txns along with the signature from the node
 	var decodeMsg IntraBlockMsg
 	err := json.Unmarshal(msg.Data, &decodeMsg)
 	FailOnError(err, "error in unmarshal intra committee block", true)
 
-	identityobj := decodeMsg.Identity
+	Identityobj := decodeMsg.Identity
 
-	if e.verifyPoW(identityobj) {
+	if e.VerifyPoW(Identityobj) {
 		signature := decodeMsg.Sign
 		TxnBlock := decodeMsg.Txnblock
+		logger.Infof("received txn block by final comm size %s", strconv.Itoa(len(TxnBlock)))
 		// verify the signatures
-		PK := identityobj.PK
-		if e.verifySignTxnList(signature, TxnBlock, &PK) {
-			if _, ok := e.CommitteeConsensusData[identityobj.CommitteeID]; ok == false {
+		PK := Identityobj.PK
+		if e.VerifySignTxnList(signature, TxnBlock, &PK) {
+			if _, ok := e.CommitteeConsensusData[Identityobj.CommitteeID]; ok == false {
 
-				e.CommitteeConsensusData[identityobj.CommitteeID] = make(map[string][]string)
-				e.CommitteeConsensusDataTxns[identityobj.CommitteeID] = make(map[string][]*Message)
+				e.CommitteeConsensusData[Identityobj.CommitteeID] = make(map[string][]string)
+				e.CommitteeConsensusDataTxns[Identityobj.CommitteeID] = make(map[string][]Transaction)
 			}
 			TxnBlockDigest := txnHexdigest(TxnBlock)
-			if _, okk := e.CommitteeConsensusData[identityobj.CommitteeID][TxnBlockDigest]; okk == false {
-				e.CommitteeConsensusData[identityobj.CommitteeID][TxnBlockDigest] = make([]string, 0)
+			if _, okk := e.CommitteeConsensusData[Identityobj.CommitteeID][TxnBlockDigest]; okk == false {
+				e.CommitteeConsensusData[Identityobj.CommitteeID][TxnBlockDigest] = make([]string, 0)
 				// store the txns for this digest
-				e.CommitteeConsensusDataTxns[identityobj.CommitteeID][TxnBlockDigest] = TxnBlock
+				e.CommitteeConsensusDataTxns[Identityobj.CommitteeID][TxnBlockDigest] = TxnBlock
 			}
 
 			// add signatures for the Txn block
-			e.CommitteeConsensusData[identityobj.CommitteeID][TxnBlockDigest] = append(e.CommitteeConsensusData[identityobj.CommitteeID][TxnBlockDigest], signature)
+			e.CommitteeConsensusData[Identityobj.CommitteeID][TxnBlockDigest] = append(e.CommitteeConsensusData[Identityobj.CommitteeID][TxnBlockDigest], signature)
 
 		} else {
 			logger.Error("signature invalid for intra committee block")
@@ -2367,10 +2389,11 @@ type IntraConsistencyMsg struct {
 	Commitments []string
 }
 
-func intersection(set1 map[string]bool, set2 []string) map[string]bool {
-	// This function takes intersection of two maps
+// Intersection :-
+func Intersection(set1 map[string]bool, set2 []string) map[string]bool {
+	// This function takes Intersection of two maps
 	// intersectSet := make(map[string]bool)
-	logger.Info("file:- elastico.go, func:- intersection()")
+	logger.Info("file:- elastico.go, func:- Intersection()")
 	for _, s1 := range set2 {
 		// _, ok := set1[s1]
 		// if ok == true {
@@ -2381,23 +2404,23 @@ func intersection(set1 map[string]bool, set2 []string) map[string]bool {
 	return set1
 }
 
-func (e *Elastico) receiveConsistency(msg DecodeMsgType) {
-	logger.Info("file:- elastico.go, func:- receiveConsistency()")
-	// receive consistency msgs
+// ReceiveConsistency :-
+func (e *Elastico) ReceiveConsistency(msg DecodeMsgType) {
+	// Receive consistency msgs
 	var decodeMsg IntraConsistencyMsg
 	err := json.Unmarshal(msg.Data, &decodeMsg)
 	FailOnError(err, "error in unmarshal intra committee block", true)
 
-	identityobj := decodeMsg.Identity
+	Identityobj := decodeMsg.Identity
 
-	if e.verifyPoW(identityobj) {
+	if e.VerifyPoW(Identityobj) {
 		Commitments := decodeMsg.Commitments
 		if len(e.EpochcommitmentSet) == 0 {
 			for _, commitment := range Commitments {
 				e.EpochcommitmentSet[commitment] = true
 			}
 		} else {
-			e.EpochcommitmentSet = intersection(e.EpochcommitmentSet, Commitments)
+			e.EpochcommitmentSet = Intersection(e.EpochcommitmentSet, Commitments)
 		}
 		// logger.Info("received Int. Consistency Commitments! ", len(e.EpochcommitmentSet), " port :", e.Port, " Commitments : ", Commitments)
 	} else {
@@ -2405,58 +2428,59 @@ func (e *Elastico) receiveConsistency(msg DecodeMsgType) {
 	}
 }
 
-func (e *Elastico) receive(msg DecodeMsgType, epoch string) {
+// Receive :-
+func (e *Elastico) Receive(msg DecodeMsgType, epoch string) {
 	/*
 		method to recieve messages for a node as per the type of a msg
 	*/
 	// new node is added in directory committee if not yet formed
 	if msg.Type == "directoryMember" {
-		e.receiveDirectoryMember(msg)
+		e.ReceiveDirectoryMember(msg)
 
 	} else if msg.Type == "newNode" && e.IsDirectory {
-		e.receiveNewNode(msg, epoch)
+		e.ReceiveNewNode(msg, epoch)
 
 	} else if msg.Type == "committee members Views" && e.IsDirectory == false {
-		e.receiveViews(msg)
+		e.ReceiveViews(msg)
 
-	} else if msg.Type == "hash" && e.isFinalMember() {
-		e.receiveHash(msg)
+	} else if msg.Type == "hash" && e.IsFinalMember() {
+		e.ReceiveHash(msg)
 
 	} else if msg.Type == "RandomStringBroadcast" {
-		e.receiveRandomStringBroadcast(msg)
+		e.ReceiveRandomStringBroadcast(msg)
 
 	} else if msg.Type == "pre-prepare" || msg.Type == "prepare" || msg.Type == "commit" {
 
-		e.pbftProcessMessage(msg)
-	} else if msg.Type == "intraCommitteeBlock" && e.isFinalMember() {
+		e.PbftProcessMessage(msg)
+	} else if msg.Type == "intraCommitteeBlock" && e.IsFinalMember() {
 
-		e.receiveIntraCommitteeBlock(msg)
-	} else if msg.Type == "InteractiveConsistency" && e.isFinalMember() {
+		e.ReceiveIntraCommitteeBlock(msg)
+	} else if msg.Type == "InteractiveConsistency" && e.IsFinalMember() {
 
-		e.receiveConsistency(msg)
+		e.ReceiveConsistency(msg)
 
 	} else if msg.Type == "notify final member" {
 		logger.Infof("notifying final member %s", e.Port)
 		var decodeMsg NotifyFinalMsg
 		err := json.Unmarshal(msg.Data, &decodeMsg)
 		FailOnError(err, "error in decoding final member msg", true)
-		identityobj := decodeMsg.Identity
-		if e.verifyPoW(identityobj) && e.CommitteeID == finNum {
+		Identityobj := decodeMsg.Identity
+		if e.VerifyPoW(Identityobj) && e.CommitteeID == FinNum {
 			e.IsFinal = true
 		}
 	} else if msg.Type == "Finalpre-prepare" || msg.Type == "Finalprepare" || msg.Type == "Finalcommit" {
 		e.FinalpbftProcessMessage(msg)
 	} else if msg.Type == "FinalBlock" {
 
-		e.receiveFinalTxnBlock(msg)
+		e.ReceiveFinalTxnBlock(msg)
 
-	} else if msg.Type == "reset-all" {
+	} else if msg.Type == "Reset-all" {
 		var decodeMsg ResetMsg
 		err := json.Unmarshal(msg.Data, &decodeMsg)
-		FailOnError(err, "fail to decode reset msg", true)
-		if e.verifyPoW(decodeMsg.Identity) {
-			// reset the elastico node
-			e.reset()
+		FailOnError(err, "fail to decode Reset msg", true)
+		if e.VerifyPoW(decodeMsg.Identity) {
+			// Reset the elastico node
+			e.Reset()
 		}
 
 	}
@@ -2467,38 +2491,39 @@ type FinalBlockMsg struct {
 	CommitSet      []string
 	Signature      string
 	Identity       IDENTITY
-	FinalBlock     []*Message
+	FinalBlock     []Transaction
 	FinalBlockSign string
 }
 
-func (is *IdentityAndSign) isEqual(data IdentityAndSign) bool {
+// IsEqual :-
+func (is *IdentityAndSign) IsEqual(data IdentityAndSign) bool {
 	/*
 		compare two objects
 	*/
-	logger.Info("file:- elastico.go, func:- isEqual() of iden and sign")
-	return is.sign == data.sign && is.identityobj.isEqual(&data.identityobj)
+	logger.Info("file:- elastico.go, func:- IsEqual() of iden and Sign")
+	return is.Sign == data.Sign && is.Identityobj.IsEqual(&data.Identityobj)
 }
 
-func (e *Elastico) receiveFinalTxnBlock(msg DecodeMsgType) {
-	logger.Info("file:- elastico.go, func:- receiveFinalTxnBlock()")
+// ReceiveFinalTxnBlock :-
+func (e *Elastico) ReceiveFinalTxnBlock(msg DecodeMsgType) {
 	var decodeMsg FinalBlockMsg
 	err := json.Unmarshal(msg.Data, &decodeMsg)
 	FailOnError(err, "fail in decoding the final block msg", true)
 
-	identityobj := decodeMsg.Identity
+	Identityobj := decodeMsg.Identity
 	// verify the PoW of the sender
-	if e.verifyPoW(identityobj) {
+	if e.VerifyPoW(Identityobj) {
 
-		sign := decodeMsg.Signature
+		Sign := decodeMsg.Signature
 		receivedCommitments := decodeMsg.CommitSet
 		finalTxnBlock := decodeMsg.FinalBlock
 
 		finalTxnBlockSignature := decodeMsg.FinalBlockSign
 
 		// verify the signatures
-		receivedCommitmentDigest := e.digestCommitments(receivedCommitments)
-		PK := identityobj.PK
-		if e.verifySign(sign, receivedCommitmentDigest, &PK) && e.verifySignTxnList(finalTxnBlockSignature, finalTxnBlock, &PK) {
+		receivedCommitmentDigest := e.DigestCommitments(receivedCommitments)
+		PK := Identityobj.PK
+		if e.VerifySign(Sign, receivedCommitmentDigest, &PK) && e.VerifySignTxnList(finalTxnBlockSignature, finalTxnBlock, &PK) {
 
 			// list init for final Txn block
 			finaltxnBlockDigest := txnHexdigest(finalTxnBlock)
@@ -2508,27 +2533,27 @@ func (e *Elastico) receiveFinalTxnBlock(msg DecodeMsgType) {
 			}
 
 			// creating the object that contains the Identity and signature of the final member
-			identityAndSign := IdentityAndSign{finalTxnBlockSignature, identityobj}
+			identityAndSign := IdentityAndSign{finalTxnBlockSignature, Identityobj}
 
-			// check whether this combination of Identity and sign already exists or not
+			// check whether this combination of Identity and Sign already exists or not
 			Flag := true
 			for _, idSignObj := range e.FinalBlockbyFinalCommittee[finaltxnBlockDigest] {
 
-				if idSignObj.isEqual(identityAndSign) {
+				if idSignObj.IsEqual(identityAndSign) {
 					// it exists
 					Flag = false
 					break
 				}
 			}
 			if Flag {
-				// appending the Identity and sign of final member
+				// appending the Identity and Sign of final member
 				e.FinalBlockbyFinalCommittee[finaltxnBlockDigest] = append(e.FinalBlockbyFinalCommittee[finaltxnBlockDigest], identityAndSign)
 			}
 
 			// block is signed by sufficient final members and when the final block has not been sent to the client yet
-			if len(e.FinalBlockbyFinalCommittee[finaltxnBlockDigest]) >= c/2+1 && e.State != ElasticoStates["FinalBlockSentToClient"] {
+			if len(e.FinalBlockbyFinalCommittee[finaltxnBlockDigest]) >= C/2+1 && e.State != ElasticoStates["FinalBlockSentToClient"] {
 				// for final members, their state is updated only when they have also sent the finalblock to ntw
-				if e.isFinalMember() {
+				if e.IsFinalMember() {
 					finalBlockSent := e.FinalBlock.Sent
 					if finalBlockSent {
 
@@ -2542,19 +2567,20 @@ func (e *Elastico) receiveFinalTxnBlock(msg DecodeMsgType) {
 
 			}
 			// union of Commitments
-			e.unionSet(receivedCommitments)
+			e.UnionSet(receivedCommitments)
 
 		} else {
 
 			logger.Error("Signature invalid in final block received")
 		}
 	} else {
-		logger.Error("PoW not valid when final member send the block")
+		logger.Error("PoW not valid when final member Send the block")
 	}
 }
 
-func (e *Elastico) unionSet(receivedSet []string) {
-	logger.Info("file:- elastico.go, func:- unionSet()")
+// UnionSet :-
+func (e *Elastico) UnionSet(receivedSet []string) {
+	logger.Info("file:- elastico.go, func:- UnionSet()")
 	// logger.Info("lenn of commitment---", len(e.NewRcommitmentSet))
 	// logger.Info("received set--", receivedSet)
 	for _, commitment := range receivedSet {
@@ -2578,21 +2604,21 @@ func (e *Elastico) FinalpbftProcessMessage(msg DecodeMsgType) {
 
 	logger.Info("file:- elastico.go, func:- FinalpbftProcessMessage()")
 	if msg.Type == "Finalpre-prepare" {
-		e.processFinalprePrepareMsg(msg)
+		e.ProcessFinalprePrepareMsg(msg)
 
 	} else if msg.Type == "Finalprepare" {
-		e.processFinalprepareMsg(msg)
+		e.ProcessFinalprepareMsg(msg)
 
 	} else if msg.Type == "Finalcommit" {
-		e.processFinalcommitMsg(msg)
+		e.ProcessFinalcommitMsg(msg)
 	}
 }
 
-func (e *Elastico) processPrePrepareMsg(msg DecodeMsgType) {
+// ProcessPrePrepareMsg :-
+func (e *Elastico) ProcessPrePrepareMsg(msg DecodeMsgType) {
 	/*
 		Process Pre-Prepare msg
 	*/
-	logger.Info("file:- elastico.go, func:- processPrePrepareMsg()")
 	var decodeMsg PrePrepareMsg
 
 	err := json.Unmarshal(msg.Data, &decodeMsg)
@@ -2600,52 +2626,52 @@ func (e *Elastico) processPrePrepareMsg(msg DecodeMsgType) {
 
 	// verify the pre-prepare message
 
-	verified := e.verifyPrePrepare(decodeMsg)
+	verified := e.VerifyPrePrepare(decodeMsg)
 	if verified {
 		// Log the pre-prepare msgs!
 		logger.Info("pre-prepared verified by port--", e.Port)
-		e.logPrePrepareMsg(decodeMsg)
+		e.LogPrePrepareMsg(decodeMsg)
 
 	} else {
-		logger.Error("error in verification of processPrePrepareMsg")
+		logger.Error("error in verification of ProcessPrePrepareMsg")
 	}
 }
 
-func (e *Elastico) verifySign(signature string, digest []byte, PublicKey *rsa.PublicKey) bool {
+// VerifySign :-
+func (e *Elastico) VerifySign(signature string, digest []byte, PublicKey *rsa.PublicKey) bool {
 	/*
 		verify whether signature is valid or not
 	*/
-	logger.Info("file:- elastico.go, func:- verifySign()")
 	signed, err := base64.StdEncoding.DecodeString(signature) // Decode the base64 encoded signature
 	FailOnError(err, "Decode error of signature", true)
-	err = rsa.VerifyPKCS1v15(PublicKey, crypto.SHA256, digest, signed) // verify the sign of digest
+	err = rsa.VerifyPKCS1v15(PublicKey, crypto.SHA256, digest, signed) // verify the Sign of digest
 	if err != nil {
 		return false
 	}
 	return true
 }
 
-func (e *Elastico) verifyPrePrepare(msg PrePrepareMsg) bool {
+// VerifyPrePrepare :-
+func (e *Elastico) VerifyPrePrepare(msg PrePrepareMsg) bool {
 	/*
 		Verify pre-prepare msgs
 	*/
-	logger.Info("file:- elastico.go, func:- verifyPrePrepare()")
-	identityobj := msg.Identity
+	Identityobj := msg.Identity
 	prePreparedData := msg.PrePrepareData
 	txnBlockList := msg.Message
 	// verify Pow
-	if e.verifyPoW(identityobj) == false {
+	if e.VerifyPoW(Identityobj) == false {
 
 		logger.Error("wrong pow in  verify pre-prepare")
 		return false
 	}
 	// verify signatures of the received msg
-	sign := msg.Sign
-	prePreparedDataDigest := e.digestPrePrepareMsg(prePreparedData)
-	PK := identityobj.PK
-	if e.verifySign(sign, prePreparedDataDigest, &PK) == false {
+	Sign := msg.Sign
+	prePreparedDataDigest := e.DigestPrePrepareMsg(prePreparedData)
+	PK := Identityobj.PK
+	if e.VerifySign(Sign, prePreparedDataDigest, &PK) == false {
 
-		logger.Error("wrong sign in  verify pre-prepare")
+		logger.Error("wrong Sign in  verify pre-prepare")
 		return false
 	}
 	// verifying the digest of request msg
@@ -2680,11 +2706,11 @@ func (e *Elastico) verifyPrePrepare(msg PrePrepareMsg) bool {
 	return true
 }
 
-func (e *Elastico) processFinalprePrepareMsg(msg DecodeMsgType) {
+// ProcessFinalprePrepareMsg :-
+func (e *Elastico) ProcessFinalprePrepareMsg(msg DecodeMsgType) {
 	/*
 		Process Final Pre-Prepare msg
 	*/
-	logger.Info("file:- elastico.go, func:- processFinalprePrepareMsg()")
 	var decodeMsg PrePrepareMsg
 
 	err := json.Unmarshal(msg.Data, &decodeMsg)
@@ -2692,39 +2718,39 @@ func (e *Elastico) processFinalprePrepareMsg(msg DecodeMsgType) {
 
 	logger.Info("final pre-prepare msg of port", e.Port, "msg--", decodeMsg)
 	// verify the Final pre-prepare message
-	verified := e.verifyFinalPrePrepare(decodeMsg)
+	verified := e.VerifyFinalPrePrepare(decodeMsg)
 	if verified {
 		logger.Info("final pre-prepare verified")
 		// Log the final pre-prepare msgs!
-		e.logFinalPrePrepareMsg(decodeMsg)
+		e.LogFinalPrePrepareMsg(decodeMsg)
 
 	} else {
-		logger.Error("error in verification of Final processPrePrepareMsg")
+		logger.Error("error in verification of Final ProcessPrePrepareMsg")
 	}
 }
 
-func (e *Elastico) verifyFinalPrePrepare(msg PrePrepareMsg) bool {
+// VerifyFinalPrePrepare :-
+func (e *Elastico) VerifyFinalPrePrepare(msg PrePrepareMsg) bool {
 	/*
 		Verify final pre-prepare msgs
 	*/
-	logger.Info("file:- elastico.go, func:- verifyFinalPrePrepare()")
-	identityobj := msg.Identity
+	Identityobj := msg.Identity
 	prePreparedData := msg.PrePrepareData
 	txnBlockList := msg.Message
 
 	// verify Pow
-	if e.verifyPoW(identityobj) == false {
+	if e.VerifyPoW(Identityobj) == false {
 
 		logger.Warn("wrong pow in  verify final pre-prepare")
 		return false
 	}
 	// verify signatures of the received msg
-	sign := msg.Sign
-	prePreparedDataDigest := e.digestPrePrepareMsg(prePreparedData)
-	PK := identityobj.PK
-	if e.verifySign(sign, prePreparedDataDigest, &PK) == false {
+	Sign := msg.Sign
+	prePreparedDataDigest := e.DigestPrePrepareMsg(prePreparedData)
+	PK := Identityobj.PK
+	if e.VerifySign(Sign, prePreparedDataDigest, &PK) == false {
 
-		logger.Warn("wrong sign in  verify final pre-prepare")
+		logger.Warn("wrong Sign in  verify final pre-prepare")
 		return false
 	}
 
@@ -2761,23 +2787,23 @@ func (e *Elastico) verifyFinalPrePrepare(msg PrePrepareMsg) bool {
 
 }
 
-func (e *Elastico) verifyCommit(msg CommitMsg) bool {
+// VerifyCommit :-
+func (e *Elastico) VerifyCommit(msg CommitMsg) bool {
 	/*
 		verify commit msgs
 	*/
-	logger.Info("file:- elastico.go, func:- verifyCommit()")
 	// verify Pow
-	identityobj := msg.Identity
-	if !e.verifyPoW(identityobj) {
+	Identityobj := msg.Identity
+	if !e.VerifyPoW(Identityobj) {
 		return false
 	}
 	// verify signatures of the received msg
 
-	sign := msg.Sign
+	Sign := msg.Sign
 	commitData := msg.CommitData
-	digestCommitData := e.digestCommitMsg(commitData)
-	PK := identityobj.PK
-	if !e.verifySign(sign, digestCommitData, &PK) {
+	digestCommitData := e.DigestCommitMsg(commitData)
+	PK := Identityobj.PK
+	if !e.VerifySign(Sign, digestCommitData, &PK) {
 		return false
 	}
 
@@ -2789,12 +2815,12 @@ func (e *Elastico) verifyCommit(msg CommitMsg) bool {
 	return true
 }
 
-func (e *Elastico) logCommitMsg(msg CommitMsg) {
+// LogCommitMsg :-
+func (e *Elastico) LogCommitMsg(msg CommitMsg) {
 	/*
 	 log the commit msg
 	*/
-	logger.Info("file:- elastico.go, func:- logCommitMsg()")
-	identityobj := msg.Identity
+	Identityobj := msg.Identity
 	commitContents := msg.CommitData
 	ViewID := commitContents.ViewID
 	seqnum := commitContents.Seq
@@ -2822,38 +2848,38 @@ func (e *Elastico) logCommitMsg(msg CommitMsg) {
 
 	// log only required details from the commit msg
 	commitDataDigest := commitContents.Digest
-	msgDetails := CommitMsgData{Digest: commitDataDigest, Identity: identityobj}
+	msgDetails := CommitMsgData{Digest: commitDataDigest, Identity: Identityobj}
 	// append msg
 	commitMsgLogSocket := commitMsgLogSeq[socketID]
 	commitMsgLogSocket = append(commitMsgLogSocket, msgDetails)
 	e.CommitMsgLog[ViewID][seqnum][socketID] = commitMsgLogSocket
 }
 
-func (e *Elastico) processCommitMsg(msg DecodeMsgType) {
+// ProcessCommitMsg :-
+func (e *Elastico) ProcessCommitMsg(msg DecodeMsgType) {
 	/*
 		process the commit msg
 	*/
 	// verify the commit message
-	logger.Info("file:- elastico.go, func:- processCommitMsg()")
 	var decodeMsg CommitMsg
 
 	err := json.Unmarshal(msg.Data, &decodeMsg)
 	FailOnError(err, "fail to decode commit msg", true)
 
 	logger.Info("commit msg in--", e.Port, "msg -- ", decodeMsg)
-	verified := e.verifyCommit(decodeMsg)
+	verified := e.VerifyCommit(decodeMsg)
 	if verified {
 		logger.Info("commit verified")
 		// Log the commit msgs!
-		e.logCommitMsg(decodeMsg)
+		e.LogCommitMsg(decodeMsg)
 	}
 }
 
-func (e *Elastico) processFinalcommitMsg(msg DecodeMsgType) {
+// ProcessFinalcommitMsg :-
+func (e *Elastico) ProcessFinalcommitMsg(msg DecodeMsgType) {
 	/*
 		process the final commit msg
 	*/
-	logger.Info("file:- elastico.go, func:- processFinalcommitMsg()")
 	// verify the commit message
 	var decodeMsg CommitMsg
 
@@ -2861,25 +2887,25 @@ func (e *Elastico) processFinalcommitMsg(msg DecodeMsgType) {
 	FailOnError(err, "fail to decode final commit msg", true)
 
 	logger.Info("final commit msg in port--", e.Port, "with msg--", decodeMsg)
-	verified := e.verifyCommit(decodeMsg)
+	verified := e.VerifyCommit(decodeMsg)
 	if verified {
 		fmt.Println("final commit verified")
 		// Log the commit msgs!
-		e.logFinalCommitMsg(decodeMsg)
+		e.LogFinalCommitMsg(decodeMsg)
 	}
 }
 
-func (e *Elastico) logFinalCommitMsg(msg CommitMsg) {
+// LogFinalCommitMsg :-
+func (e *Elastico) LogFinalCommitMsg(msg CommitMsg) {
 	/*
 		log the final commit msg
 	*/
-	logger.Info("file:- elastico.go, func:- logFinalCommitMsg()")
-	identityobj := msg.Identity
+	Identityobj := msg.Identity
 	commitContents := msg.CommitData
 	ViewID := commitContents.ViewID
 	seqnum := commitContents.Seq
 
-	socketID := identityobj.IP + ":" + identityobj.Port
+	socketID := Identityobj.IP + ":" + Identityobj.Port
 	// add msgs for this view
 	_, ok := e.FinalcommitMsgLog[ViewID]
 	if ok == false {
@@ -2904,7 +2930,7 @@ func (e *Elastico) logFinalCommitMsg(msg CommitMsg) {
 
 	// log only required details from the commit msg
 	commitDataDigest := commitContents.Digest
-	msgDetails := CommitMsgData{Digest: commitDataDigest, Identity: identityobj}
+	msgDetails := CommitMsgData{Digest: commitDataDigest, Identity: Identityobj}
 	// append msg
 	commitMsgLogSocket := commitMsgLogSeq[socketID]
 	commitMsgLogSocket = append(commitMsgLogSocket, msgDetails)
@@ -2912,29 +2938,29 @@ func (e *Elastico) logFinalCommitMsg(msg CommitMsg) {
 
 }
 
-func (e *Elastico) pbftProcessMessage(msg DecodeMsgType) {
+// PbftProcessMessage :-
+func (e *Elastico) PbftProcessMessage(msg DecodeMsgType) {
 	/*
 		Process the messages related to Pbft!
 	*/
-	logger.Info("file:- elastico.go, func:- pbftProcessMessage()")
 	if msg.Type == "pre-prepare" {
 
-		e.processPrePrepareMsg(msg)
+		e.ProcessPrePrepareMsg(msg)
 
 	} else if msg.Type == "prepare" {
 
-		e.processPrepareMsg(msg)
+		e.ProcessPrepareMsg(msg)
 
 	} else if msg.Type == "commit" {
-		e.processCommitMsg(msg)
+		e.ProcessCommitMsg(msg)
 	}
 }
 
-func (e *Elastico) processPrepareMsg(msg DecodeMsgType) {
+// ProcessPrepareMsg :-
+func (e *Elastico) ProcessPrepareMsg(msg DecodeMsgType) {
 	/*
 		process prepare msg
 	*/
-	logger.Info("file:- elastico.go, func:- processPrepareMsg()")
 	// verify the prepare message
 	var decodeMsg PrepareMsg
 
@@ -2942,25 +2968,25 @@ func (e *Elastico) processPrepareMsg(msg DecodeMsgType) {
 	FailOnError(err, "fail to decode prepare msg", true)
 	logger.Infof("prepare msg in-- %s msg---", e.Port)
 
-	verified := e.verifyPrepare(decodeMsg)
+	verified := e.VerifyPrepare(decodeMsg)
 	if verified {
 		logger.Info("prepare verified")
 		// Log the prepare msgs!
-		e.logPrepareMsg(decodeMsg)
+		e.LogPrepareMsg(decodeMsg)
 	}
 }
 
-func (e *Elastico) logPrepareMsg(msg PrepareMsg) {
+// LogPrepareMsg :-
+func (e *Elastico) LogPrepareMsg(msg PrepareMsg) {
 	/*
 		log the prepare msg
 	*/
-	logger.Info("file:- elastico.go, func:- logPrepareMsg()")
-	identityobj := msg.Identity
+	Identityobj := msg.Identity
 	prepareData := msg.PrepareData
 	ViewID := prepareData.ViewID
 	seqnum := prepareData.Seq
 
-	socketID := identityobj.IP + ":" + identityobj.Port
+	socketID := Identityobj.IP + ":" + Identityobj.Port
 	// add msgs for this view
 	if _, ok := e.PrepareMsgLog[ViewID]; ok == false {
 
@@ -2983,7 +3009,7 @@ func (e *Elastico) logPrepareMsg(msg PrepareMsg) {
 	// ToDo: check that the msg appended is dupicate or not
 	// log only required details from the prepare msg
 	prepareDataDigest := prepareData.Digest
-	msgDetails := PrepareMsgData{Digest: prepareDataDigest, Identity: identityobj}
+	msgDetails := PrepareMsgData{Digest: prepareDataDigest, Identity: Identityobj}
 	// append msg to prepare msg log
 	prepareMsgLogSocket := prepareMsgLogSeq[socketID]
 	prepareMsgLogSocket = append(prepareMsgLogSocket, msgDetails)
@@ -2991,27 +3017,27 @@ func (e *Elastico) logPrepareMsg(msg PrepareMsg) {
 
 }
 
-func (e *Elastico) verifyPrepare(msg PrepareMsg) bool {
+// VerifyPrepare :-
+func (e *Elastico) VerifyPrepare(msg PrepareMsg) bool {
 	/*
 	 Verify prepare msgs
 	*/
-	logger.Info("file:- elastico.go, func:- verifyPrepare()")
 	// verify Pow
-	identityobj := msg.Identity
-	if e.verifyPoW(identityobj) == false {
+	Identityobj := msg.Identity
+	if e.VerifyPoW(Identityobj) == false {
 
 		logger.Error("wrong pow in verify prepares")
 		return false
 	}
 
 	// verify signatures of the received msg
-	sign := msg.Sign
+	Sign := msg.Sign
 	prepareData := msg.PrepareData
-	PrepareContentsDigest := e.digestPrepareMsg(prepareData)
-	PK := identityobj.PK
-	if e.verifySign(sign, PrepareContentsDigest, &PK) == false {
+	PrepareContentsDigest := e.DigestPrepareMsg(prepareData)
+	PK := Identityobj.PK
+	if e.VerifySign(Sign, PrepareContentsDigest, &PK) == false {
 
-		logger.Error("wrong sign in verify prepares")
+		logger.Error("wrong Sign in verify prepares")
 		return false
 	}
 
@@ -3037,28 +3063,28 @@ func (e *Elastico) verifyPrepare(msg PrepareMsg) bool {
 	return false
 }
 
-func (e *Elastico) verifyFinalPrepare(msg PrepareMsg) bool {
+// VerifyFinalPrepare :-
+func (e *Elastico) VerifyFinalPrepare(msg PrepareMsg) bool {
 	/*
 		Verify final prepare msgs
 	*/
-	logger.Info("file:- elastico.go, func:- verifyFinalPrepare()")
 	// verify Pow
-	identityobj := msg.Identity
-	if e.verifyPoW(identityobj) == false {
+	Identityobj := msg.Identity
+	if e.VerifyPoW(Identityobj) == false {
 
 		logger.Warn("wrong pow in verify final prepares")
 		return false
 	}
 	// verify signatures of the received msg
-	sign := msg.Sign
+	Sign := msg.Sign
 	prepareData := msg.PrepareData
-	PrepareContentsDigest := e.digestPrepareMsg(prepareData)
+	PrepareContentsDigest := e.DigestPrepareMsg(prepareData)
 
-	PK := identityobj.PK
+	PK := Identityobj.PK
 
-	if e.verifySign(sign, PrepareContentsDigest, &PK) == false {
+	if e.VerifySign(Sign, PrepareContentsDigest, &PK) == false {
 
-		logger.Warn("wrong sign in verify final prepares")
+		logger.Warn("wrong Sign in verify final prepares")
 		return false
 	}
 	ViewID := prepareData.ViewID
@@ -3084,36 +3110,36 @@ func (e *Elastico) verifyFinalPrepare(msg PrepareMsg) bool {
 	return false
 }
 
-func (e *Elastico) processFinalprepareMsg(msg DecodeMsgType) {
+// ProcessFinalprepareMsg :-
+func (e *Elastico) ProcessFinalprepareMsg(msg DecodeMsgType) {
 	/*
 		process final prepare msg
 	*/
-	logger.Info("file:- elastico.go, func:- processFinalprepareMsg()")
 	var decodeMsg PrepareMsg
 	err := json.Unmarshal(msg.Data, &decodeMsg)
 	FailOnError(err, "fail to decode final prepare msg", true)
 	// verify the prepare message
 
 	logger.Info("final prepare msg of port--", e.Port, "with msg--", decodeMsg)
-	verified := e.verifyFinalPrepare(decodeMsg)
+	verified := e.VerifyFinalPrepare(decodeMsg)
 	if verified {
 		fmt.Println("FINAL PREPARE VERIFIED with port--", e.Port)
 		// Log the prepare msgs!
-		e.logFinalPrepareMsg(decodeMsg)
+		e.LogFinalPrepareMsg(decodeMsg)
 	}
 }
 
-func (e *Elastico) logFinalPrepareMsg(msg PrepareMsg) {
+// LogFinalPrepareMsg :-
+func (e *Elastico) LogFinalPrepareMsg(msg PrepareMsg) {
 	/*
 		log the prepare msg
 	*/
-	logger.Info("file:- elastico.go, func:- logFinalPrepareMsg()")
-	identityobj := msg.Identity
+	Identityobj := msg.Identity
 	prepareData := msg.PrepareData
 	ViewID := prepareData.ViewID
 	seqnum := prepareData.Seq
 
-	socketID := identityobj.IP + ":" + identityobj.Port
+	socketID := Identityobj.IP + ":" + Identityobj.Port
 
 	// add msgs for this view
 	if _, ok := e.FinalPrepareMsgLog[ViewID]; ok == false {
@@ -3138,26 +3164,26 @@ func (e *Elastico) logFinalPrepareMsg(msg PrepareMsg) {
 	// ToDo: check that the msg appended is dupicate or not
 	// log only required details from the prepare msg
 	prepareDataDigest := prepareData.Digest
-	msgDetails := PrepareMsgData{Digest: prepareDataDigest, Identity: identityobj}
+	msgDetails := PrepareMsgData{Digest: prepareDataDigest, Identity: Identityobj}
 	// append msg to prepare msg log
 	prepareMsgLogSocket := prepareMsgLogSeq[socketID]
 	prepareMsgLogSocket = append(prepareMsgLogSocket, msgDetails)
 	e.FinalPrepareMsgLog[ViewID][seqnum][socketID] = prepareMsgLogSocket
 }
 
-func (e *Elastico) unionViews(nodeData, incomingData []IDENTITY) []IDENTITY {
+// UnionViews :-
+func (e *Elastico) UnionViews(nodeData, incomingData []IDENTITY) []IDENTITY {
 	/*
 		nodeData and incomingData are the set of identities
 		Adding those identities of incomingData to nodeData that are not present in nodeData
 	*/
-	logger.Info("file:- elastico.go, func:- unionViews()")
 	for _, data := range incomingData {
 
 		Flag := false
 		for _, nodeID := range nodeData {
 
 			// data is present already in nodeData
-			if nodeID.isEqual(&data) {
+			if nodeID.IsEqual(&data) {
 				Flag = true
 				break
 			}
@@ -3175,25 +3201,26 @@ type ViewsMsg struct {
 	CommitteeMembers      []IDENTITY
 	FinalCommitteeMembers []IDENTITY
 	Identity              IDENTITY
-	Txns                  []*Message
+	Txns                  []Transaction
 }
 
-func (e *Elastico) receiveViews(msg DecodeMsgType) {
-	// logger.Info("file:- elastico.go, func:- receiveViews()")
+// ReceiveViews :-
+func (e *Elastico) ReceiveViews(msg DecodeMsgType) {
 	var decodeMsg ViewsMsg
 
 	err := json.Unmarshal(msg.Data, &decodeMsg)
 	// fmt.Println("Views msg---", decodeMsg)
 	FailOnError(err, "fail to decode Views msg", true)
 
-	identityobj := decodeMsg.Identity
+	Identityobj := decodeMsg.Identity
 
-	if e.verifyPoW(identityobj) {
+	if e.VerifyPoW(Identityobj) {
 
-		if _, ok := e.Views[identityobj.IP+identityobj.Port]; ok == false {
+		if _, ok := e.Views[Identityobj.IP+Identityobj.Port]; ok == false {
 
+			logger.Infof("my Ip:- %s for the views", e.IP)
 			// union of committe members Views
-			e.Views[identityobj.IP+identityobj.Port] = true
+			e.Views[Identityobj.IP+Identityobj.Port] = true
 
 			commMembers := decodeMsg.CommitteeMembers
 			finalMembers := decodeMsg.FinalCommitteeMembers
@@ -3203,18 +3230,18 @@ func (e *Elastico) receiveViews(msg DecodeMsgType) {
 			// ToDo: txnblock should be ordered, not set
 			if len(Txns) > 0 {
 
-				e.TxnBlock = e.unionTxns(e.TxnBlock, Txns)
-				logger.Infof("I am Primary %s", e.IP)
+				e.TxnBlock = e.UnionTxns(e.TxnBlock, Txns)
+				logger.Infof("I am Primary %s , %s ", e.IP, strconv.Itoa(len(e.TxnBlock[0].Txn.Payload)))
 				e.Primary = true
 			}
 
 			// ToDo: verify this union thing
 			// union of committee members wrt directory member
-			e.CommitteeMembers = e.unionViews(e.CommitteeMembers, commMembers)
+			e.CommitteeMembers = e.UnionViews(e.CommitteeMembers, commMembers)
 			// union of final committee members wrt directory member
-			e.FinalCommitteeMembers = e.unionViews(e.FinalCommitteeMembers, finalMembers)
+			e.FinalCommitteeMembers = e.UnionViews(e.FinalCommitteeMembers, finalMembers)
 			// received the members
-			if e.State == ElasticoStates["Formed Committee"] && len(e.Views) >= c/2+1 {
+			if len(e.Views) >= C/2+1 {
 
 				e.State = ElasticoStates["Receiving Committee Members"]
 			}
