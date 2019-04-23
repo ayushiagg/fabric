@@ -173,11 +173,10 @@ func GetState(path string) string {
 		config := EState{}
 		err := decoder.Decode(&config)
 		if err != nil {
-			FailOnError(err, "error in decoding config", false)
+			// FailOnError(err, "error in decoding config", false)
 			return ""
 		}
 		return config.State
-
 	}
 	return ""
 }
