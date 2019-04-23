@@ -337,14 +337,19 @@ func (ch *chain) main() {
 					}
 				}
 				// run the elastico
-				ch.runElastico(msg)
+				var checkMsg Transaction
+				checkMsg.ConfigSeq = msg.ConfigSeq
+				checkMsg.Txn = *msg.NormalMsg
+				receivedMsgs := ch.runElastico(checkMsg)
+				for _, txnMsg := range receivedMsgs {
+					logger.Info("Elastico completed")
 
-				batches, pending := ch.support.BlockCutter().Ordered(msg.NormalMsg)
+					batches, pending := ch.support.BlockCutter().Ordered(&txnMsg.Txn)
 
-				for _, batch := range batches {
-					block := ch.support.CreateNextBlock(batch)
-					ch.support.WriteBlock(block, nil)
-				}
+					for _, batch := range batches {
+						block := ch.support.CreateNextBlock(batch)
+						ch.support.WriteBlock(block, nil)
+					}
 
 				switch {
 				case timer != nil && !pending:
