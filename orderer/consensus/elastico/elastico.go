@@ -17,20 +17,22 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
+
 	"github.com/streadway/amqp"
 )
 
-// finNum - final committee id
-var finNum int64
+// FinNum - final committee id
+var FinNum int64
 
-// D - difficulty level , leading bits of PoW must have D 0's (keep w.r.t to hex)
+// D - difficulty level , leading bits of PoW must have D 0's (keep w.R.t to hex)
 var D = 3
 
-// c - size of committee
-var c = 2
+// C - size of committee
+var C = 4
 
-// r - number of bits in random string
-var r int64 = 8
+// R - number of bits in random string
+var R int64 = 8
 
 // s - where 2^s is the number of committees
 var s = 2
