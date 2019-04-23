@@ -267,6 +267,55 @@ func (ch *chain) runElastico(msg Transaction) []Transaction {
 	for StateEnv := GetState(path); StateEnv != strconv.Itoa(ElasticoStates["Reset"]); {
 		StateEnv = GetState(path)
 	}
+	ListOfTxns := GetDeliveryMsg(channel, deliveryqueueName)
+	return ListOfTxns
+}
+
+// DeliveryMsg :-
+type DeliveryMsg struct {
+	Type    string
+	Epoch   string
+	Data    []Transaction
+	Orderer string
+}
+
+// GetDeliveryMsg :-
+func GetDeliveryMsg(channel *amqp.Channel, queueName string) []Transaction {
+	logger.Info("delivery queue start")
+	queue, err := channel.QueueInspect(queueName)
+	var ListOfTxns []Transaction
+	FailOnError(err, "error in elivery queue inspect", true)
+	for ; queue.Messages > 0; queue.Messages-- {
+		// get the message from the queue
+		logger.Info("inside queue messages")
+		msg, ok, err := channel.Get(queue.Name, true)
+		FailOnError(err, "error in get of delivery queue", true)
+		if ok {
+			var decodemsg DeliveryMsg
+			err = json.Unmarshal(msg.Body, &decodemsg)
+			// logger.Info("decode msg :- ", decodemsg)
+			FailOnError(err, "error in unmarshall the delivery msg", true)
+			if decodemsg.Orderer == os.Getenv("ORDERER_HOST") {
+				for _, txndelivery := range decodemsg.Data {
+					logger.Infof("received delivery msg size - %s", strconv.Itoa(len(txndelivery.Txn.Payload)))
+					ListOfTxns = append(ListOfTxns, txndelivery)
+				}
+			} else {
+				errRequeue := channel.Publish(
+					"",        // exchange
+					queueName, // routing key
+					false,     // mandatory
+					false,     // immediate
+					amqp.Publishing{
+						ContentType: "text/plain",
+						Body:        msg.Body,
+					})
+				FailOnError(errRequeue, "fail to requeue", true)
+			}
+		}
+	}
+
+	return ListOfTxns
 }
 
 func (ch *chain) main() {
