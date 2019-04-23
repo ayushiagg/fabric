@@ -254,6 +254,9 @@ func (ch *chain) runElastico(msg Transaction) []Transaction {
 	newEpochMsg["Data"] = msg
 	newEpochMsg["Orderer"] = os.Getenv("ORDERER_HOST")
 
+	logger.Infof("see the config seq of gng msg %s", strconv.FormatUint(msg.ConfigSeq, 10))
+	size := strconv.Itoa(len(msg.Txn.Payload))
+	logger.Infof("see the size of gng Payload %s", size)
 	// inform other orderers to start the epoch
 	for _, queueName := range allqueues {
 		publishMsg(channel, queueName.Name, newEpochMsg)
