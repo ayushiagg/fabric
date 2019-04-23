@@ -1272,19 +1272,18 @@ func (t Transaction) Hexdigest() string {
 	/*
 		Digest of a transaction
 	*/
-	logger.Info("file:- elastico.go, func:- hexdigest of Message()")
+	logger.Info("file:- elastico.go, func:- Hexdigest of Message()")
 	digest := sha256.New()
-	if t.ConfigMsg == nil {
-		digest.Write(t.NormalMsg.Payload)
-		digest.Write(t.NormalMsg.Signature)
-		digest.Write(t.NormalMsg.XXX_unrecognized)
-		digest.Write([]byte(strconv.FormatInt(int64(t.NormalMsg.XXX_sizecache), 10)))
-	} else {
-		digest.Write(t.ConfigMsg.Payload)
-		digest.Write(t.ConfigMsg.Signature)
-		digest.Write(t.ConfigMsg.XXX_unrecognized)
-		digest.Write([]byte(strconv.FormatInt(int64(t.ConfigMsg.XXX_sizecache), 10)))
-	}
+	digest.Write(t.Txn.Payload)
+	digest.Write(t.Txn.Signature)
+	digest.Write(t.Txn.XXX_unrecognized)
+	digest.Write([]byte(strconv.FormatInt(int64(t.Txn.XXX_sizecache), 10)))
+	// } else {
+	// 	digest.Write(t.ConfigMsg.Payload)
+	// 	digest.Write(t.ConfigMsg.Signature)
+	// 	digest.Write(t.ConfigMsg.XXX_unrecognized)
+	// 	digest.Write([]byte(strconv.FormatInt(int64(t.ConfigMsg.XXX_sizecache), 10)))
+	// }
 	digest.Write([]byte(strconv.FormatUint(t.ConfigSeq, 10))) // convert amount(big.Int) to string
 
 	hashVal := fmt.Sprintf("%x", digest.Sum(nil))
