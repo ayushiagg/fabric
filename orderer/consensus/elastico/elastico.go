@@ -1251,21 +1251,24 @@ func (e *Elastico) IsFinalCommitted() bool {
 	return false
 }
 
-func (e *Elastico) isPrePrepared() bool {
+// IsPrePrepared :-
+func (e *Elastico) IsPrePrepared() bool {
 	/*
 		if the node received the pre-prepare msg from the Primary
 	*/
-	logger.Info("file:- elastico.go, func:- isPrePrepared()")
+	// logger.Info("file:- elastico.go, func:- IsPrePrepared()")
 	return len(e.PrePrepareMsgLog) > 0
 }
 
-func (e *Elastico) isFinalprePrepared() bool {
+// IsFinalprePrepared :-
+func (e *Elastico) IsFinalprePrepared() bool {
 
-	logger.Info("file:- elastico.go, func:- isFinalprePrepared()")
+	logger.Info("file:- elastico.go, func:- IsFinalprePrepared()")
 	return len(e.FinalPrePrepareMsgLog) > 0
 }
 
-func (t *Message) hexdigest() string {
+// Hexdigest :-
+func (t Transaction) Hexdigest() string {
 	/*
 		Digest of a transaction
 	*/
