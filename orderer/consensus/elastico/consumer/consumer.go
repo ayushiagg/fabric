@@ -88,6 +88,7 @@ func Consume(ch *amqp.Channel, queue amqp.Queue, elasticoObj *elastico.Elastico)
 				// bind the queue to the exchange
 				errQueueBind := ch.QueueBind(queue.Name, "", exchangeName, false, nil)
 				elastico.FailOnError(errQueueBind, "Failed to bind a queue to exchange", true)
+				// testData(newEpochMessage)
 
 				// consume the msg by taking the action in receive
 				ExecuteConsume(ch, queue.Name, decodemsg, exchangeName, newEpochMessage, elasticoObj)
@@ -95,6 +96,17 @@ func Consume(ch *amqp.Channel, queue amqp.Queue, elasticoObj *elastico.Elastico)
 			}
 		}
 	}
+}
+
+func testData(data elastico.Transaction) {
+	logger.Infof("see the rcved configseq %s", strconv.FormatUint(data.ConfigSeq, 10))
+	size := strconv.Itoa(len(data.Txn.Payload))
+	logger.Infof("see the size of rcved Payload %s", size)
+	if size != "0" {
+		s := string(data.Txn.Payload)
+		logger.Infof("see the sending array payloag %s", s)
+	}
+	os.Exit(1)
 }
 
 // Run :-
