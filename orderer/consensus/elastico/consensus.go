@@ -252,6 +252,7 @@ func (ch *chain) runElastico(msg Transaction) []Transaction {
 	newEpochMsg["Type"] = "StartNewEpoch"
 	newEpochMsg["Epoch"] = RandomGen(64).String()
 	newEpochMsg["Data"] = msg
+	newEpochMsg["Orderer"] = os.Getenv("ORDERER_HOST")
 
 	// inform other orderers to start the epoch
 	for _, queueName := range allqueues {
