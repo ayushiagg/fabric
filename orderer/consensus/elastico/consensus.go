@@ -259,7 +259,9 @@ func (ch *chain) runElastico(msg Transaction) []Transaction {
 	logger.Infof("see the size of gng Payload %s", size)
 	// inform other orderers to start the epoch
 	for _, queueName := range allqueues {
-		publishMsg(channel, queueName.Name, newEpochMsg)
+		if queueName.Name != deliveryqueueName {
+			PublishMsg(channel, queueName.Name, newEpochMsg)
+		}
 	}
 	// Block will not go to BlockCutter till state is reset for the orderer
 	for StateEnv := GetState(path); StateEnv != strconv.Itoa(ElasticoStates["Reset"]); {
