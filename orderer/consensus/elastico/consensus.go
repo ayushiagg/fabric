@@ -134,8 +134,9 @@ func marshalData(msg map[string]interface{}) []byte {
 	return body
 }
 
-func publishMsg(channel *amqp.Channel, queueName string, msg map[string]interface{}) {
-	logger.Info("file:- consensus.go, func:- publishMsg()")
+// PublishMsg :-
+func PublishMsg(channel *amqp.Channel, queueName string, msg map[string]interface{}) {
+	logger.Info("file:- consensus.go, func:- PublishMsg()")
 	body := marshalData(msg)
 
 	err := channel.Publish(
@@ -205,10 +206,6 @@ func (ch *chain) runElastico(msg *Message) {
 	config.State = strconv.Itoa(ElasticoStates["NONE"])
 	SetState(config, path)
 
-	conn := GetConnection()
-	channel := GetChannel(conn)
-	defer conn.Close()
-	defer channel.Close()
 	// get all queues of rabbit mq
 	allqueues := getallQueues()
 
