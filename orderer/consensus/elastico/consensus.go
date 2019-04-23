@@ -351,18 +351,19 @@ func (ch *chain) main() {
 						ch.support.WriteBlock(block, nil)
 					}
 
-				switch {
-				case timer != nil && !pending:
-					// Timer is already running but there are no messages pending, stop the timer
-					timer = nil
-				case timer == nil && pending:
-					// Timer is not already running and there are messages pending, so start it
-					timer = time.After(ch.support.SharedConfig().BatchTimeout())
-					logger.Debugf("Just began %s batch timer", ch.support.SharedConfig().BatchTimeout().String())
-				default:
-					// Do nothing when:
-					// 1. Timer is already running and there are messages pending
-					// 2. Timer is not set and there are no messages pending
+					switch {
+					case timer != nil && !pending:
+						// Timer is already running but there are no messages pending, stop the timer
+						timer = nil
+					case timer == nil && pending:
+						// Timer is not already running and there are messages pending, so start it
+						timer = time.After(ch.support.SharedConfig().BatchTimeout())
+						logger.Debugf("Just began %s batch timer", ch.support.SharedConfig().BatchTimeout().String())
+					default:
+						// Do nothing when:
+						// 1. Timer is already running and there are messages pending
+						// 2. Timer is not set and there are no messages pending
+					}
 				}
 
 			} else {
