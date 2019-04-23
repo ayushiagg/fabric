@@ -23,13 +23,41 @@ func StateName(stateNum int) string {
 }
 
 //ExecuteConsume :-
-func ExecuteConsume(ch *amqp.Channel, Queue string, decodeMsg elastico.DecodeMsgType, exchangeName string, newEpochMessage elastico.NewEpochMsg, elasticoObj *elastico.Elastico) {
+func ExecuteConsume(ch *amqp.Channel, Queue string, decodeMsg elastico.DecodeMsgType, exchangeName string, newEpochMessage elastico.Transaction, elasticoObj *elastico.Elastico) {
 	// logger.Info("file:- consumer.go, func:- ExecuteConsume()")
 	for {
 		statename := StateName(elasticoObj.State)
 		logger.Infof("Orderer State - %s , %s ", os.Getenv("ORDERER_HOST"), statename)
 		response := elasticoObj.Execute(exchangeName, decodeMsg.Epoch, newEpochMessage)
-		if response == "reset" {
+		if response == "Reset" {
+
+			if os.Getenv("ORDERER_HOST") == decodeMsg.Orderer {
+
+				var finalListMsg []elastico.Transaction
+				logger.Infof("get response size : %s", strconv.Itoa(elasticoObj.GetResponseSize()))
+
+				response := elasticoObj.GetResponse()
+				for _, deliverBlock := range response {
+					logger.Info("something in response")
+					for _, txn := range deliverBlock.TxnList {
+						logger.Infof("something in deliver block 's txnlist size - %s", strconv.Itoa(len(txn.Txn.Payload)))
+						finalListMsg = append(finalListMsg, txn)
+					}
+				}
+				data := make(map[string]interface{})
+				data["Type"] = "deliveryMsg"
+				data["Epoch"] = decodeMsg.Epoch
+				data["Data"] = finalListMsg
+				data["Orderer"] = decodeMsg.Orderer
+				logger.Info("gng msg in delivery queue", data)
+				elastico.PublishMsg(ch, "deliveryQueue", data)
+
+			}
+			// changing the state to reset in file after sending delivery msgs
+			config := elastico.EState{}
+			config.State = strconv.Itoa(elastico.ElasticoStates["Reset"])
+			elastico.SetState(config, "/conf.json")
+			logger.Infof("reset done by %s", os.Getenv("ORDERER_HOST"))
 			break
 		}
 		elasticoObj.Consume(ch, Queue, newEpochMessage, decodeMsg.Epoch)
