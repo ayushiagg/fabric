@@ -14,11 +14,18 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/hyperledger/fabric/orderer/consensus"
 	"github.com/hyperledger/fabric/orderer/consensus/migration"
 	cb "github.com/hyperledger/fabric/protos/common"
 	"github.com/streadway/amqp"
 )
+
+// Transaction :-
+type Transaction struct {
+	ConfigSeq uint64
+	Txn       cb.Envelope
+}
 
 type consenter struct{}
 
@@ -156,7 +163,6 @@ type EState struct {
 
 // GetState :-
 func GetState(path string) string {
-
 	if _, err := os.Stat(path); err == nil {
 		// path/to/whatever exists
 		file, errOpen := os.Open(path)
