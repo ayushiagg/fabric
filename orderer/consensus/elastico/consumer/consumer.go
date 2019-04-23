@@ -77,7 +77,7 @@ func Consume(ch *amqp.Channel, queue amqp.Queue, elasticoObj *elastico.Elastico)
 			elastico.FailOnError(err, "error in unmarshall", true)
 			if decodemsg.Type == "StartNewEpoch" {
 
-				var newEpochMessage elastico.NewEpochMsg
+				var newEpochMessage elastico.Transaction
 				err := json.Unmarshal(decodemsg.Data, &newEpochMessage)
 				elastico.FailOnError(err, "fail to decode new epoch msg", true)
 				// set the exchange name as Epoch Num
