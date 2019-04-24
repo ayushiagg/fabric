@@ -14,7 +14,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/hyperledger/fabric/orderer/consensus"
 	"github.com/hyperledger/fabric/orderer/consensus/migration"
 	cb "github.com/hyperledger/fabric/protos/common"
@@ -127,16 +126,14 @@ func (ch *chain) MigrationStatus() migration.Status {
 }
 
 func marshalData(msg map[string]interface{}) []byte {
-	// logger.Info("file:- consensus.go, func:- marshalData()")
 	body, err := json.Marshal(msg)
-	// fmt.Println("marshall data", body)
 	FailOnError(err, "error in marshal", true)
 	return body
 }
 
-// PublishMsg :-
+// PublishMsg :- publish the message in the queue
 func PublishMsg(channel *amqp.Channel, queueName string, msg map[string]interface{}) {
-	logger.Info("file:- consensus.go, func:- PublishMsg()")
+
 	body := marshalData(msg)
 
 	err := channel.Publish(
@@ -162,10 +159,10 @@ type EState struct {
 	State string
 }
 
-// GetState :-
+// GetState :- get the state of Elastico
 func GetState(path string) string {
+
 	if _, err := os.Stat(path); err == nil {
-		// path/to/whatever exists
 		file, errOpen := os.Open(path)
 		FailOnError(errOpen, "error in opening the file", true)
 		defer file.Close()
@@ -173,8 +170,7 @@ func GetState(path string) string {
 		config := EState{}
 		err := decoder.Decode(&config)
 		if err != nil {
-			// FailOnError(err, "error in decoding config", false)
-			return ""
+			return "" // file empty
 		}
 		return config.State
 	}
@@ -195,24 +191,8 @@ func SetState(config EState, path string) {
 	FailOnError(err2, "fail to write in file", true)
 }
 
-func test(msg Transaction) {
-	body, err := json.Marshal(msg.Txn)
-	FailOnError(err, "error in marshalling the txn", true)
-
-	var res cb.Envelope
-	err = json.Unmarshal(body, &res)
-	FailOnError(err, "error in unmarshalling the txn", true)
-
-	if cmp.Equal(msg.Txn, res) {
-		logger.Info("two msgs are equal")
-	} else {
-
-		logger.Info("two msgs are NOT equal")
-	}
-}
-
-func declareDeliveryQueue(channel *amqp.Channel) {
-	queueName := "deliveryQueue"
+// DeclareQueue :-
+func DeclareQueue(channel *amqp.Channel, queueName string) {
 
 	_, err := channel.QueueDeclare(
 		queueName, //name of the queue
@@ -228,19 +208,23 @@ func declareDeliveryQueue(channel *amqp.Channel) {
 
 func (ch *chain) runElastico(msg Transaction) []Transaction {
 
-	conn := GetConnection()
-	channel := GetChannel(conn)
+	conn := GetConnection()     // get the connection from rabbitmq
+	channel := GetChannel(conn) // get the channel
 	defer conn.Close()
 	defer channel.Close()
-	declareDeliveryQueue(channel)
+
 	deliveryqueueName := "deliveryQueue"
+	DeclareQueue(channel, deliveryqueueName)
+	// path of the file of the elastico state
 	path := "/conf.json"
+	// elastico state
 	config := EState{}
 
 	// if elastico is running for previous epoch then wait for it to reset and get finished
 	for stateEnv := GetState(path); stateEnv != "" && stateEnv != strconv.Itoa(ElasticoStates["Reset"]); {
 		stateEnv = GetState(path)
 	}
+	// set the elastico state to NONE for next epoch
 	config.State = strconv.Itoa(ElasticoStates["NONE"])
 	SetState(config, path)
 
@@ -254,9 +238,8 @@ func (ch *chain) runElastico(msg Transaction) []Transaction {
 	newEpochMsg["Data"] = msg
 	newEpochMsg["Orderer"] = os.Getenv("ORDERER_HOST")
 
-	logger.Infof("see the config seq of gng msg %s", strconv.FormatUint(msg.ConfigSeq, 10))
 	size := strconv.Itoa(len(msg.Txn.Payload))
-	logger.Infof("see the size of gng Payload %s", size)
+	logger.Infof("Size of gng Payload %s", size)
 	// inform other orderers to start the epoch
 	for _, queueName := range allqueues {
 		if queueName.Name != deliveryqueueName {
@@ -267,6 +250,7 @@ func (ch *chain) runElastico(msg Transaction) []Transaction {
 	for StateEnv := GetState(path); StateEnv != strconv.Itoa(ElasticoStates["Reset"]); {
 		StateEnv = GetState(path)
 	}
+	// get the messages from the delivery queue
 	ListOfTxns := GetDeliveryMsg(channel, deliveryqueueName)
 	return ListOfTxns
 }
@@ -279,28 +263,28 @@ type DeliveryMsg struct {
 	Orderer string
 }
 
-// GetDeliveryMsg :-
+// GetDeliveryMsg :- get the messages out of the delivery queue
 func GetDeliveryMsg(channel *amqp.Channel, queueName string) []Transaction {
-	logger.Info("delivery queue start")
+
 	queue, err := channel.QueueInspect(queueName)
-	var ListOfTxns []Transaction
 	FailOnError(err, "error in elivery queue inspect", true)
+	var ListOfTxns []Transaction
 	for ; queue.Messages > 0; queue.Messages-- {
 		// get the message from the queue
-		logger.Info("inside queue messages")
 		msg, ok, err := channel.Get(queue.Name, true)
-		FailOnError(err, "error in get of delivery queue", true)
+		FailOnError(err, "error in msg get of delivery queue", true)
 		if ok {
 			var decodemsg DeliveryMsg
 			err = json.Unmarshal(msg.Body, &decodemsg)
-			// logger.Info("decode msg :- ", decodemsg)
-			FailOnError(err, "error in unmarshall the delivery msg", true)
+			FailOnError(err, "error in unmarshall of the delivery msg", true)
+			// pick the messages for the designated orderer
 			if decodemsg.Orderer == os.Getenv("ORDERER_HOST") {
 				for _, txndelivery := range decodemsg.Data {
 					logger.Infof("received delivery msg size - %s", strconv.Itoa(len(txndelivery.Txn.Payload)))
 					ListOfTxns = append(ListOfTxns, txndelivery)
 				}
 			} else {
+				// Requeue the messages that are for other orderer
 				errRequeue := channel.Publish(
 					"",        // exchange
 					queueName, // routing key
@@ -337,10 +321,10 @@ func (ch *chain) main() {
 					}
 				}
 				// run the elastico
-				var checkMsg Transaction
-				checkMsg.ConfigSeq = msg.ConfigSeq
-				checkMsg.Txn = *msg.NormalMsg
-				receivedMsgs := ch.runElastico(checkMsg)
+				var newTxn Transaction
+				newTxn.ConfigSeq = msg.ConfigSeq
+				newTxn.Txn = *msg.NormalMsg
+				receivedMsgs := ch.runElastico(newTxn)
 				for _, txnMsg := range receivedMsgs {
 					logger.Info("Elastico completed")
 

@@ -12,7 +12,7 @@ import (
 
 var logger = flogging.MustGetLogger("orderer.consensus.elastico.consumer")
 
-// StateName :-
+// StateName :- returns the elastico state name corresponding to the elastico state number
 func StateName(stateNum int) string {
 	for k, v := range elastico.ElasticoStates {
 		if v == stateNum {
@@ -24,11 +24,14 @@ func StateName(stateNum int) string {
 
 //ExecuteConsume :-
 func ExecuteConsume(ch *amqp.Channel, Queue string, decodeMsg elastico.DecodeMsgType, exchangeName string, newEpochMessage elastico.Transaction, elasticoObj *elastico.Elastico) {
-	// logger.Info("file:- consumer.go, func:- ExecuteConsume()")
 	for {
+		// get the statename corresponding to state number
 		statename := StateName(elasticoObj.State)
+		// logging the state name alongwith the orderer name
 		logger.Infof("Orderer State - %s , %s ", os.Getenv("ORDERER_HOST"), statename)
+		// Execute the steps of Elastico
 		response := elasticoObj.Execute(exchangeName, decodeMsg.Epoch, newEpochMessage)
+
 		if response == "Reset" {
 
 			if os.Getenv("ORDERER_HOST") == decodeMsg.Orderer {
@@ -71,10 +74,10 @@ func Consume(ch *amqp.Channel, queue amqp.Queue, elasticoObj *elastico.Elastico)
 	for ; queue.Messages > 0; queue.Messages-- {
 		// get the message from the queue
 		msg, ok, err := ch.Get(queue.Name, true)
-		elastico.FailOnError(err, "error in get of queue", true)
+		elastico.FailOnError(err, "error in getting msg from queue", true)
 		if ok {
 			err = json.Unmarshal(msg.Body, &decodemsg)
-			elastico.FailOnError(err, "error in unmarshall", true)
+			elastico.FailOnError(err, "error in unmarshall the msg in get of the queue", true)
 			if decodemsg.Type == "StartNewEpoch" {
 
 				var newEpochMessage elastico.Transaction
@@ -88,6 +91,7 @@ func Consume(ch *amqp.Channel, queue amqp.Queue, elasticoObj *elastico.Elastico)
 				// bind the queue to the exchange
 				errQueueBind := ch.QueueBind(queue.Name, "", exchangeName, false, nil)
 				elastico.FailOnError(errQueueBind, "Failed to bind a queue to exchange", true)
+
 				// testData(newEpochMessage)
 
 				// consume the msg by taking the action in receive
@@ -128,20 +132,13 @@ func main() {
 	ch := elastico.GetChannel(conn)
 	defer conn.Close()
 
+	// queue name is the container-id of the orderer
 	queueName := os.Getenv("ORDERER_HOST")
 
-	queue, err := ch.QueueDeclare(
-		queueName, //name of the queue
-		false,     // durable
-		false,     // delete when unused
-		false,     // exclusive
-		false,     // no-wait
-		nil,       // arguments
-	)
+	elastico.DeclareQueue(ch, queueName)
 
-	elastico.FailOnError(err, "Failed to declare a queue", true)
-	elasticoObj := elastico.Elastico{}
-	elasticoObj.ElasticoInit()
+	elasticoObj := elastico.Elastico{} // create the Elastico Object
+	elasticoObj.ElasticoInit()         // initialise the variables of Elastico
 	logger.Info("elastico-consumer running start")
-	Run(ch, queue.Name, &elasticoObj)
+	Run(ch, queueName, &elasticoObj)
 }
