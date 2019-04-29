@@ -26,6 +26,12 @@ type Transaction struct {
 	Txn       cb.Envelope
 }
 
+// DummyMessage :-
+type DummyMessage struct {
+	ConfigSeq uint64
+	Txn       *cb.Envelope
+}
+
 type consenter struct{}
 
 type chain struct {
@@ -206,7 +212,7 @@ func DeclareQueue(channel *amqp.Channel, queueName string) {
 	FailOnError(err, "Failed to declare a delivery queue", true)
 }
 
-func (ch *chain) runElastico(msg Transaction) []Transaction {
+func (ch *chain) runElastico(msg Transaction) []DummyMessage {
 
 	conn := GetConnection()     // get the connection from rabbitmq
 	channel := GetChannel(conn) // get the channel
@@ -218,18 +224,7 @@ func (ch *chain) runElastico(msg Transaction) []Transaction {
 	// path of the file of the elastico state
 	path := "/conf.json"
 	// elastico state
-	config := EState{}
-
-	// if elastico is running for previous epoch then wait for it to reset and get finished
-	for stateEnv := GetState(path); stateEnv != "" && stateEnv != strconv.Itoa(ElasticoStates["Reset"]); {
-		stateEnv = GetState(path)
-	}
-	// set the elastico state to NONE for next epoch
-	config.State = strconv.Itoa(ElasticoStates["NONE"])
-	SetState(config, path)
-
-	// get all queues of rabbit mq
-	allqueues := getallQueues()
+	// config := EState{}
 
 	//construct the new epoch msg
 	newEpochMsg := make(map[string]interface{})
@@ -237,13 +232,27 @@ func (ch *chain) runElastico(msg Transaction) []Transaction {
 	newEpochMsg["Epoch"] = RandomGen(64).String()
 	newEpochMsg["Data"] = msg
 	newEpochMsg["Orderer"] = os.Getenv("ORDERER_HOST")
+	// if elastico is running for previous epoch then wait for it to reset and get finished
 
-	size := strconv.Itoa(len(msg.Txn.Payload))
-	logger.Infof("Size of gng Payload %s", size)
-	// inform other orderers to start the epoch
-	for _, queueName := range allqueues {
-		if queueName.Name != deliveryqueueName {
-			PublishMsg(channel, queueName.Name, newEpochMsg)
+	if stateEnv := GetState(path); stateEnv != "" && stateEnv != strconv.Itoa(ElasticoStates["Reset"]) {
+		PublishMsg(channel, os.Getenv("ORDERER_HOST"), newEpochMsg)
+
+	} else {
+
+		// set the elastico state to NONE for next epoch
+		// config.State = strconv.Itoa(ElasticoStates["NONE"])
+		// SetState(config, path)
+
+		// get all queues of rabbit mq
+		allqueues := getallQueues()
+
+		size := strconv.Itoa(len(msg.Txn.Payload))
+		logger.Infof("Size of gng Payload %s", size)
+		// inform other orderers to start the epoch
+		for _, queueName := range allqueues {
+			if queueName.Name != deliveryqueueName {
+				PublishMsg(channel, queueName.Name, newEpochMsg)
+			}
 		}
 	}
 	// Block will not go to BlockCutter till state is reset for the orderer
@@ -264,11 +273,11 @@ type DeliveryMsg struct {
 }
 
 // GetDeliveryMsg :- get the messages out of the delivery queue
-func GetDeliveryMsg(channel *amqp.Channel, queueName string) []Transaction {
+func GetDeliveryMsg(channel *amqp.Channel, queueName string) []DummyMessage {
 
 	queue, err := channel.QueueInspect(queueName)
 	FailOnError(err, "error in elivery queue inspect", true)
-	var ListOfTxns []Transaction
+	var ListOfTxns []DummyMessage
 	for ; queue.Messages > 0; queue.Messages-- {
 		// get the message from the queue
 		msg, ok, err := channel.Get(queue.Name, true)
@@ -281,7 +290,8 @@ func GetDeliveryMsg(channel *amqp.Channel, queueName string) []Transaction {
 			if decodemsg.Orderer == os.Getenv("ORDERER_HOST") {
 				for _, txndelivery := range decodemsg.Data {
 					logger.Infof("received delivery msg size - %s", strconv.Itoa(len(txndelivery.Txn.Payload)))
-					ListOfTxns = append(ListOfTxns, txndelivery)
+					DummyTxnMessage := DummyMessage{txndelivery.ConfigSeq, &txndelivery.Txn}
+					ListOfTxns = append(ListOfTxns, DummyTxnMessage)
 				}
 			} else {
 				// Requeue the messages that are for other orderer
@@ -328,7 +338,7 @@ func (ch *chain) main() {
 				for _, txnMsg := range receivedMsgs {
 					logger.Info("Elastico completed")
 
-					batches, pending := ch.support.BlockCutter().Ordered(&txnMsg.Txn)
+					batches, pending := ch.support.BlockCutter().Ordered(txnMsg.Txn)
 
 					for _, batch := range batches {
 						block := ch.support.CreateNextBlock(batch)

@@ -2032,7 +2032,11 @@ func (e *Elastico) Consume(channel *amqp.Channel, queueName string, Txn Transact
 				if decodedmsg.Epoch == epoch {
 					// consume the msg by taking the action in Receive
 					e.Receive(decodedmsg, epoch)
-				} //else if decodedmsg.Epoch > epoch {
+				} else {
+					// if e.Sta
+				}
+
+				//else if decodedmsg.Epoch > epoch {
 				// 	requeueMsgs = append(requeueMsgs, msg.Body)
 				// 	logger.Warn("Need to requeue msgs! type - ", decodedmsg.Type, " epoch - ", decodedmsg.Epoch, " present epoch : ", epoch)
 				// } else {
@@ -2434,6 +2438,7 @@ func (e *Elastico) Receive(msg DecodeMsgType, epoch string) {
 		method to recieve messages for a node as per the type of a msg
 	*/
 	// new node is added in directory committee if not yet formed
+
 	if msg.Type == "directoryMember" {
 		e.ReceiveDirectoryMember(msg)
 

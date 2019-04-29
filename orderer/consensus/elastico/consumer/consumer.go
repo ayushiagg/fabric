@@ -61,6 +61,7 @@ func ExecuteConsume(ch *amqp.Channel, Queue string, decodeMsg elastico.DecodeMsg
 			config.State = strconv.Itoa(elastico.ElasticoStates["Reset"])
 			elastico.SetState(config, "/conf.json")
 			logger.Infof("reset done by %s", os.Getenv("ORDERER_HOST"))
+			elasticoObj.Reset()
 			break
 		}
 		elasticoObj.Consume(ch, Queue, newEpochMessage, decodeMsg.Epoch)
@@ -122,7 +123,6 @@ func Run(ch *amqp.Channel, queueName string, elasticoObj *elastico.Elastico) {
 		elastico.FailOnError(err, "error in inspect", false)
 		if err == nil {
 			Consume(ch, queue, elasticoObj)
-			//ToDo:- Add reset for elastico node
 		}
 	}
 }
