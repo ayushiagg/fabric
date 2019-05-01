@@ -268,7 +268,7 @@ func (ch *chain) runElastico(msg Transaction) []DummyMessage {
 		}
 		// publish msg
 		requeue(channel, elasticoStateQueueName, ElasticoMsg.Body)
-		threshold := 4
+		threshold := ElasticoStates["RunAsDirectory after-TxnReceived"]
 		ElMsg := getElasticoState(ElasticoMsg)
 		ElMsgStateNum, _ := strconv.ParseInt(ElMsg.State, 10, 32)
 		if ElMsgStateNum < int64(threshold) {

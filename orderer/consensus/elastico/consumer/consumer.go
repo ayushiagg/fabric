@@ -54,6 +54,7 @@ func ExecuteConsume(ch *amqp.Channel, Queue string, decodeMsg elastico.DecodeMsg
 				data["Orderer"] = decodeMsg.Orderer
 				logger.Info("gng msg in delivery queue", data)
 				elastico.PublishMsg(ch, "deliveryQueue", data)
+				elasticoObj.UpdateElState("0", "")
 
 			}
 			// changing the state to reset in file after sending delivery msgs
