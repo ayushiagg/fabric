@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hyperledger/fabric/orderer/consensus/elastico"
 
 	"github.com/streadway/amqp"
 )
@@ -166,6 +167,7 @@ type Elastico struct {
 	IsFinal          bool
 	EpochRandomness  string
 	Ri               string
+	EpochTxns         []Transaction
 	// only when this node is the member of final committee
 	Commitments                    map[string]bool
 	TxnBlock                       []Transaction
@@ -200,6 +202,7 @@ type Elastico struct {
 	FinalpreparedData     map[int]map[int][]Transaction
 	FinalcommittedData    map[int]map[int][]Transaction
 	EpochcommitmentSet    map[string]bool
+	MsgesSameEpoch        []Transaction
 }
 
 // Reset :-
@@ -221,12 +224,12 @@ func (e *Elastico) Reset() {
 	e.CommitteeList = make(map[int64][]IDENTITY)
 	// only when this node is not the member of directory committee
 	e.CommitteeMembers = make([]IDENTITY, 0)
-
+	e.MsgesSameEpoch = make([]Transaction, 0)
 	e.Identity = IDENTITY{}
 	e.CommitteeID = -1
 	var Ri string
 	e.Ri = Ri
-
+	e.EpochTxns = make([]Transaction, 0)
 	e.IsDirectory = false
 	e.IsFinal = false
 
@@ -1578,20 +1581,31 @@ type NewEpochMsg struct {
 }
 
 // ReceiveTxns :-
-func (e *Elastico) ReceiveTxns(epochTxn Transaction) {
+func (e *Elastico) ReceiveTxns(epochTxn []Transaction) {
 	/*
 		directory node will Receive transactions from client
 	*/
-	// Receive txns from client for an epoch
-	// var k int64
+	var k int64
 	numOfCommittees := int64(math.Pow(2, float64(s)))
-	// var num int64
-	// num = 1 // Transactions per committee
-	// loop in sorted order of committee ids
+	var num int64
+	num = int64(len(epochTxn)) / numOfCommittees // Transactions per committee
 	var iden int64
-	for iden = 0; iden < numOfCommittees; iden++ {
-		e.Txn[iden] = make([]Transaction, 1)
-		e.Txn[iden][0] = epochTxn
+	if num == 0 {
+		for iden = 0; iden < numOfCommittees; iden++ {
+			e.txn[iden] = epochTxn
+		}
+	} else {
+
+		// loop in sorted order of committee ids 
+		for iden = 0; iden < numOfCommittees; iden++ {
+			if iden == numOfCommittees-1 {
+				// give all the remaining txns to the last committee
+				e.txn[iden] = epochTxn[k:]
+			} else {
+				e.txn[iden] = epochTxn[k : k+num]
+			}
+			k = k + num
+		}
 	}
 }
 
@@ -1752,7 +1766,7 @@ func (e *Elastico) Execute(exchangeName string, epoch string, Txn Transaction) s
 	} else if e.IsDirectory && e.State == ElasticoStates["RunAsDirectory"] {
 
 		logger.Infof("The directory member :- %s ", e.IP)
-		e.ReceiveTxns(Txn)
+		e.ReceiveTxns(e.EpochTxns)
 		// directory member has received the txns for all committees
 		e.State = ElasticoStates["RunAsDirectory after-TxnReceived"]
 	} else if e.State == ElasticoStates["Receiving Committee Members"] {
@@ -1844,6 +1858,17 @@ func (e *Elastico) Execute(exchangeName string, epoch string, Txn Transaction) s
 		e.State = ElasticoStates["Reset"]
 		// Now, the node can be Reset
 		return "Reset"
+	}
+	if len(e.MsgesSameEpoch) > 0 {
+		if len(e.CurDirectory >= C)
+		{
+			sameEpochMsg := map[string]interface{}{"Type" : "sameEpochMsg" , "Epoch" : epoch , "Data" : e.MsgesSameEpoch}
+			for _, node := range(e.CurDirectory) {
+				node.Send(sameEpochMsg)
+			}
+			// discarding the transactions
+			e.MsgesSameEpoch = make([]Transaction, 0)
+		}
 	}
 	config.State = strconv.Itoa(e.State)
 	SetState(config, "/conf.json")
@@ -2488,7 +2513,41 @@ func (e *Elastico) Receive(msg DecodeMsgType, epoch string) {
 			e.Reset()
 		}
 
+	} else if msg.Type == "NewMsgSameEpoch" {
+		e.HandleNewMsg(msg)
+	} else if msg.Type == "sameEpochMsg" {
+		var decodeMsg EpochMsg
+		err := json.Unmarshal(msg.Data, &decodeMsg)
+		FailOnError(err, "fail to decode same epoch msg", true)
+		for _, transaction := range decodeMsg.Data {
+
+			Flag := true
+			for _, Txn := range e.EpochTxns {
+				if Txn.IsEqual(transaction) {
+					Flag = false
+					break
+				}
+			}
+			if Flag {
+				e.EpochTxns = append(e.EpochTxns, transaction)
+			}
+		}
 	}
+}
+// EpochMsg :-
+ type EpochMsg struct {
+	Data []Transaction
+ }
+
+// HandleNewMsg :-
+func (e *Elastico) HandleNewMsg(msg DecodeMsgType) {
+	if len(e.CurDirectory) < C {
+		var sameEpochMessage Transaction
+		err := json.Unmarshal(decodemsg.Data, &sameEpochMessage)
+		elastico.FailOnError(err, "fail to decode same epoch msg", true)
+		e.MsgesSameEpoch = append(e.MsgesSameEpoch, msg)
+	}
+
 }
 
 // FinalBlockMsg - final block msg

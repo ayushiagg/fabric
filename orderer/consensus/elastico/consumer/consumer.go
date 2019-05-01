@@ -137,6 +137,16 @@ func main() {
 
 	elastico.DeclareQueue(ch, queueName)
 
+	// queue that denotes whether any directory memeber has started multicast of msgs or not
+	elasticoStateQueueName := "elasticoState"
+	elastico.DeclareQueue(ch, elasticoStateQueueName)
+
+	// enter the initial in the elasticoState Queue for the first time
+	if queueName == "orderer0.example.com" {
+		ElMsg := map[string]interface{}{"State": "0", "Epoch": ""}
+		elastico.PublishMsg(ch, elasticoStateQueueName, ElMsg)
+	}
+
 	elasticoObj := elastico.Elastico{} // create the Elastico Object
 	elasticoObj.ElasticoInit()         // initialise the variables of Elastico
 	logger.Info("elastico-consumer running start")

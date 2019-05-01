@@ -155,6 +155,20 @@ func PublishMsg(channel *amqp.Channel, queueName string, msg map[string]interfac
 	FailOnError(err, "Failed to publish a Message", true)
 }
 
+func requeue(channel *amqp.Channel, queueName string, body []byte) {
+	err := channel.Publish(
+		"",        // exchange
+		queueName, // routing key
+		false,     // mandatory
+		false,     // immediate
+		amqp.Publishing{
+			ContentType: "text/plain",
+			Body:        body,
+		})
+
+	FailOnError(err, "Failed to publish a Message", true)
+}
+
 type msgType struct {
 	Data map[string]interface{}
 	Type string
@@ -212,6 +226,17 @@ func DeclareQueue(channel *amqp.Channel, queueName string) {
 	FailOnError(err, "Failed to declare a delivery queue", true)
 }
 
+// ElState :-
+type ElState struct {
+	State string
+	Epoch string
+}
+
+func getElasticoState(ElasticoMsg amqp.Delivery) ElState {
+	var decodeMsg ElState
+	json.Unmarshal(ElasticoMsg.Body, &decodeMsg)
+	return decodeMsg
+}
 func (ch *chain) runElastico(msg Transaction) []DummyMessage {
 
 	conn := GetConnection()     // get the connection from rabbitmq
@@ -221,27 +246,55 @@ func (ch *chain) runElastico(msg Transaction) []DummyMessage {
 
 	deliveryqueueName := "deliveryQueue"
 	DeclareQueue(channel, deliveryqueueName)
-	// path of the file of the elastico state
-	path := "/conf.json"
-	// elastico state
-	// config := EState{}
 
+	elasticoStateQueueName := "elasticoState"
+	// path of the file of the elastico state of the orderer
+	path := "/conf.json"
+	epoch := ""
+
+	for {
+		stateEnv := GetState(path)
+		if stateEnv == "" || stateEnv == strconv.Itoa(ElasticoStates["Reset"]) {
+			// break the wait if state is reset or empty (new epoch) and proceed for next epoch
+			break
+		}
+		var (
+			ElasticoMsg amqp.Delivery
+			ok          bool
+			errorMsg    error
+		)
+		for ElasticoMsg, ok, errorMsg = channel.Get(elasticoStateQueueName, true); ok == false || errorMsg != nil; {
+			ElasticoMsg, ok, errorMsg = channel.Get(elasticoStateQueueName, true)
+		}
+		// publish msg
+		requeue(channel, elasticoStateQueueName, ElasticoMsg.Body)
+		threshold := 4
+		ElMsg := getElasticoState(ElasticoMsg)
+		ElMsgStateNum, _ := strconv.ParseInt(ElMsg.State, 10, 32)
+		if ElMsgStateNum < int64(threshold) {
+			//can still publish the msg in this epoch bcz committees have not yet formed
+			epoch = ElMsg.Epoch
+			break
+		}
+	}
+	if epoch == "" {
+		// set for the new epoch
+		epoch = RandomGen(64).String()
+	}
 	//construct the new epoch msg
 	newEpochMsg := make(map[string]interface{})
-	newEpochMsg["Type"] = "StartNewEpoch"
-	newEpochMsg["Epoch"] = RandomGen(64).String()
+	newEpochMsg["Epoch"] = epoch
 	newEpochMsg["Data"] = msg
 	newEpochMsg["Orderer"] = os.Getenv("ORDERER_HOST")
-	// if elastico is running for previous epoch then wait for it to reset and get finished
 
 	if stateEnv := GetState(path); stateEnv != "" && stateEnv != strconv.Itoa(ElasticoStates["Reset"]) {
+		newEpochMsg["Type"] = "NewMsgSameEpoch"
+		logger.Info("new message for the same epoch")
 		PublishMsg(channel, os.Getenv("ORDERER_HOST"), newEpochMsg)
-
 	} else {
 
-		// set the elastico state to NONE for next epoch
-		// config.State = strconv.Itoa(ElasticoStates["NONE"])
-		// SetState(config, path)
+		logger.Info("message for the new epoch")
+		newEpochMsg["Type"] = "StartNewEpoch"
 
 		// get all queues of rabbit mq
 		allqueues := getallQueues()
@@ -254,6 +307,9 @@ func (ch *chain) runElastico(msg Transaction) []DummyMessage {
 				PublishMsg(channel, queueName.Name, newEpochMsg)
 			}
 		}
+		// Set the state before starting next Epoch
+		config := EState{strconv.Itoa(ElasticoStates["NONE"])}
+		SetState(config, path)
 	}
 	// Block will not go to BlockCutter till state is reset for the orderer
 	for StateEnv := GetState(path); StateEnv != strconv.Itoa(ElasticoStates["Reset"]); {
