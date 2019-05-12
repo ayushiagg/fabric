@@ -223,7 +223,7 @@ func DeclareQueue(channel *amqp.Channel, queueName string) {
 		nil,       // arguments
 	)
 
-	FailOnError(err, "Failed to declare a delivery queue", true)
+	FailOnError(err, "Failed to declare a queue "+queueName, true)
 }
 
 // ElState :-
@@ -246,7 +246,7 @@ func (ch *chain) runElastico(msg Transaction) []DummyMessage {
 
 	deliveryqueueName := "deliveryQueue"
 	DeclareQueue(channel, deliveryqueueName)
-
+	logger.Info("run elastico")
 	elasticoStateQueueName := "elasticoState"
 	// path of the file of the elastico state of the orderer
 	path := "/conf.json"
@@ -255,15 +255,18 @@ func (ch *chain) runElastico(msg Transaction) []DummyMessage {
 	for {
 		stateEnv := GetState(path)
 		if stateEnv == "" || stateEnv == strconv.Itoa(ElasticoStates["Reset"]) {
+			logger.Info("stateenv is empty or reset")
 			// break the wait if state is reset or empty (new epoch) and proceed for next epoch
 			break
 		}
+		logger.Info("stateenv is not reset")
 		var (
 			ElasticoMsg amqp.Delivery
 			ok          bool
 			errorMsg    error
 		)
 		for ElasticoMsg, ok, errorMsg = channel.Get(elasticoStateQueueName, true); ok == false || errorMsg != nil; {
+			logger.Info("waiting for el state")
 			ElasticoMsg, ok, errorMsg = channel.Get(elasticoStateQueueName, true)
 		}
 		// publish msg
@@ -272,6 +275,7 @@ func (ch *chain) runElastico(msg Transaction) []DummyMessage {
 		ElMsg := getElasticoState(ElasticoMsg)
 		ElMsgStateNum, _ := strconv.ParseInt(ElMsg.State, 10, 32)
 		if ElMsgStateNum < int64(threshold) {
+			logger.Info("within threshold")
 			//can still publish the msg in this epoch bcz committees have not yet formed
 			epoch = ElMsg.Epoch
 			break
@@ -293,6 +297,9 @@ func (ch *chain) runElastico(msg Transaction) []DummyMessage {
 		PublishMsg(channel, os.Getenv("ORDERER_HOST"), newEpochMsg)
 	} else {
 
+		// Set the state before starting next Epoch
+		config := EState{strconv.Itoa(ElasticoStates["NONE"])}
+		SetState(config, path)
 		logger.Info("message for the new epoch")
 		newEpochMsg["Type"] = "StartNewEpoch"
 
@@ -303,13 +310,10 @@ func (ch *chain) runElastico(msg Transaction) []DummyMessage {
 		logger.Infof("Size of gng Payload %s", size)
 		// inform other orderers to start the epoch
 		for _, queueName := range allqueues {
-			if queueName.Name != deliveryqueueName {
+			if queueName.Name != deliveryqueueName && queueName.Name != elasticoStateQueueName {
 				PublishMsg(channel, queueName.Name, newEpochMsg)
 			}
 		}
-		// Set the state before starting next Epoch
-		config := EState{strconv.Itoa(ElasticoStates["NONE"])}
-		SetState(config, path)
 	}
 	// Block will not go to BlockCutter till state is reset for the orderer
 	for StateEnv := GetState(path); StateEnv != strconv.Itoa(ElasticoStates["Reset"]); {

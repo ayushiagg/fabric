@@ -1,0 +1,1450 @@
+  orderer0.example.com:
+    container_name: orderer0.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer0.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer0.example.com/:/var/hyperledger/orderer
+      - orderer0.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 7050:7050
+
+  orderer1.example.com:
+    container_name: orderer1.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer1.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer1.example.com/:/var/hyperledger/orderer
+      - orderer1.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 7550:7050
+
+  orderer2.example.com:
+    container_name: orderer2.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer2.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer2.example.com/:/var/hyperledger/orderer
+      - orderer2.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 8050:7050
+
+  orderer3.example.com:
+    container_name: orderer3.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer3.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer3.example.com/:/var/hyperledger/orderer
+      - orderer3.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 8550:7050
+
+  orderer4.example.com:
+    container_name: orderer4.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer4.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer4.example.com/:/var/hyperledger/orderer
+      - orderer4.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 9050:7050
+
+  orderer5.example.com:
+    container_name: orderer5.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer5.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer5.example.com/:/var/hyperledger/orderer
+      - orderer5.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 9550:7050
+
+  orderer6.example.com:
+    container_name: orderer6.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer6.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer6.example.com/:/var/hyperledger/orderer
+      - orderer6.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 10050:7050
+
+  orderer7.example.com:
+    container_name: orderer7.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer7.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer7.example.com/:/var/hyperledger/orderer
+      - orderer7.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 10550:7050
+
+  orderer8.example.com:
+    container_name: orderer8.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer8.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer8.example.com/:/var/hyperledger/orderer
+      - orderer8.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 11050:7050
+
+  orderer9.example.com:
+    container_name: orderer9.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer9.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer9.example.com/:/var/hyperledger/orderer
+      - orderer9.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 11550:7050
+
+  orderer10.example.com:
+    container_name: orderer10.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer10.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer10.example.com/:/var/hyperledger/orderer
+      - orderer10.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 12050:7050
+
+  orderer11.example.com:
+    container_name: orderer11.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer11.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer11.example.com/:/var/hyperledger/orderer
+      - orderer11.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 12550:7050
+
+  orderer12.example.com:
+    container_name: orderer12.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer12.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer12.example.com/:/var/hyperledger/orderer
+      - orderer12.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 13050:7050
+
+  orderer13.example.com:
+    container_name: orderer13.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer13.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer13.example.com/:/var/hyperledger/orderer
+      - orderer13.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 13550:7050
+
+  orderer14.example.com:
+    container_name: orderer14.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer14.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer14.example.com/:/var/hyperledger/orderer
+      - orderer14.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 14050:7050
+
+  orderer15.example.com:
+    container_name: orderer15.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer15.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer15.example.com/:/var/hyperledger/orderer
+      - orderer15.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 14550:7050
+
+  orderer16.example.com:
+    container_name: orderer16.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer16.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer16.example.com/:/var/hyperledger/orderer
+      - orderer16.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 15050:7050
+
+  orderer17.example.com:
+    container_name: orderer17.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer17.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer17.example.com/:/var/hyperledger/orderer
+      - orderer17.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 15550:7050
+
+  orderer18.example.com:
+    container_name: orderer18.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer18.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer18.example.com/:/var/hyperledger/orderer
+      - orderer18.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 16050:7050
+
+  orderer19.example.com:
+    container_name: orderer19.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer19.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer19.example.com/:/var/hyperledger/orderer
+      - orderer19.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 16550:7050
+
+  orderer20.example.com:
+    container_name: orderer20.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer20.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer20.example.com/:/var/hyperledger/orderer
+      - orderer20.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 17050:7050
+
+  orderer21.example.com:
+    container_name: orderer21.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer21.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer21.example.com/:/var/hyperledger/orderer
+      - orderer21.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 17550:7050
+
+  orderer22.example.com:
+    container_name: orderer22.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer22.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer22.example.com/:/var/hyperledger/orderer
+      - orderer22.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 18050:7050
+
+  orderer23.example.com:
+    container_name: orderer23.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer23.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer23.example.com/:/var/hyperledger/orderer
+      - orderer23.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 18550:7050
+
+  orderer24.example.com:
+    container_name: orderer24.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer24.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer24.example.com/:/var/hyperledger/orderer
+      - orderer24.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 19050:7050
+
+  orderer25.example.com:
+    container_name: orderer25.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer25.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer25.example.com/:/var/hyperledger/orderer
+      - orderer25.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 19550:7050
+
+  orderer26.example.com:
+    container_name: orderer26.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer26.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer26.example.com/:/var/hyperledger/orderer
+      - orderer26.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 20050:7050
+
+  orderer27.example.com:
+    container_name: orderer27.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer27.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer27.example.com/:/var/hyperledger/orderer
+      - orderer27.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 20550:7050
+
+  orderer28.example.com:
+    container_name: orderer28.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer28.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer28.example.com/:/var/hyperledger/orderer
+      - orderer28.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 21050:7050
+
+  orderer29.example.com:
+    container_name: orderer29.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer29.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer29.example.com/:/var/hyperledger/orderer
+      - orderer29.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 21550:7050
+
+  orderer30.example.com:
+    container_name: orderer30.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer30.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer30.example.com/:/var/hyperledger/orderer
+      - orderer30.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 22050:7050
+
+  orderer31.example.com:
+    container_name: orderer31.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer31.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer31.example.com/:/var/hyperledger/orderer
+      - orderer31.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 22550:7050
+
+  orderer32.example.com:
+    container_name: orderer32.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer32.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer32.example.com/:/var/hyperledger/orderer
+      - orderer32.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 23050:7050
+
+  orderer33.example.com:
+    container_name: orderer33.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer33.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer33.example.com/:/var/hyperledger/orderer
+      - orderer33.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 23550:7050
+
+  orderer34.example.com:
+    container_name: orderer34.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer34.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer34.example.com/:/var/hyperledger/orderer
+      - orderer34.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 24050:7050
+
+  orderer35.example.com:
+    container_name: orderer35.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer35.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer35.example.com/:/var/hyperledger/orderer
+      - orderer35.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 24550:7050
+
+  orderer36.example.com:
+    container_name: orderer36.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer36.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer36.example.com/:/var/hyperledger/orderer
+      - orderer36.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 25050:7050
+
+  orderer37.example.com:
+    container_name: orderer37.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer37.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer37.example.com/:/var/hyperledger/orderer
+      - orderer37.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 25550:7050
+
+  orderer38.example.com:
+    container_name: orderer38.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer38.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer38.example.com/:/var/hyperledger/orderer
+      - orderer38.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 26050:7050
+
+  orderer39.example.com:
+    container_name: orderer39.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer39.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer39.example.com/:/var/hyperledger/orderer
+      - orderer39.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 26550:7050
+
+  orderer40.example.com:
+    container_name: orderer40.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer40.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer40.example.com/:/var/hyperledger/orderer
+      - orderer40.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 27050:7050
+
+  orderer41.example.com:
+    container_name: orderer41.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer41.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer41.example.com/:/var/hyperledger/orderer
+      - orderer41.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 27550:7050
+
+  orderer42.example.com:
+    container_name: orderer42.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer42.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer42.example.com/:/var/hyperledger/orderer
+      - orderer42.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 28050:7050
+
+  orderer43.example.com:
+    container_name: orderer43.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer43.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer43.example.com/:/var/hyperledger/orderer
+      - orderer43.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 28550:7050
+
+  orderer44.example.com:
+    container_name: orderer44.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer44.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer44.example.com/:/var/hyperledger/orderer
+      - orderer44.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 29050:7050
+
+  orderer45.example.com:
+    container_name: orderer45.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer45.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer45.example.com/:/var/hyperledger/orderer
+      - orderer45.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 29550:7050
+
+  orderer46.example.com:
+    container_name: orderer46.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer46.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer46.example.com/:/var/hyperledger/orderer
+      - orderer46.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 30050:7050
+
+  orderer47.example.com:
+    container_name: orderer47.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer47.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer47.example.com/:/var/hyperledger/orderer
+      - orderer47.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 30550:7050
+
+  orderer48.example.com:
+    container_name: orderer48.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer48.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer48.example.com/:/var/hyperledger/orderer
+      - orderer48.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 31050:7050
+
+  orderer49.example.com:
+    container_name: orderer49.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_HOST=orderer49.example.com
+      - RABBITMQ_CONNECT=rabbitmq0:5672
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt, /var/hyperledger/peerOrg1/tls/ca.crt, /var/hyperledger/peerOrg2/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer49.example.com/:/var/hyperledger/orderer
+      - orderer49.example.com:/var/hyperledger/production/orderer
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/bin/consumer:/var/hyperledger/fabric/orderer/elastico
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/var/hyperledger/peerOrg1
+      - /home/ayushi/go/src/github.com/hyperledger/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/var/hyperledger/peerOrg2
+    ports:
+      - 31550:7050
+

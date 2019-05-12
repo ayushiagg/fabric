@@ -54,8 +54,8 @@ func ExecuteConsume(ch *amqp.Channel, Queue string, decodeMsg elastico.DecodeMsg
 				data["Orderer"] = decodeMsg.Orderer
 				logger.Info("gng msg in delivery queue", data)
 				elastico.PublishMsg(ch, "deliveryQueue", data)
+				// updating the elastico state in queue
 				elasticoObj.UpdateElState("0", "")
-
 			}
 			// changing the state to reset in file after sending delivery msgs
 			config := elastico.EState{}
@@ -109,8 +109,8 @@ func testData(data elastico.Transaction) {
 	size := strconv.Itoa(len(data.Txn.Payload))
 	logger.Infof("see the size of rcved Payload %s", size)
 	if size != "0" {
-		s := string(data.Txn.Payload)
-		logger.Infof("see the sending array payloag %s", s)
+		// s := string(data.Txn.Payload)
+		// logger.Infof("see the sending array payloag %s", s)
 	}
 	os.Exit(1)
 }

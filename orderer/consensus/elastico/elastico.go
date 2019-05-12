@@ -709,6 +709,7 @@ func (e *Elastico) RunPBFT(epoch string) {
 	*/
 	if e.State == ElasticoStates["PBFT_NONE"] {
 		if e.Primary {
+			logger.Info("I ammm primary!!!!")
 			prePrepareMsg := e.ConstructPrePrepare(epoch) //construct pre-prepare msg
 			// multicasts the pre-prepare msg to replicas
 			// ToDo: what if Primary does not Send the pre-prepare to one of the nodes
@@ -1590,6 +1591,7 @@ func (e *Elastico) ReceiveTxns(epochTxn []Transaction) {
 	num = int64(len(epochTxn)) / numOfCommittees // Transactions per committee
 	var iden int64
 	if num == 0 {
+		logger.Info("num is 0")
 		for iden = 0; iden < numOfCommittees; iden++ {
 			e.Txn[iden] = epochTxn
 		}
@@ -1766,9 +1768,10 @@ func (e *Elastico) Execute(exchangeName string, epoch string, Txn Transaction) s
 
 		logger.Infof("The directory member :- %s ", e.IP)
 		if len(e.CurDirectory) >= C {
+			logger.Info("updating the el state")
 			// Modify EL-State in ElasticoState Queue
 			e.UpdateElState(strconv.Itoa(ElasticoStates["RunAsDirectory after-TxnReceived"]), epoch)
-
+			e.EpochTxns = append([]Transaction{Txn}, e.EpochTxns...)
 			e.ReceiveTxns(e.EpochTxns)
 			// directory member has received the txns for all committees
 			e.State = ElasticoStates["RunAsDirectory after-TxnReceived"]
