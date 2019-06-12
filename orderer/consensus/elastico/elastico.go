@@ -26,10 +26,10 @@ import (
 var FinNum int64
 
 // D - difficulty level , leading bits of PoW must have D 0's (keep w.R.t to hex)
-var D = 3
+var D = 16
 
 // C - size of committee
-var C = 4
+var C = 2
 
 // R - number of bits in random string
 var R int64 = 8
@@ -274,6 +274,81 @@ func (e *Elastico) Reset() {
 	e.EpochcommitmentSet = make(map[string]bool)
 }
 
+// Reset2 :-
+func (e *Elastico) Reset2() {
+	/*
+		Reset some of the elastico class members
+	*/
+	logger.Info("file:- elastico.go, func:- Reset2!!")
+	// e.GetIP()
+	// e.GetKey()
+	// removed queue delete and port update!
+	// e.PoW = PoWmsg{}
+	// e.PoW.Hash = ""
+	// e.PoW.SetOfRs = make([]string, 0)
+	// e.PoW.Nonce = 0
+
+	// e.CurDirectory = make([]IDENTITY, 0)
+	// only when this node is the member of directory committee
+	// e.CommitteeList = make(map[int64][]IDENTITY)
+	// only when this node is not the member of directory committee
+	// e.CommitteeMembers = make([]IDENTITY, 0)
+	e.MsgesSameEpoch = make([]Transaction, 0)
+	// e.Identity = IDENTITY{}
+	// e.CommitteeID = -1
+	var Ri string
+	e.Ri = Ri
+	e.EpochTxns = make([]Transaction, 0)
+	// e.IsDirectory = false
+	// e.IsFinal = false
+
+	// only when this node is the member of final committee
+	e.Commitments = make(map[string]bool)
+	e.TxnBlock = make([]Transaction, 0)
+	e.SetOfRs = e.NewsetOfRs
+	e.NewsetOfRs = make(map[string]bool)
+	e.CommitteeConsensusData = make(map[int64]map[string][]string)
+	e.CommitteeConsensusDataTxns = make(map[int64]map[string][]Transaction)
+	e.FinalBlockbyFinalCommittee = make(map[string][]IdentityAndSign)
+	e.FinalBlockbyFinalCommitteeTxns = make(map[string][]Transaction)
+	if e.IsDirectory == true {
+
+		e.State = ElasticoStates["RunAsDirectory"]
+	} else {
+		e.State = ElasticoStates["Formed Committee"]
+	}
+	e.MergedBlock = make([]Transaction, 0)
+
+	e.FinalBlock = FinalBlockData{}
+	e.FinalBlock.Sent = false
+	e.FinalBlock.Txns = make([]Transaction, 0)
+
+	e.RcommitmentSet = e.NewRcommitmentSet
+	e.NewRcommitmentSet = make(map[string]bool)
+	// e.FinalCommitteeMembers = make([]IDENTITY, 0)
+
+	// only when this is the member of the directory committee
+	e.Txn = make(map[int64][]Transaction)
+	e.Response = make([]FinalCommittedBlock, 0)
+	e.Flag = true
+	e.Views = make(map[string]bool)
+	e.Primary = false
+	e.ViewID = 0
+	e.Faulty = false
+
+	e.PrePrepareMsgLog = make(map[string]PrePrepareMsg)
+	e.PrepareMsgLog = make(map[int]map[int]map[string][]PrepareMsgData)
+	e.CommitMsgLog = make(map[int]map[int]map[string][]CommitMsgData)
+	e.PreparedData = make(map[int]map[int][]Transaction)
+	e.CommittedData = make(map[int]map[int][]Transaction)
+	e.FinalPrePrepareMsgLog = make(map[string]PrePrepareMsg)
+	e.FinalPrepareMsgLog = make(map[int]map[int]map[string][]PrepareMsgData)
+	e.FinalcommitMsgLog = make(map[int]map[int]map[string][]CommitMsgData)
+	e.FinalpreparedData = make(map[int]map[int][]Transaction)
+	e.FinalcommittedData = make(map[int]map[int][]Transaction)
+	e.EpochcommitmentSet = make(map[string]bool)
+}
+
 // GetIP :-
 func (e *Elastico) GetIP() {
 	/*
@@ -447,7 +522,14 @@ func (e *Elastico) ComputePoW() {
 		digest.Write([]byte(strconv.Itoa(nonce)))
 
 		hashVal := fmt.Sprintf("%x", digest.Sum(nil))
-		if strings.HasPrefix(hashVal, zeroString) {
+		bindigest := ""
+
+		for i := 0; i < len(hashVal); i++ {
+			intVal, err := strconv.ParseInt(string(hashVal[i]), 16, 0) // converts hex string to integer
+			FailOnError(err, "string to int conversion error", true)
+			bindigest += fmt.Sprintf("%04b", intVal) // converts intVal to 4 bit binary value
+		}
+		if strings.HasPrefix(bindigest, zeroString) {
 			//hash starts with leading D 0's
 			e.PoW.Hash = hashVal
 			e.PoW.SetOfRs = randomsetR
@@ -647,8 +729,16 @@ func (e *Elastico) VerifyPoW(Identityobj IDENTITY) bool {
 		return false
 	}
 
+	bindigest := ""
+
+	for i := 0; i < len(hash); i++ {
+		intVal, err := strconv.ParseInt(string(hash[i]), 16, 0) // converts hex string to integer
+		FailOnError(err, "string to int conversion error", true)
+		bindigest += fmt.Sprintf("%04b", intVal) // converts intVal to 4 bit binary value
+	}
+
 	// Valid Hash has D leading '0's (in hex)
-	if !strings.HasPrefix(hash, zeroString) {
+	if !strings.HasPrefix(bindigest, zeroString) {
 		logger.Error("POW not verified - zero not in prefix")
 		return false
 	}
@@ -690,7 +780,14 @@ func (e *Elastico) VerifyPoW(Identityobj IDENTITY) bool {
 	digest.Write([]byte(strconv.Itoa(nonce)))
 
 	hashVal := fmt.Sprintf("%x", digest.Sum(nil))
-	if strings.HasPrefix(hash, zeroString) && hashVal == hash {
+	bindigest = ""
+
+	for i := 0; i < len(hashVal); i++ {
+		intVal, err := strconv.ParseInt(string(hashVal[i]), 16, 0) // converts hex string to integer
+		FailOnError(err, "string to int conversion error", true)
+		bindigest += fmt.Sprintf("%04b", intVal) // converts intVal to 4 bit binary value
+	}
+	if strings.HasPrefix(bindigest, zeroString) && hashVal == hash {
 		// Found a valid Pow, If this doesn't match with PoW["Hash"] then Doesnt verify!
 		return true
 	}
@@ -1231,7 +1328,7 @@ func (e *Elastico) IsFinalCommitted() bool {
 						}
 					} else {
 
-						logger.Error("wrong digest in is committed")
+						logger.Error("wrong digest in is final committed")
 					}
 				} else {
 
@@ -1776,6 +1873,9 @@ func (e *Elastico) Execute(exchangeName string, epoch string, Txn Transaction) s
 			// directory member has received the txns for all committees
 			e.State = ElasticoStates["RunAsDirectory after-TxnReceived"]
 		}
+	} else if e.State == ElasticoStates["RunAsDirectory after-TxnReceived"] {
+		// check when txns received if committee full
+		e.CheckCommitteeFull(epoch)
 	} else if e.State == ElasticoStates["Receiving Committee Members"] {
 
 		// when a node is part of some committee

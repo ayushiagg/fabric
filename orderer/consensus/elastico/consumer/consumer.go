@@ -62,7 +62,8 @@ func ExecuteConsume(ch *amqp.Channel, Queue string, decodeMsg elastico.DecodeMsg
 			config.State = strconv.Itoa(elastico.ElasticoStates["Reset"])
 			elastico.SetState(config, "/conf.json")
 			logger.Infof("reset done by %s", os.Getenv("ORDERER_HOST"))
-			elasticoObj.Reset()
+			// elasticoObj.Reset()
+			elasticoObj.Reset2()
 			break
 		}
 		elasticoObj.Consume(ch, Queue, newEpochMessage, decodeMsg.Epoch)
@@ -88,6 +89,7 @@ func Consume(ch *amqp.Channel, queue amqp.Queue, elasticoObj *elastico.Elastico)
 				// set the exchange name as Epoch Num
 				exchangeName := "epoch" + decodemsg.Epoch
 				// declare the exchange
+				// this helps in broadcast of messages to all queues
 				errExchange := ch.ExchangeDeclare(exchangeName, "fanout", true, false, false, false, nil)
 				elastico.FailOnError(errExchange, "Failed to declare a exchange", true)
 				// bind the queue to the exchange

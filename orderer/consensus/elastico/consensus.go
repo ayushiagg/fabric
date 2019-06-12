@@ -294,6 +294,7 @@ func (ch *chain) runElastico(msg Transaction) []DummyMessage {
 	if stateEnv := GetState(path); stateEnv != "" && stateEnv != strconv.Itoa(ElasticoStates["Reset"]) {
 		newEpochMsg["Type"] = "NewMsgSameEpoch"
 		logger.Info("new message for the same epoch")
+		//publish the message to the orderer's queue
 		PublishMsg(channel, os.Getenv("ORDERER_HOST"), newEpochMsg)
 	} else {
 
